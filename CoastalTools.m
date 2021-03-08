@@ -135,7 +135,7 @@ classdef CoastalTools < muiModelUI
                             'Resample timeseries','Patch timeseries',...                
                             'Trim timeseries','Delete multiple profiles',...                
                             'Edit or Delete profile in timeseries'};
-            menu.Setup(offset+2).Callback = repmat({@(src,evt)ct_data_cleanup(obj,src)},[1,6]);
+            menu.Setup(offset+2).Callback = repmat({@obj.datacleanup},[1,6]);
             menu.Setup(offset+2).Separator = {'off','off','off','off','on','off'};
             
             %% Run menu ---------------------------------------------------
@@ -336,6 +336,12 @@ classdef CoastalTools < muiModelUI
                 tabsrc = findobj(obj.mUI.Tabs,'Tag',tabname);
                 InputTabSummary(obj,tabsrc);
             end                  
+        end
+%%
+        function datacleanup(obj,src,~)
+            %all cleanup options call the same function
+            ct_data_cleanup(obj.Cases,src);
+            DrawMap(obj);
         end
         %% Run menu -------------------------------------------------------
         function runModel(obj,src,~)
