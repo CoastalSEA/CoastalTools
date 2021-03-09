@@ -387,10 +387,10 @@ classdef CoastalTools < muiModelUI
             switch src.Text
                 case 'Analysis'
                     %run tidal analysis to generate set of constituents
-                    callClassFunction(obj,'TidalAnalysis','runTidalAnalysis');
+                    TidalAnalysis.runTidalAnalysis(obj);
                 case 'Reconstruction'
                     %run utide to get reconstructed tidal signal
-                    callClassFunction(obj,'TidalAnalysis','getTidalData');
+                    TidalAnalysis.getTidalData(obj);
             end
         end
 %%
@@ -471,10 +471,10 @@ classdef CoastalTools < muiModelUI
             %create tables for Data and Model tabs - called by DrawMap
             % load case descriptions
             muicat = obj.Cases;
-            idx = tabSubset(obj,ht.Tag);
-            caseid = muicat.Catalogue.CaseID(idx);
-            casedesc = muicat.Catalogue.CaseDescription(idx);
-            caseclass = muicat.Catalogue.CaseClass(idx);
+            caserec = find(tabSubset(obj,ht.Tag));
+            caseid = muicat.Catalogue.CaseID(caserec);
+            casedesc = muicat.Catalogue.CaseDescription(caserec);
+            caseclass = muicat.Catalogue.CaseClass(caserec);
 
             cdata = {'0','Type','Description of individual cases','','','',''};
             irec = 1;
@@ -493,7 +493,7 @@ classdef CoastalTools < muiModelUI
                     end
                 end
                 %
-                dst = getDataset(muicat,i,1);
+                dst = getDataset(muicat,caserec(i),1);
                 range = getVarAttRange(dst,1,'Time');
                 if ~isempty(dst.RowRange)
                     reclen = num2str(height(dst.DataTable));
