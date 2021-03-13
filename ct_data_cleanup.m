@@ -327,6 +327,7 @@ function delete_profile_ts(muicat)
     pobj = muicat.DataSets.(classname);
     
     prompt = {'Minimum number of time steps'};
+    title = 'Delete short profile records';
     default = {num2str(0)};
     answer = inputdlg(prompt,title,1,default);
     nmin = str2double(answer{1});                
@@ -353,18 +354,16 @@ function delete_profile_ts(muicat)
     idx = ntstep<nmin & idfsel;
     if any(idx)
         deleteID = [pobj(idx).CaseIndex];
-        msg = sprintf('Deleting %d profiles',length(deleteID));
+        msgbox(sprintf('%d profiles deleted',length(deleteID)));
     else
         msgbox('No profiles below threshold set');
         return
     end
-    
-    hw = waitbar(0,msg);   
+
     scenariolist = muicat.Catalogue.CaseID;   
     %find the ids of the deletelist in the full scenariolist
     caserec = find(ismember(scenariolist,deleteID));
     deleteCases(muicat,caserec)  
-    close(hw);  
 end
 %%
 function edit_delete_profile(muicat)
@@ -379,12 +378,9 @@ function edit_delete_profile(muicat)
         [caserec,isok] = selectRecord(muicat,'PromptText',promptxt,...
                               'CaseClass',classname,'ListSize',[150,250]);
         if isok<1, return; end %user cancelled  
-        
-%         dst = getDataset(muicat,caserec,1);
-%         caseid = caseID(muicat,caserec);
+
         [cobj,classrec,~] = getCase(muicat,caserec);
         dst = cobj.Data.(datasetname);
-%         [chandle,id_c,id_r] = getCaseDataID(mobj.Cases,[],caserec);
 
         ptime = dst.RowNames;
         hfig = figure('Name','Delete individual profiles','Tag','PlotFig',...
@@ -436,8 +432,7 @@ function edit_delete_profile(muicat)
         hold off
         close(hfig)
     end
-     
-    
+
         %nested function to plot a profile and allow user to delete it
         function [dst,ptime,ok] = plotdeleteprofile(dst,ptime,idx,hax)
             ok = 1;
@@ -456,39 +451,29 @@ function edit_delete_profile(muicat)
             if strcmp(action,'Cancel')   
                 ok = 0;
             elseif strcmp(action,'Edit/Delete')
-%                 scenariolist = muicat.CaseDescriptions';  
+                %option to edit or delete selected profile
                 answer = questdlg('Edit or Delete this profile?',dst.Description,...
                                     'Edit','Delete','Cancel','Edit');
                 if strcmp(answer,'Delete')
                     dst.DataTable(idx,:) = [];
                     ptime(idx) = [];
-%                     
-%                     dst = delsamplefromcollection(dst,'Index',idx);                    
-%                     mobj.(chandle)(id_c).mtsc{id_r} = dst;
-                    %now update meta-data in Project object                 
-                    %find the id of the profile record in the full scenariolist
-%                     idp = ismember(scenariolist,dst.Decription);
-%                     tsprops = mobj.Cases.CaseTSprops;
-%                     tsprops{idp}.Start = datestr(dst.TimeInfo.StartDate,'dd-mmm-yyyy');
-%                     tsprops{idp}.End = datestr(datenum(dst.TimeInfo.StartDate)+...
-%                                     dst.TimeInfo.End,'dd-mmm-yyyy');
-%                     tsprops{idp}.Length = length(dst);
-%                     mobj.Cases.CaseTSprops = tsprops;
-%                     ptime = getabstime(dst);
                 elseif strcmp(answer,'Edit')
-                    data2use = {y,z};                 
-                    h_tab = Tabledlg('RowNames',data2use{1}, ...
-                                 'ColNames',{'Elevation'}, ...
-                                 'Title',dst.Description, ...
-                                 'Prompt','Edit profile', ...
-                                 'FigWidth',0.2, ...
-                                 'ColEdit',true, ...
-                                 'ColType',{}, ...
-                                 'ColWidth',{100}, ...
-                                 'FigHeight',0.6, ...
-                                 'UserData',data2use{2});
-                    if h_tab.ok==0, return; end           
-                    dst.Elevation(idx,:) = h_tab.UserData;
+                    %zero chainage can be repeated in some profiles
+                    [isall,idx] = isunique(y,false);
+                    if ~isall                 %add a small offset to duplicate value
+                        y(idx) = y(idx)+eps;  %only works if there is just one duplicate
+                    end
+                    idd = ~isnan(y);  %remove nans
+                    %create tablefigure for editing data
+                    oldtable = table(z(idd),'RowNames',string(y(idd)));
+                    title = sprintf('Edit profile'); 
+                    txt1 = 'To edit select a cell, amend value and press return, or select another cell';
+                    header = sprintf('%s\nProfile: %s',txt1,dst.Description);    
+                    but.Text = {'Save','Cancel'}; %labels for tab button definition
+                    newtable = tablefigureUI(title,header,oldtable,true,but);
+                    if isempty(newtable), return; end  %user cancelled  
+                    
+                    dst.Elevation(idx,:) = newtable{:,:};
                     nvar = length(dst.VariableQCflags);
                     dst.VariableQCflags(1:nvar) = repmat({'qc'},1,nvar);
                 end

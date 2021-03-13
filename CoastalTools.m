@@ -38,10 +38,10 @@ classdef CoastalTools < muiModelUI
             modelLogo = 'CoastalTools_logo.jpg';  %default splash figure
             %classes required to run model, format:           
             %obj.ModelInputs.<model classname> = {'Param_class1',Param_class2',etc}
-            obj.ModelInputs.InWaveModel = {'ctWaveParameters','ctWaveData'};  
-            obj.ModelInputs.OffWaveModel = {'ctWaveParameters','ctWaveData'};
-            obj.ModelInputs.WindWaveModel = {'ctHindcastParameters','ctWindData'};  
-            obj.ModelInputs.TidalAnalysis = {'ctWaterLevelData'};
+            obj.ModelInputs.ctWaveModel = {'ctWaveParameters','ctWaveData'};  
+%             obj.ModelInputs.OffWaveModel = {'ctWaveParameters','ctWaveData'};
+            obj.ModelInputs.ctWindWaveModel = {'ctHindcastParameters','ctWindData'};  
+            obj.ModelInputs.ctTidalAnalysis = {'ctWaterLevelData'};
             obj.ModelInputs.CT_WaveModels = {'ctWaveParameters','ctWaveModel'};  
             obj.ModelInputs.CT_BeachAnalysis = {'ctBeachProfileData'}; 
             obj.ModelInputs.CT_UserModel = {'ctWaveParameters'}; 
@@ -199,7 +199,7 @@ classdef CoastalTools < muiModelUI
             %format for subtabs: 
             %    subtabs.<tagname>(i,:) = {<subtab label>,<callback function>};
             %where <tagname> is the struct fieldname for the top level tab.
-            tabs.Cases  = {'   Data  ',@obj.refresh};        
+            tabs.Data  = {'   Data  ',@obj.refresh};        
             tabs.Models = {'  Models  ',@obj.refresh};
             tabs.Site = {'  Site  ','gcbo;'};
             subtabs.Site(1,:) = {'  Waves  ',@obj.InputTabSummary};
@@ -370,15 +370,15 @@ classdef CoastalTools < muiModelUI
             switch src.Text
                 case 'Nearshore Waves'
                     %run wave model to create inshore wave data
-                    callClassFunction(obj,'InWaveModel','runInWaveModel');
+                    ctWaveModel.runModel(obj,true);
                 case 'Deepwater waves'
                     %run wave model to create inshore wave data
-                    callClassFunction(obj,'OffWaveModel','runOffWaveModel');
+                    ctWaveModel.runModel(obj,false);
                 case 'Wind-Waves'
                     %run wave model to create inshore wave data
-                    callClassFunction(obj,'WindWaveModel','runWindWaveModel');    
+                    ctWindWaveModel.runModel(obj);    
                 otherwise
-                    obj.h_CT_WaveModels = CT_WaveModels.runModel(obj,src);   
+                    CT_WaveModels.runModel(obj,src);   
             end
         end
 %%
@@ -387,10 +387,10 @@ classdef CoastalTools < muiModelUI
             switch src.Text
                 case 'Analysis'
                     %run tidal analysis to generate set of constituents
-                    TidalAnalysis.runTidalAnalysis(obj);
+                    ctTidalAnalysis.runTidalAnalysis(obj);
                 case 'Reconstruction'
                     %run utide to get reconstructed tidal signal
-                    TidalAnalysis.getTidalData(obj);
+                    ctTidalAnalysis.getTidalData(obj);
             end
         end
 %%
