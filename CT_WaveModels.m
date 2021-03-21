@@ -61,7 +61,7 @@ classdef CT_WaveModels < muiDataSet
                 case 2              %Cross-shore transport
                     output = xshoreModel(obj,mobj,site);
                 case 3              %Wave Energy
-                    output = energyModel(obj,mobj);
+                    output = energyModel(obj,mobj,site);
                 case 4              %Runup
                     output = runupModel(obj,mobj,site);
                 case 5              %Overtopping
@@ -113,7 +113,7 @@ classdef CT_WaveModels < muiDataSet
             %class instance for inshore wave data
             inwave = mobj.Cases.DataSets.ctWaveModel;
             %retrieve an inshore wave data set
-            wv = getWaveModelDataset(inwave,mobj,'Inwave_model');
+            wv = getWaveModelDataset(inwave,mobj,'Inwave_model',{'Tp'});
 
             %bed slope within surf zone (half depth of inshore wave point)  
             ubs = site.UpperBeachSlope;
@@ -148,8 +148,8 @@ classdef CT_WaveModels < muiDataSet
             
             output.results = {Q};
             output.modeltime = wv.RowNames;
-            output.metatxt = {sprintf('Drift using %s; Theta=%g; d50=%g; Kc=%g; Beach slope=1:%.1f; Zi=%g',...
-                                    formula,theta,d50,Kc,bs,zi)};      
+            output.metatxt = sprintf('Drift using %s; Theta=%g; d50=%g; Kc=%g; Beach slope=1:%.1f; Zi=%g',...
+                                    formula,theta,d50,Kc,bs,zi);      
         end
 %%
         function output = xshoreModel(~,mobj,site)
@@ -168,10 +168,9 @@ classdef CT_WaveModels < muiDataSet
             % xshore_bailard
             
             %class instance for inshore wave data
-            inwaveobj = mobj.(getClassHandle(mobj,'InWaveModel'));
+            inwave = mobj.Cases.DataSets.ctWaveModel;
             %retrieve an inshore wave data set
-            wv = getInWaveModelData(inwaveobj,mobj);
-            wv.Tp = wv.inpwvtsc.Tp.Data; 
+            wv = getWaveModelDataset(inwave,mobj,'Inwave_model',{'Tp'});
             
             %bed slope within surf zone (half depth of inshore wave point)  
             ubs = site.UpperBeachSlope;
@@ -191,12 +190,12 @@ classdef CT_WaveModels < muiDataSet
             zi = mean((wv.swl-wv.depi),'omitnan');
             
             output.results = {Qx};
-            output.modeltime = wv.time;
-            output.metatxt = {sprintf('d50=%g; Beach slope=1:%.1f; Zi=%g',...
-                                           d50,bs,zi)};
+            output.modeltime = wv.RowNames;
+            output.metatxt = sprintf('d50=%g; Beach slope=1:%.1f; Zi=%g',...
+                                           d50,bs,zi);
         end
 %%
-        function output = energyModel(~,mobj)
+        function output = energyModel(~,mobj,site)
             %calculate the inshore wave energy using linear wave theory and
             %the refracted, shoaled and breaking wave conditions at the 
             %defined inshore point
@@ -215,14 +214,16 @@ classdef CT_WaveModels < muiDataSet
             % wave_energyflux
             
             %class instance for inshore wave data
-            inwaveobj = mobj.(getClassHandle(mobj,'InWaveModel'));
+            inwave = mobj.Cases.DataSets.ctWaveModel;
             %retrieve an inshore wave data set
-            wv= getInWaveModelData(inwaveobj,mobj);            
-            wv.Tp = wv.inpwvtsc.Tp.Data;  
+            wv = getWaveModelDataset(inwave,mobj,'Inwave_model',{'Tp'});
             
-            %average nearshore bed slope
+            %average nearshore bed slope - for meta data only
             zi = mean((wv.swl-wv.depi),'omitnan');
-            bs = mean(wv.bs(wv.bs>0),'omitnan'); %for meta data only
+            dep = mean((wv.depi),'omitnan');
+            ubs = site.UpperBeachSlope;
+            z1km = site.BedLevelat1km;            
+            bs = profileslope(dep/2,wv.swl,z1km,ubs);
             
             %calculate energy flux and add results to wave timeseries
             rhow = mobj.Constants.WaterDensity;
@@ -231,8 +232,8 @@ classdef CT_WaveModels < muiDataSet
             Ef = wave_energyflux(Hrms,wv.Tp,wv.depi,rhow,g);
  
             output.results = {Ef};
-            output.modeltime = wv.time;
-            output.metatxt = {sprintf('Nearshore slope=1:%.1f; Zi=%g',bs,zi)};   
+            output.modeltime = wv.RowNames;
+            output.metatxt = sprintf('Nearshore slope=1:%.1f; Zi=%g',bs,zi);   
         end
 %%
         function output = runupModel(obj,mobj,site)
@@ -257,11 +258,9 @@ classdef CT_WaveModels < muiDataSet
             % shoaling, runup, iribarren, runup_slope          
             
             %class instance for inshore wave data
-            waveobj = mobj.(getClassHandle(mobj,'InWaveModel'));
-            %structobj = mobj.(getClassHandle(mobj,'SimpleStructureInput'));
+            inwave = mobj.Cases.DataSets.ctWaveModel;
             %retrieve an inshore wave data set
-            wv= getInWaveModelData(waveobj,mobj);  
-            wv.Tp = wv.inpwvtsc.Tp.Data;
+            wv = getWaveModelDataset(inwave,mobj,'Inwave_model',{'Tp'});
             
             %get "effective" deepwater offshore wave conditions             
             dep0 = wv.depi;        %depth at inshore pint used by wave model
@@ -286,8 +285,8 @@ classdef CT_WaveModels < muiDataSet
             zi = mean((wv.swl-wv.depi),'omitnan');
             
             output.results = {R2,zR,Rslope};
-            output.modeltime = wv.time;
-            output.metatxt = {sprintf('Beach slope=1:%0.1f; mean zi=%g',bs,zi)};  
+            output.modeltime = wv.RowNames;
+            output.metatxt = sprintf('Beach slope=1:%0.1f; mean zi=%g',bs,zi);  
         end
 %%
         function output = overtopModel(~,mobj,site)
@@ -306,42 +305,42 @@ classdef CT_WaveModels < muiDataSet
             % structure definition (obj.Structure)
             % FUNCTION CALLS (external)
             % otop_Q (uses celerity, hb_break, coeff_AB)
-            
-            %class instance for inshore wave data
-            waveobj = mobj.(getClassHandle(mobj,'InWaveModel'));
-            structobj = mobj.(getClassHandle(mobj,'SimpleStructureInput'));
-            if isempty(structobj)
+
+            if isfield(mobj.Inputs,'ctStructureInput') && ...
+                                    ~isempty(mobj.Inputs.ctStructureInput)
+                structprops = mobj.Inputs.ctStructureInput;   
+            else
                 warndlg('Structure properties have not been defined')
                 output = [];
                 return;
             end
+            
+            %class instance for inshore wave data
+            inwave = mobj.Cases.DataSets.ctWaveModel;
             %retrieve an inshore wave data set
-            wv= getInWaveModelData(waveobj,mobj);             
-            varnames = gettimeseriesnames(wv.inpwvtsc);
-            if any(strcmp(varnames,'Tz'))
-                Tz = wv.inpwvtsc.Tz.Data; 
-            else
-                Tz = wv.inpwvtsc.Tp.Data*0.7775;  %assumes JONSWAP with gamma=3.3
+            wv = getWaveModelDataset(inwave,mobj,'Inwave_model',{'Tp','Tz'});
+            varnames = wv.VariableNames;
+            if ~any(strcmp(varnames,'Tz'))
+                Tz = wv.Tp*0.7775;  %assumes JONSWAP with gamma=3.3
+                wv = addvars(wvdst,Tz,'NewVariableNames','Tz'); 
+                getdialog('Tz estimated using Tp')
             end
             
-            %bed slope at inshore wave point
-            zi = site.InshoreBedLevel;
-            if isnan(zi)
-                bs = wv.bs;          
-            else
-                bs = wv.bs(wv.bs>0); %remove zero padding when only one slope
-            end
-            
+            %bed slope half wave length in front of structure
+            ubs = site.UpperBeachSlope;
+            z1km = site.BedLevelat1km;       
+            bs = profileslope(wv.depi/2,wv.swl,z1km,ubs); %first argument is depth
+
             g = mobj.Constants.Gravity;
             theta = site.ShorelineAngle;
             alp = wv.Diri-(theta+90);            
-            structure = getStructure(structobj);
-            Q = otop_Q(wv.swl,wv.Hsi,Tz,alp,bs,g,structure);            
+            structure = getStructure(structprops);
+            Q = otop_Q(wv.swl,wv.Hsi,wv.Tz,alp,bs,g,structure);            
             bs = mean(bs,'omitnan'); %use average slope in metadata
 
             output.results = {Q};
-            output.modeltime = wv.time;
-            output.metatxt = {sprintf('Neashore slope=1:%0.1f; theta=%g',bs,theta)}; 
+            output.modeltime = wv.RowNames;
+            output.metatxt = sprintf('Neashore slope=1:%0.1f; theta=%g',bs,theta); 
         end
 %%
         function output = iribarrenModel(~,mobj,site)
@@ -360,10 +359,9 @@ classdef CT_WaveModels < muiDataSet
             % Iribarren (uses Hs_break, Hb_break)
             
             %class instance for inshore wave data
-            inwaveobj = mobj.(getClassHandle(mobj,'InWaveModel'));
+            inwave = mobj.Cases.DataSets.ctWaveModel;
             %retrieve an inshore wave data set
-            wv= getInWaveModelData(inwaveobj,mobj);
-            wv.Tp = wv.inpwvtsc.Tp.Data;            
+            wv = getWaveModelDataset(inwave,mobj,'Inwave_model',{'Tp'});          
 
             %find slope at swl on beach         
             ubs = site.UpperBeachSlope;
@@ -377,8 +375,8 @@ classdef CT_WaveModels < muiDataSet
             zi = mean((wv.swl-wv.depi),'omitnan');
             
             output.results = {Iri,Ityp};
-            output.modeltime = wv.time;
-            output.metatxt = {sprintf('Beach slope=1:%.1f; Zi=%g',bs,zi)}; 
+            output.modeltime = wv.RowNames;
+            output.metatxt = sprintf('Beach slope=1:%.1f; Zi=%g',bs,zi); 
         end
 %%
         function Rslope = getRunupSlope(~,mobj,Hs0,Tp,site)
@@ -442,7 +440,7 @@ classdef CT_WaveModels < muiDataSet
                         'QCflag',{'model'});
                 case 4
                     dsp.Variables = struct(...                       
-                        'Name',{'R2%','zRU','Rslope'},...
+                        'Name',{'R2','zRU','Rslope'},...
                         'Description',{'Runup (2%)','Runup elevation (R2%+swl)',...
                                                     'Runup slope (1:rs)'},...
                         'Unit',{'m','mOD','-'},...

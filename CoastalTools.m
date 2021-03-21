@@ -305,7 +305,8 @@ classdef CoastalTools < muiModelUI
                 case 'Quality Control'
                     useCase(obj.Cases,mode,classname,'qcData');
             end
-            DrawMap(obj);
+            ht = findobj(obj.mUI.Tabs.Children,'Tag','Data');
+            DrawMap(obj,ht);
         end        
 %%
         function runProps(obj,src,~)
@@ -335,7 +336,7 @@ classdef CoastalTools < muiModelUI
                 %update tab used for properties
                 tabsrc = findobj(obj.mUI.Tabs,'Tag',tabname);
                 InputTabSummary(obj,tabsrc);
-            end                  
+            end 
         end
 %%
         function datacleanup(obj,src,~)
@@ -348,7 +349,7 @@ classdef CoastalTools < muiModelUI
             %callback to run generic model functions
             switch src.Text
                 case 'Derive Output'
-                    obj.GuiManip = DataManip.getDataManipGui(obj);
+                    obj.mUI.ManipUI = muiManipUI.getManipUI(obj);
                 case 'Simulation'
                     obj.GuiSimulation = CT_Simulation.getCTSimGui(obj);
                 case 'BVI site'  %vulnerability for single location
@@ -380,6 +381,8 @@ classdef CoastalTools < muiModelUI
                 otherwise
                     CT_WaveModels.runModel(obj,src);   
             end
+            ht = findobj(obj.mUI.Tabs.Children,'Tag','Models');
+            DrawMap(obj,ht);
         end
 %%
         function runTides(obj,src,~)
@@ -498,7 +501,7 @@ classdef CoastalTools < muiModelUI
                 if ~isempty(dst.RowRange)
                     reclen = num2str(height(dst.DataTable));
                     stdate = datestr(range{1},'dd-mmm-yyyy'); %use to datestr to control ouput format
-                    endate = datestr(dst.RowNames(end),'dd-mmm-yyyy');
+                    endate = datestr(range{2},'dd-mmm-yyyy');
                     qualcl = '';
                     if ~isempty(dst.VariableQCflags)
                         qualcl = dst.VariableQCflags{1};
@@ -508,12 +511,20 @@ classdef CoastalTools < muiModelUI
                     irec = irec+1;
                 end                
             end
+            
+            if strcmp(ht.Tag,'Models')
+                headers = {'ID','Model Type','Model Description','Tstep',...
+                'Start','End','QC'};
+            else
+                headers = {'ID','Data Type','Data Description','Tstep',...
+                'Start','End','QC'};
+            end
+            
             % draw table of case descriptions
             tc=uitable('Parent',ht,'Units','normalized',...
                 'CellSelectionCallback',@obj.caseCallback,...
                 'Tag','cstab');
-            tc.ColumnName = {'ID','Data Type','Data Description','Tstep',...
-                'Start','End','QC'};
+            tc.ColumnName = headers;
             tc.RowName = {};
             tc.Data = cdata;
             tc.ColumnWidth = {20 80 180 55 80 80 20};
@@ -522,7 +533,6 @@ classdef CoastalTools < muiModelUI
             tc.Position(2)=0.9-tc.Position(4);
         end   
     end
- 
 end    
     
     
