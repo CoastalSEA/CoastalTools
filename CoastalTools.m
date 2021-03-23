@@ -15,8 +15,8 @@ classdef CoastalTools < muiModelUI
 % 
     properties  (Access = protected)
         %implement properties defined as Abstract in muiModelUI
-        vNumber = '1.0'
-        vDate   = 'Jan 2021'
+        vNumber = '3.0'
+        vDate   = 'May 2021'
         modelName = 'CoastalTools'                        
         %Properties defined in muiModelUI that need to be defined in setGui
         % ModelInputs  %classes required by model: used in isValidModel check 
@@ -75,18 +75,18 @@ classdef CoastalTools < muiModelUI
             menu = menuStruct(obj,MenuLabels);  %create empty menu struct
             %
             %% File menu --------------------------------------------------
-             %list as per muiModelUI.fileMenuOptions
+             %list as per callback function muiModelUI.fileMenuOptions
             menu.File.List = {'New','Open','Save','Save as','Exit'};
             menu.File.Callback = repmat({@obj.fileMenuOptions},[1,5]);
             
             %% Tools menu -------------------------------------------------
-            %list as per muiModelUI.toolsMenuOptions
+            %overlaod callback function toolsMenuOptions
             menu.Tools(1).List = {'Refresh','Clear all'};
             menu.Tools(1).Callback = {@obj.refresh, 'gcbo;'};  
             
             % submenu for 'Clear all'
-            menu.Tools(2).List = {'Model','Figures','Cases'};
-            menu.Tools(2).Callback = repmat({@obj.toolsMenuOptions},[1,3]);
+            menu.Tools(2).List = {'Project','Figures','Data','Models'};
+            menu.Tools(2).Callback = repmat({@obj.toolsMenuOptions},[1,4]);
 
             %% Project menu -----------------------------------------------
             menu.Project(1).List = {'Project Info','Cases','Export/Import'};
@@ -104,7 +104,7 @@ classdef CoastalTools < muiModelUI
             menu.Project(3).Callback = repmat({@obj.projectMenuOptions},[1,2]);
             
             %% Setup menu -------------------------------------------------
-            menu.Setup(1).List = {'Import Data','Site parameters',...
+            menu.Setup(1).List = {'Import data','Site parameters',...
                                       'Model parameters','Data clean-up'};                                    
             menu.Setup(1).Callback = repmat({'gcbo;'},[1,4]);
             menu.Setup(1).Separator = {'off','off','off','on'}; %separator preceeds item
@@ -206,12 +206,12 @@ classdef CoastalTools < muiModelUI
             subtabs.Site(2,:) = {' Simulation ',@obj.InputTabSummary};
             tabs.Plot = {'  Q-Plot  ',@obj.getTabData};
             tabs.Calcs = {'  Calcs  ','gcbo;'};
-            subtabs.Calcs(1,:) = {' Volumes ',@obj.InputTabSummary};
-            subtabs.Calcs(2,:) = {' Shoreline ',@obj.InputTabSummary};
-            subtabs.Calcs(3,:) = {' Profile ',@obj.InputTabSummary};
+            subtabs.Calcs(1,:) = {' Volumes ',@obj.getTabData};
+            subtabs.Calcs(2,:) = {' Shoreline ',@obj.getTabData};
+            subtabs.Calcs(3,:) = {' Profile ',@obj.getTabData};
             tabs.Stats = {'   Stats   ','gcbo;'};
-            subtabs.Stats(1,:) = {' Descriptive ',@obj.InputTabSummary};
-            subtabs.Stats(2,:) = {' Extremes ',@obj.InputTabSummary};
+            subtabs.Stats(1,:) = {' Descriptive ',@obj.getTabData};
+            subtabs.Stats(2,:) = {' Extremes ',@obj.getTabData};
         end
        
 %%
@@ -240,6 +240,8 @@ classdef CoastalTools < muiModelUI
                      tabPlot(cobj,src);
                 case 'Stats'
                      tabStats(cobj,src);    
+                case 'Calcs'
+                     tabCalcs(cobj,src);
             end
         end      
 %% ------------------------------------------------------------------------
@@ -248,9 +250,21 @@ classdef CoastalTools < muiModelUI
         %% File menu ------------------------------------------------------
         %use default menu functions defined in muiModelUI
             
-        %% Tools menu -----------------------------------------------------
-        %use default menu functions defined in muiModelUI
-                
+        %% Tools menu ----------------------------------------------------- 
+        function toolsMenuOptions(obj,src,~)
+            %callback function for Tools menu options
+            switch src.Text
+                case 'Project'
+                    obj.clearModel;
+                case 'Figures'
+                    obj.clearFigures;
+                case 'Data'
+                    clearCases(obj,'Data');
+                case 'Models'
+                    clearCases(obj,'Models');
+            end
+        end         
+        
         %% Project menu ---------------------------------------------------
         %use default menu functions defined in muiModelUI           
 

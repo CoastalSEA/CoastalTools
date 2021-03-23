@@ -168,26 +168,33 @@ function concatenate_ts(muicat)
 end
 %%
 function resample_ts(muicat)
-    %resample a timeseries or a tscollection to a different time interval. 
-    %For timeseries nan values are kept. for a tscollection interolation 
-    %is used to fill any gaps in each timeseries that make up the collection.
-    %
-    %select record to be used
-    seltype = [];
-    promptxt = 'Select a timeseries';
-    [caserec,ok] = selectTSdata(mobj,seltype,promptxt);
-    if ok<1, return; end  %user cancelled    
-    [tsc1,caseobj] = getCaseDataSet(mobj.Cases,mobj,caserec); 
-    [classhandle,id_class,~] = getCaseDataID(mobj.Cases,[],caserec); 
+    %resample a timeseries to a different time interval. 
+    datasetname = 'Dataset';   %uses default dataset name
+    %select record to be used    
+    promptxt = 'Select profile timeseries (Cancel to quit)';
+    [caserec,isok] = selectRecord(muicat,'PromptText',promptxt,...
+                                                    'ListSize',[150,250]);
+    if isok<1, return; end %user cancelled  
+    [cobj,~,~] = getCase(muicat,caserec);
+    dst = cobj.Data.(datasetname);
     
-    %concatenate single timeseries or two tscollections with same variables
+    %get the old and new times for resampling
+    tint = [];
+    while isempty(tint)
+        tint = get_timeinterval(dst);
+    end
+    oldtime = dst.RowNames;
+    stend = dst.RowRange;
+    newtime = (stend{1}:tint:stend{2})';
+    
+    %get the variables to be resampled
+    varnames = dst.VariableNames;
     quest = 'Do you want to resample a single variable or all variables?';
     answer = questdlg(quest,'Resample timeseries',...
                                     'Single','All','Cancel','All');   
     switch answer
         case 'Single'                           
-            %select variable to be interpolated
-            varnames = gettimeseriesnames(tsc1);
+            %select variable to be interpolated            
             if length(varnames)>1
                 [idx,ok] = listdlg('Name','TS options', ...
                                     'PromptString','Select TS variable:', ...
@@ -197,36 +204,37 @@ function resample_ts(muicat)
             else
                 idx = 1;
             end
-            sts = tsc1.(varnames{idx});  %timeseries of selected variable
-            %idnan = isnan(sts.Data);     %index for all nan values in source
+            %now resample the selected timeseries
             ptxt = varnames{idx};
+            dst = getDSTable(dst,[],idx);
+            newvar = {interp1(oldtime,dst.(varnames{idx}),newtime,'linear','extrap')};            
         case 'All'
-            sts = tsc1; 
             ptxt = 'All';
+            %now resample the selected timeseries
+            nrec = length(varnames);
+            newvar{1,nrec} = [];
+            for i=1:nrec
+                newvar{i} = interp1(oldtime,dst.(varnames{i}),newtime,'linear','extrap');
+            end
         otherwise
             return
     end
-    tint = [];
-    while isempty(tint)
-        tint = get_timeinterval(sts);
-    end
-    %now resample the selected timeseries or tscollection
-    startime = datetime(sts.TimeInfo.StartDate);
-    endtime = datetime(startime+sts.TimeInfo.End);
-    time = cellstr((startime:tint:endtime)');
-    new_tsc = resample(sts,time); %applies to a timeseries or tscollection
-    if isa(new_tsc,'timeseries')
-        %new_tsc.Data(idnan) = NaN;       %restore nan values**************
-        new_tsc = tscollection(new_tsc); %make a tscollection if timeseries
-    end
-    RecName = sprintf('%s resampled',tsc1.Name);           
-    new_tsc.Name = RecName;
-    new_tsc.TimeInfo.UserData = sprintf('%s, %s resampled at %s',tsc1.Name,ptxt,string(tint));
-
-    id_rec = length(caseobj.mtsc)+1;
-    caseobj.mtsc{id_rec} = new_tsc;
-    Results.saveResults(mobj,classhandle,caseobj,id_class);
-     
+    
+    %now assign new dataset to a dstable
+    dsp = dst.DSproperties;
+    newdst = dstable(newvar{:},'RowNames',newtime,'DSproperties',dsp);
+    newdst.Description = sprintf('%s resampled',dst.Description);           
+    newdst.Source = sprintf('%s, %s resampled at %s',dst.Description,ptxt,string(tint));
+    
+    %save results as a new Record in Catalogue
+    classname = metaclass(cobj).Name;
+    type = convertStringsToChars(muicat.Catalogue.CaseType(caserec));
+    casedesc = muicat.Catalogue.CaseDescription(caserec);
+    heq = str2func(classname);
+    obj = heq();  %new instance of class object
+    obj.Data.Dataset = newdst;  
+    addCaseRecord(obj,muicat,type);       
+    getdialog(sprintf('Data resampled for: %s',casedesc));
 end
 %%
 function patch_ts(muicat)
@@ -293,32 +301,23 @@ end
 function trim_ts(muicat)
     %allow user to adjust the start and end data of a timeseries
     %select record to be used
-    seltype = [];
-    promptxt = 'Select a timeseries';
-    [caserec,ok] = selectTSdata(mobj,seltype,promptxt);
-    if ok<1, return; end  %user cancelled    
-    [tsc1,caseobj] = getCaseDataSet(mobj.Cases,mobj,caserec); 
-    [classhandle,id_class,~] = getCaseDataID(mobj.Cases,[],caserec);
+    datasetname = 'Dataset';
+    promptxt = 'Select profile timeseries (Cancel to quit)';
+    [caserec,isok] = selectRecord(muicat,'PromptText',promptxt,...
+                                                    'ListSize',[150,250]);
+    if isok<1, return; end %user cancelled  
+    [cobj,classrec,~] = getCase(muicat,caserec);
+    classname = metaclass(cobj).Name; 
+    dst = cobj.Data.(datasetname);
+
+    %get start and end time to use and extract dataset
+    values = editrange_ui(dst.RowRange);
+    startime = datetime(values{1})-minutes(1);  %offset ensures selected 
+    endtime = datetime(values{2})+minutes(1);   %range is extracted
+    timeidx = isbetween(dst.RowNames,startime,endtime);
     
-    %now get start and end time to use
-    tsc1_startime = tsc1.TimeInfo.StartDate;
-    tsc1_endtime = datestr(datenum(tsc1_startime)+tsc1.TimeInfo.End);
-    promptxt = {'Adjust Start date', 'Adjust End date'};
-    defaults = {datestr(tsc1_startime),datestr(tsc1_endtime)};
-    values = inputdlg(promptxt,'Option to adjust',1,defaults);
-    if ~isempty(values)
-        tsc1_startime = values{1};
-        tsc1_endtime = values{2};
-    end
-    
-    tsc1name = tsc1.Name;                
-    tsc1 = getsampleusingtime(tsc1,tsc1_startime,tsc1_endtime);
-    tsc1.Name = tsc1name; 
-    
-    id_rec = length(caseobj.mtsc)+1;
-    caseobj.mtsc{id_rec} = tsc1;
-    Results.saveResults(mobj,classhandle,caseobj,id_class);
-    
+    newdst = getDSTable(dst,timeidx);
+    muicat.DataSets.(classname)(classrec).Data.Dataset = newdst;
 end
 %%
 function delete_profile_ts(muicat)
@@ -371,8 +370,6 @@ function edit_delete_profile(muicat)
     isok = 1;    
     classname = 'ctBeachProfileData';
     datasetname = 'Dataset';
-%     pobj = muicat.DataSets.(classname);
-    
     promptxt = 'Select profile timeseries (Cancel to quit)';
     while isok>0
         [caserec,isok] = selectRecord(muicat,'PromptText',promptxt,...
@@ -432,7 +429,7 @@ function edit_delete_profile(muicat)
         hold off
         close(hfig)
     end
-
+        %------------------------------------------------------------------
         %nested function to plot a profile and allow user to delete it
         function [dst,ptime,ok] = plotdeleteprofile(dst,ptime,idx,hax)
             ok = 1;
@@ -480,50 +477,22 @@ function edit_delete_profile(muicat)
             end
         end
 end
-
 %%
-function tint = get_timeinterval(ats)
+function tint = get_timeinterval(dst)
     %prompt user for the time interval to be used and return as a duration
-    %works if ats is a timeseries or a tscollection
-    varunits = ats.TimeInfo.Units;
-    tint1 = TSDataSet.ts_interval(ats,'First interval');
-    stint1 = cellstr(tint1,varunits(1));
-    stint2 = cellstr(TSDataSet.ts_interval(ats,'Mean'),varunits(1));
-    stint3 = cellstr(TSDataSet.ts_interval(ats,'Mode'),varunits(1));
+    time = dst.RowNames;
+    rowunit = dst.RowUnit;
+    tint1 = ts_interval(time,rowunit,'First interval'); %returns a duration
+    stint1 = cellstr(tint1,rowunit);
+    stint2 = cellstr(ts_interval(time,rowunit,'Mean'),rowunit);
+    stint3 = cellstr(ts_interval(time,rowunit,'Mode'),rowunit);
     p1 = sprintf('First interval %s, Mean %s, Mode %s',stint1{1},stint2{1},stint3{1});
     
-    p2 = sprintf('Duration of time steps (%s)',varunits);
+    p2 = sprintf('Duration of time steps (%s)',rowunit);
     prompt = {sprintf('%s\n%s',p1,p2),'Units (days, hours, minutes, seconds)'};
     title = 'Define interval';
     numlines = 1;
-    default = {num2str(datenum(tint1),4),varunits};    
+    default = {stint1{1},rowunit};    
     answer = inputdlg(prompt,title,numlines,default);
-    tint = str2double(answer{1}); %new interval
-    switch answer{2}
-        case 'days'
-            tint = days(tint);
-        case 'hours'
-            tint = hours(tint);
-        case 'minutes'
-            tint = minutes(tint);    
-        case 'seconds'
-            tint = seconds(tint);
-        otherwise
-            msgbox('Units can only be "days","hours","minutes" or "seconds"');
-            tint = [];
-            return;
-    end
+    tint = str2duration(answer{1},rowunit); %new interval
 end
-% %%
-% function [recnum,ok] = selectTSdata(mobj,seltype,promptxt)
-%     %prompt user to select a timeseries data set
-%     %prompt user to select an existing form model to modify
-%     % seltype - handle of class to use in subselection
-%     %        - or data type (model, data, etc)            
-%     [recnum,~,~,ok] = ScenarioList(mobj.Cases,seltype,...
-%                 'PromptText',promptxt,'ListSize',[300,100]);
-% %     if ok<1
-% %         warndlg('No selection made');
-% %         return;
-% %     end
-% end
