@@ -8,6 +8,8 @@ classdef CT_WaveModels < muiDataSet
 %
 % SEE ALSO
 %   muiDataSet
+%   For full list of functions used:
+%   flist = matlab.codetools.requiredFilesAndProducts('CT_BeachAnalysis.m')'
 %
 % Author: Ian Townend
 % CoastalSEA (c) Jan 2021
@@ -20,7 +22,7 @@ classdef CT_WaveModels < muiDataSet
     
     properties (Transient)
         ModelList = {'Littoral Drift','X-shore Transport','Wave Energy',...
-                                'Runup','Overtopping','Iribarren Number'}
+                     'Runup','Overtopping','Iribarren Number','Beach type'}
     end
     
     methods (Access = private)
@@ -68,6 +70,8 @@ classdef CT_WaveModels < muiDataSet
                     output = overtopModel(obj,mobj,site);
                 case 6              %Iribarren Number
                     output = iribarrenModel(obj,mobj,site);  
+                case 7              %Beach type based on fall velocity
+                    output = beachTypeModel(obj,mobj,site);                    
             end
             if isempty(output) || isempty(output.results{1})
                 return; %user cancelled or no results returned
@@ -83,10 +87,8 @@ classdef CT_WaveModels < muiDataSet
 % Save results
 %--------------------------------------------------------------------------                        
             %assign metadata about model
-            ModelList = {'Littoral Drift','X-shore Transport','Wave Energy',...
-                                'Runup','Overtopping','Iribarren Number'};
             dst.Source = sprintf('Class %s, using %s',metaclass(obj).Name,...
-                                                ModelList{id_model});
+                                                obj.ModelList{id_model});
             dst.MetaData = output.metatxt;
             %save results
             setDataSetRecord(obj,muicat,dst,'model');
@@ -379,6 +381,39 @@ classdef CT_WaveModels < muiDataSet
             output.metatxt = sprintf('Beach slope=1:%.1f; Zi=%g',bs,zi); 
         end
 %%
+       function output = beachTypeModel(~,mobj,site)
+            % compute the beach type based on dimensionless fall velocity
+            % INPUTS
+            % mobj - handle to CoastlTools class objects
+            % Variables used by model:
+                % Hsi - incident significant wave height (m)
+                % Tp  - peak wave period (s)
+                % rhow- water density(kg/m3)
+                % rhos- sediment density(kg/m3)   
+                % visc- kinematic viscosity (m2/s)
+                % d50 - sediment grain size(m)
+            %class instance for inshore wave data
+            inwave = mobj.Cases.DataSets.ctWaveModel;
+            %retrieve an inshore wave data set
+            wv = getWaveModelDataset(inwave,mobj,'Inwave_model',{'Tp'});
+            if isempty(wv), return; end %user cancelled or no data
+
+            %calculate dimensionless fall velocity and add results to wave timeseries
+            d50 = site.GrainSize;
+            g = mobj.Constants.Gravity;
+            rhow = mobj.Constants.WaterDensity;
+            rhos = mobj.Constants.SedimentDensity;
+            visc = mobj.Constants.KinematicViscosity;
+            ws = settling_velocity(d50,g,rhow,rhos,visc);  %sediment fall velocity
+            dfv = wv.Hsi./ws./wv.Tp;  %dimensionless fall velocity
+            %if dfv(i)>=6  'dissipative';
+            %elseif dfv(i)<6 && dfv(ij)>1  'intermediate';
+            %else  'reflective';
+            output.results = {dfv};
+            output.modeltime = wv.RowNames;
+            output.metatxt = {sprintf('d50=%g',d50)}; 
+        end
+%%
         function Rslope = getRunupSlope(~,mobj,Hs0,Tp,site)
             %setup input and call runup_slope
             g    = mobj.Constants.Gravity;            %gravity (m/s^2)
@@ -417,28 +452,28 @@ classdef CT_WaveModels < muiDataSet
             
             %struct entries are cell arrays and can be column or row vectors
             switch id_model
-                case 1
+                case 1             %Drift
                     dsp.Variables = struct(...                       
                         'Name',{'Qs'},...
                         'Description',{'Alongshore drift rate potential'},...
                         'Unit',{'m^3/s'},...
                         'Label',{'Transport rate (m^3/s)'},...
                         'QCflag',{'model'});
-                case 2
+                case 2             %X-shore
                     dsp.Variables = struct(...                       
                         'Name',{'Qx'},...
                         'Description',{'Cross-shore transport rate'},...
                         'Unit',{'m^3/s'},...
                         'Label',{'Transport rate (m^3/s)'},...
                         'QCflag',{'model'});
-                case 3
+                case 3             %Energy flux
                     dsp.Variables = struct(...                       
                         'Name',{'Eflux'},...
                         'Description',{'Inshore energy flux'},...
                         'Unit',{'J/ms'},...
                         'Label',{'Energy flux (J/ms)'},...
                         'QCflag',{'model'});
-                case 4
+                case 4              %Runup
                     dsp.Variables = struct(...                       
                         'Name',{'R2','zRU','Rslope'},...
                         'Description',{'Runup (2%)','Runup elevation (R2%+swl)',...
@@ -447,21 +482,29 @@ classdef CT_WaveModels < muiDataSet
                         'Label',{'Runup distance (m)','Runup elevation (mOD)',...
                                                     'Runup slope (1:rs)'},...
                         'QCflag',repmat({'model'},1,3));
-                case 5
+                case 5              %Overtopping
                     dsp.Variables = struct(...                       
                         'Name',{'Qotop'},...
                         'Description',{'Overtopping discharge'},...
                         'Unit',{'m^3/s'},...
                         'Label',{'Overtopping discharge (m^3/s)'},...
                         'QCflag',{'model'});
-                case 6
+                case 6              %Iribarren
                     dsp.Variables = struct(...                       
                         'Name',{'Iri','BreakerType'},...
                         'Description',{'Iribarren wave number','Breaker type'},...
                         'Unit',{'-','-'},...
                         'Label',{'Iribarren wave number','Breaker Type (1-Spill; 2-Plunge; 3-Surge)'},...
                         'QCflag',{'model','model'});
+                case 7              %Beach tupe 
+                    dsp.Variables = struct(...                       
+                        'Name',{'dfv'},...
+                        'Description',{'Dimensionless fall velocity'},...
+                        'Unit',{'-'},...
+                        'Label',{'Dimensionless fall velocity'},...
+                        'QCflag',{'model'});
             end
+            %
             dsp.Row = struct(...
                 'Name',{'Time'},...
                 'Description',{'Time'},...

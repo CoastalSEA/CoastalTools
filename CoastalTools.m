@@ -157,7 +157,7 @@ classdef CoastalTools < muiModelUI
             % submenu for Beach properties
             menu.Run(3).List = {'Profiles','Shore change','Beach type',...
                                            'Shore profile','Dean profile'}; 
-            menu.Run(3).Callback = {'gcbo;','gcbo;',@obj.runBeachAnalysis...
+            menu.Run(3).Callback = {'gcbo;','gcbo;',@obj.runWaveModel...
                             @obj.runBeachAnalysis,@obj.runBeachAnalysis};
             menu.Run(3).Separator = {'off','off','off','on','off'};
             
@@ -441,7 +441,7 @@ classdef CoastalTools < muiModelUI
                     if ~isvalid, return; end 
                     getProfileSpaceTimePlot(lobj(id_class),obj);
                 otherwise
-                    obj.h_CT_BeachAnalysis = CT_BeachAnalysis.runModel(obj,src);                     
+                    CT_BeachAnalysis.runModel(obj,src);                     
             end
         end
 %%

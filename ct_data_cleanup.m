@@ -14,9 +14,11 @@ function ct_data_cleanup(muicat,src)
 %   results are saved to the relevant CoastalTools class object
 % NOTES
 %   List of cleanup functions available:
-%       Concatenate two timeseries
-%       Resample timeseries
-%       Delete multiple profiles
+%       Concatenate two timeseries datasets
+%       Resample timeseries dataset
+%       Patch NaNs or gaps in one timeseries with data from another
+%       Trim the ends of a timeseries data set
+%       Delete multiple profiles 
 %       Edit or Delete profile in timeseries
 %
 % Author: Ian Townend
@@ -41,131 +43,65 @@ end
 %%
 function concatenate_ts(muicat)
     %concatenate two time series and write result as a new timeseries
-    %get first time series
-    seltype = [];
+    %get first time series  
     promptxt = 'Select first timeseries';
-    [caserec,ok] = selectTSdata(mobj,seltype,promptxt);
-    if ok<1, return; end  %user cancelled    
-    [tsc1,caseobj] = getCaseDataSet(mobj.Cases,mobj,caserec); 
-    [classhandle,id_class,~] = getCaseDataID(mobj.Cases,[],caserec);   
-    
-    %get second time series
-    promptxt = 'Select second timeseries';
-    [caserec2,ok] = selectTSdata(mobj,seltype,promptxt);
-    if ok<1, return; end  %user cancelled    
-    [tsc2,~] = getCaseDataSet(mobj.Cases,mobj,caserec2);   
-    
-    %order in sequence and find any overlap    
-    if datenum(tsc1.TimeInfo.StartDate)>datenum(tsc2.TimeInfo.StartDate)
-        %tsc2 is before tsc1 so swap them around
-        temp = tsc1;
-        tsc1 = tsc2;
-        tsc2 = temp;
-        clear temp
-    end
-    %now get start and end time of both timeseries
-    tsc1_startime = datenum(tsc1.TimeInfo.StartDate);
-    tsc1_endtime = tsc1_startime+tsc1.TimeInfo.End;
-    tsc2_startime = datenum(tsc2.TimeInfo.StartDate);        
-    tsc2_endtime = tsc2_startime+tsc2.TimeInfo.End;
-    
-    if tsc1_endtime>tsc2_startime
-        %there is an overlap
-        
-        
-        quest = 'Use which timeseries for overlap?';
-        tsn = questdlg(quest,'Concatenate timeseries',...
-                                    tsc1.Name,tsc2.Name,tsc1.Name);
-        promptxt = {'Adjust end of TS1', 'Adjust start of TS2'};
-        defaults = {datestr(tsc1_endtime),datestr(tsc2_startime)};
-        values = inputdlg(promptxt,'Option to adjust',1,defaults);
-        
-        if ~isempty(values)
-            tsc1_endtime = datenum(values{1});
-            tsc2_startime = datenum(values{2});
-        end
+    [caserec1,isok] = selectRecord(muicat,'PromptText',promptxt,...
+                                                    'ListSize',[150,250]);
+    if isok<1, return; end %user cancelled 
+    dst1 = getDataset(muicat,caserec1,1);
+    classname = muicat.Catalogue.CaseClass(caserec1);
+    range1 = dst1.RowRange;
 
-        switch tsn
-            case tsc1.Name
-                %adjust tsc1 in case user has changed end date
-                tsc1name = tsc1.Name;                
-                tsc1 = getsampleusingtime(tsc1,datestr(tsc1_startime),...
-                                                    datestr(tsc1_endtime));
-                tsc1.Name = tsc1name;
-                %trim tsc2 to date after tsc1_endtime
-                tsc2name = tsc2.Name;
-                offset = TSDataSet.ts_interval(tsc2,'First interval');
-                %contrary to documentation, timeseries functions cannot handle datenums
-                tsc1_endtime  = datestr(tsc1_endtime+offset);
-                tsc2_endtime  = datestr(tsc2_endtime);
-                tsc2 = getsampleusingtime(tsc2,tsc1_endtime,tsc2_endtime);
-                tsc2.Name = tsc2name;
-                switchtime = tsc1_endtime;                
-            case tsc2.Name
-                %adjust tsc2 in case user has changed start date
-                tsc2name = tsc2.Name;
-                tsc2 = getsampleusingtime(tsc2,datestr(tsc2_startime),...
-                                                datestr(tsc2_endtime));
-                tsc2.Name = tsc2name;
-                %trim tsc1 to date before tsc2_startime
-                tsc1name = tsc1.Name;
-                offset = TSDataSet.ts_interval(tsc1,'First interval');                
-                tsc1_startime = datestr(tsc1_startime);        
-                tsc2_startime = datestr(tsc2_startime-offset);
-                tsc1 = getsampleusingtime(tsc1,tsc1_startime,tsc2_startime);
-                tsc1.Name = tsc1name;
-                switchtime = tsc2_startime;                
-        end
-    else
-        tsn = 'No overlap';
-        switchtime = 'timeseries';
+    %get second time series
+    promptxt = 'Select second timeseries';    
+    [caserec2,isok] = selectRecord(muicat,'PromptText',promptxt,...
+                               'CaseClass',classname,'ListSize',[150,250]);
+    if isok<1, return; end %user cancelled  
+    dst2 = getDataset(muicat,caserec2,1);
+    range2 = dst2.RowRange;
+
+    %order in sequence and find any overlap    
+    if range1{1}>range2{1}
+        %dst2 is before dst1 so swap them around
+        temp1 = range1;     temp2 = dst1;
+        range1 = range2;    dst1 = dst2;
+        range2 = temp1;     dst2 = temp2;
+        clear temp1 temp2
     end
     
-    %concatenate single timeseries or two tscollections with same variables
-    quest = 'Do you want to concatenate a single variable or all variables?';
-    answer = questdlg(quest,'Concatenate timeseries',...
-                                    'Single','All','Cancel','All');    
-    switch answer
-        case 'Cancel'
-            return
-        case 'Single'
-            idx1 = 1; idx2 = 1;
-            varnames = gettimeseriesnames(tsc1);
-            if length(varnames)>1
-                [idx1,ok] = listdlg('Name','TS1 options', ...
-                    'PromptString','Select TS1 variable:', ...
-                    'SelectionMode','single', ...
-                    'ListString',varnames);
-                if ok<1, idx1 = 1; end
-            end
-            ts1 = tsc1.(varnames(idx1));
-            varnames = gettimeseriesnames(tsc2);
-            if length(varnames)>1
-                [idx2,ok] = listdlg('Name','TS2 options', ...
-                    'PromptString','Select TS2 variable:', ...
-                    'SelectionMode','single', ...
-                    'ListString',varnames);
-                if ok<1, idx2 = 1; end
-            end
-            ts2 = tsc2.(varnames(idx2));
-            new_ts = append(ts1,ts2);   
-            %add meta-data to timeseries
-            new_ts.Name = varnames(idx2);
-            new_ts.UserData = sprintf('Series used for overlap: %s',char(tsn));
-            new_ts.DataInfo.UserData = sprintf('%s to %s',char(tsn),switchtime);
-            new_tsc = tscollection(new_ts);
-        case 'All'
-            new_tsc = vertcat(tsc1,tsc2);
+    switchtime = 'end of first ts';
+    if range1{2}>range2{1}
+        %there is an overlap
+        promptxt = {'Adjust end of TS1', 'Adjust start of TS2'};
+        defaults = {datestr(range1{2}),datestr(range2{1})};
+        values = inputdlg(promptxt,'Option to adjust',1,defaults);
+        if ~isempty(values)
+            range1{2} = datetime(values{1});
+            range2{1} = datetime(values{2});
+        end
+        %adjust dst1 to account far any change in end date
+        startime = range1{1}-minutes(1);  %offset ensures selected 
+        endtime = range1{2}+minutes(1);   %range is extracted
+        timeidx = isbetween(dst1.RowNames,startime,endtime);
+        dst1 = getDSTable(dst1,timeidx);
+        %trim dst2 to date after dst1 endtime
+        timeidx = isbetween(dst2.RowNames,endtime,range2{2}+minutes(1));
+        dst2 = getDSTable(dst2,timeidx);
+        switchtime = datestr(range1{2}); 
     end
-    %save as a new record
-    RecName = sprintf('%s and %s',tsc1.Name,tsc2.Name);            
-    new_tsc.Name = RecName;
-    new_tsc.TimeInfo.UserData = sprintf('%s to %s',char(tsn),switchtime);
-    id_rec = length(caseobj.mtsc)+1;
-    caseobj.mtsc{id_rec} = new_tsc;
-    Results.saveResults(mobj,classhandle,caseobj,id_class);
-     
-end
+    
+    %concatenate a new dstable
+    newdst = vertcat(dst1,dst2);
+    newdst.Description = sprintf('%s and %s',dst1.Description,dst2.Description);
+    newdst.Source = sprintf('%s, switched at %s',newdst.Description,switchtime);
+    %save results as a new Record in Catalogue
+    type = convertStringsToChars(muicat.Catalogue.CaseType(caserec1));    
+    heq = str2func(classname);
+    obj = heq();  %new instance of class object
+    obj.Data.Dataset = newdst;  
+%     addCaseRecord(obj,muicat,type);  
+    setCase(muicat,obj,type);
+    getdialog(sprintf('Concatenated %s',newdst.Description));end
 %%
 function resample_ts(muicat)
     %resample a timeseries to a different time interval. 
@@ -175,7 +111,7 @@ function resample_ts(muicat)
     [caserec,isok] = selectRecord(muicat,'PromptText',promptxt,...
                                                     'ListSize',[150,250]);
     if isok<1, return; end %user cancelled  
-    [cobj,~,~] = getCase(muicat,caserec);
+    [cobj,~,catrec] = getCase(muicat,caserec);
     dst = cobj.Data.(datasetname);
     
     %get the old and new times for resampling
@@ -227,75 +163,71 @@ function resample_ts(muicat)
     newdst.Source = sprintf('%s, %s resampled at %s',dst.Description,ptxt,string(tint));
     
     %save results as a new Record in Catalogue
-    classname = metaclass(cobj).Name;
-    type = convertStringsToChars(muicat.Catalogue.CaseType(caserec));
-    casedesc = muicat.Catalogue.CaseDescription(caserec);
-    heq = str2func(classname);
+    type = convertStringsToChars(catrec.CaseType);
+    heq = str2func(catrec.CaseClass);
     obj = heq();  %new instance of class object
     obj.Data.Dataset = newdst;  
-    addCaseRecord(obj,muicat,type);       
-    getdialog(sprintf('Data resampled for: %s',casedesc));
+%     addCaseRecord(obj,muicat,type);  
+    setCase(muicat,obj,type);
+    getdialog(sprintf('Data resampled for: %s',catrec.CaseDescription));
 end
 %%
 function patch_ts(muicat)
     %replace NaN values in one timeseries with values from another ts
-    %NB both timeseries must be the same length
-    seltype = [];
-    promptxt = 'Select primary timeseries';
-    [caserec,ok] = selectTSdata(mobj,seltype,promptxt);
-    if ok<1, return; end  %user cancelled    
-    [tsc1,caseobj] = getCaseDataSet(mobj.Cases,mobj,caserec); 
-    [classhandle,id_class,~] = getCaseDataID(mobj.Cases,[],caserec);   
     
-    %get second time series
-    promptxt = 'Select infill timeseries';
-    [caserec2,ok] = selectTSdata(mobj,seltype,promptxt);
-    if ok<1, return; end  %user cancelled    
-    [tsc2,~] = getCaseDataSet(mobj.Cases,mobj,caserec2); 
+    %get the first time series                                
+    promptxt1 = 'Select primary timeseries';   
+    [caserec1,isok] = selectRecord(muicat,'PromptText',promptxt1,...
+                                                        'ListSize',[150,250]);
+    if isok<1, return; end %user cancelled  
+    dst1 = getDataset(muicat,caserec1,1);   %make new copy of primary dataset
+    t1 = dst1.RowNames;
+    [varname1,vidx] = getVariable(dst1);
+    ds1 = dst1.(varname1);
     
-    time = getabstime(tsc1);
-    t1 = datenum(time);    
-    t2 = datenum(getabstime(tsc2));
-
-    idx1 = 1; idx2 = 1;
-    varnames = gettimeseriesnames(tsc1);
-    if length(varnames)>1
-        [idx1,ok] = listdlg('Name','TS1 options', ...
-            'PromptString','Select TS1 variable:', ...
-            'SelectionMode','single', ...
-            'ListString',varnames);
-        if ok<1, idx1 = 1; end
+    tint = get_timeinterval(dst1);
+    stend = dst1.RowRange;
+    newtime = (stend{1}:tint:stend{2})';
+    %check whether the primary data set has time defined with NaNs or has
+    %missing time rows
+    if length(newtime)~=length(t1)
+        [~,patch] = intersect(newtime,t1);
+        newvar = NaN(length(newtime),1);
+        newvar(patch) = ds1;
+    else
+        newtime = t1; newvar = ds1;
     end
-    ts1 = tsc1.(varnames(idx1));
-    varnames = gettimeseriesnames(tsc2);
-    if length(varnames)>1
-        [idx2,ok] = listdlg('Name','TS2 options', ...
-            'PromptString','Select TS2 variable:', ...
-            'SelectionMode','single', ...
-            'ListString',varnames);
-        if ok<1, idx2 = 1; end
-    end
-    ts2 = tsc2.(varnames(idx2));
     
-    data = ts1.Data;
-    missing = isnan(data);
-    [~,patch] = intersect(t2,t1(missing));
-    data(missing)= ts2.Data(patch);
+    %get the second time series
+    promptxt2 = 'Select infill timeseries';
+    [caserec2,isok] = selectRecord(muicat,'PromptText',promptxt2,...
+                                                        'ListSize',[150,250]);
+    if isok<1, return; end %user cancelled  
+    dst2 = getDataset(muicat,caserec2,1);
+    t2 = dst2.RowNames;
+    varname2 = getVariable(dst2);
+    ds2 = dst2.(varname2);
     
-    new_ts = timeseries(data,time);  
-    %add meta-data to timeseries
-    new_ts.Name = ts1.Name;
-    new_ts.UserData = sprintf('Series used for patch: %s',ts2.Name);
-    new_tsc = tscollection(new_ts);
+    %add the patch
+    missing = isnan(newvar);
+    patch = interp1(t2,ds2,newtime,'linear');
+    newvar(missing)= patch(missing);
     
-    %save as a new record
-    RecName = sprintf('%s and %s',tsc1.Name,tsc2.Name);            
-    new_tsc.Name = RecName;
-    new_tsc.TimeInfo.UserData = sprintf('Series used for patch: %s',ts2.Name);
-    id_rec = length(caseobj.mtsc)+1;
-    caseobj.mtsc{id_rec} = new_tsc;
-    Results.saveResults(mobj,classhandle,caseobj,id_class);
-         
+    %now assign new dataset to a dstable
+    dsp = dst1.DSproperties;
+    dsp.Variables(~vidx) = [];
+    newdst = dstable(newvar,'RowNames',newtime,'DSproperties',dsp);
+    newdst.Description = sprintf('%s and %s',dst1.Description,dst2.Description);
+    newdst.Source = {sprintf('%s patched with %s',dst1.Source{1},newdst.Description)};
+    %save results as a new Record in Catalogue
+    classname = muicat.Catalogue.CaseClass(caserec1);
+    type = convertStringsToChars(muicat.Catalogue.CaseType(caserec1));
+    heq = str2func(classname);
+    obj = heq();  %new instance of class object
+    obj.Data.Dataset = newdst;  
+%     addCaseRecord(obj,muicat,type);   
+    setCase(muicat,obj,type);
+    getdialog(sprintf('Patched %s',newdst.Description));         
 end
 %%
 function trim_ts(muicat)
@@ -306,17 +238,17 @@ function trim_ts(muicat)
     [caserec,isok] = selectRecord(muicat,'PromptText',promptxt,...
                                                     'ListSize',[150,250]);
     if isok<1, return; end %user cancelled  
-    [cobj,classrec,~] = getCase(muicat,caserec);
-    classname = metaclass(cobj).Name; 
+    [cobj,classrec,catrec] = getCase(muicat,caserec); %use getCase because need classrec
+    classname = catrec.CaseClass; 
     dst = cobj.Data.(datasetname);
-
+    
     %get start and end time to use and extract dataset
     values = editrange_ui(dst.RowRange);
     startime = datetime(values{1})-minutes(1);  %offset ensures selected 
     endtime = datetime(values{2})+minutes(1);   %range is extracted
-    timeidx = isbetween(dst.RowNames,startime,endtime);
-    
+    timeidx = isbetween(dst.RowNames,startime,endtime);    
     newdst = getDSTable(dst,timeidx);
+    
     muicat.DataSets.(classname)(classrec).Data.Dataset = newdst;
 end
 %%
@@ -495,4 +427,20 @@ function tint = get_timeinterval(dst)
     default = {stint1{1},rowunit};    
     answer = inputdlg(prompt,title,numlines,default);
     tint = str2duration(answer{1},rowunit); %new interval
+end
+%%
+function [varname,vidx] = getVariable(dst)
+    %prompt user to select a variables from the dataset
+    vars = dst.VariableNames;
+    nrec = length(vars);
+    idx = 1;
+    if nrec>1
+        [idx,ok] = listdlg('Name','TS1 options', ...
+            'PromptString','Select TS1 variable:', ...
+            'SelectionMode','single', ...
+            'ListString',vars);
+        if ok<1, idx = 1; end
+    end
+    varname = vars{idx};
+    vidx = (1:nrec)==idx;
 end
