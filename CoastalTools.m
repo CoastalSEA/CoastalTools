@@ -18,7 +18,7 @@ classdef CoastalTools < muiModelUI
         vNumber = '3.0'
         vDate   = 'May 2021'
         modelName = 'CoastalTools'                        
-        %Properties defined in muiModelUI that need to be defined in setGui
+        %Properties defined in muiModelUI that need to be assigned in setGui
         % ModelInputs  %classes required by model: used in isValidModel check 
         % DataUItabs   %struct to define type of muiDataUI tabs for each use                         
     end
@@ -53,7 +53,7 @@ classdef CoastalTools < muiModelUI
             %Statistics options: 'General','Timeseries','Taylor','Intervals'
             obj.DataUItabs.Stats = {'General','Timeseries','Taylor','Intervals'};              
             
-            initialiseUI(obj,modelLogo); %initialise menus and tabs                  
+            initialiseUI(obj,modelLogo); %initialise menus and tabs
         end    
         
 %% ------------------------------------------------------------------------
@@ -118,8 +118,8 @@ classdef CoastalTools < muiModelUI
             menu.Setup(2).Separator = {'off','off','off','off','off','on','off'};
             
             for j=1:nitems  %add standard submenu to all import menu items
-            menu.Setup(j+2).List = {'Load','Add','Delete','Quality Control'};
-            menu.Setup(j+2).Callback = repmat({@obj.loadMenuOptions},[1,4]);
+                menu.Setup(j+2).List = {'Load','Add','Delete','Quality Control'};
+                menu.Setup(j+2).Callback = repmat({@obj.loadMenuOptions},[1,4]);
             end
             % submenu for Site parameters
             offset = nitems+3;
@@ -206,9 +206,10 @@ classdef CoastalTools < muiModelUI
             subtabs.Site(2,:) = {' Simulation ',@obj.InputTabSummary};
             tabs.Plot = {'  Q-Plot  ',@obj.getTabData};
             tabs.Calcs = {'  Calcs  ','gcbo;'};
-            subtabs.Calcs(1,:) = {' Volumes ',@obj.getTabData};
-            subtabs.Calcs(2,:) = {' Shoreline ',@obj.getTabData};
-            subtabs.Calcs(3,:) = {' Profile ',@obj.getTabData};
+            subtabs.Calcs(1,:) = {' Volumes ',@obj.setTabAction};
+            subtabs.Calcs(2,:) = {' Shoreline ',@obj.setTabAction};
+            subtabs.Calcs(3,:) = {'  BVI  ',@obj.setTabAction};
+            subtabs.Calcs(4,:) = {' Profile ',@obj.setTabAction};
             tabs.Stats = {'   Stats   ','gcbo;'};
             subtabs.Stats(1,:) = {' Descriptive ',@obj.getTabData};
             subtabs.Stats(2,:) = {' Extremes ',@obj.getTabData};
@@ -232,16 +233,20 @@ classdef CoastalTools < muiModelUI
                 'Sim_BMVinput','Simulation',[0.95,0.98],{180,60},'BMV Model parameters:'};
         end    
  %%
-        function setTabAction(~,src,cobj)
-            %function required by GUIinterface and sets action for selected
-            %tab (src)
-            switch src.Tag                                    % << Edit match tab requirements
+        function setTabAction(obj,src,cobj)
+            %function required by muiModelUI and sets action for selected
+            %tab (src). Called by muiModelUI.
+            msg = 'No results to display';
+            switch src.Tag                             
                 case 'Plot' 
-                     tabPlot(cobj,src);
+                    tabPlot(cobj,src);
                 case 'Stats'
-                     tabStats(cobj,src);    
-                case 'Calcs'
-                     tabCalcs(cobj,src);
+                    tabStats(cobj,src);    
+                case {'Volumes','Shoreline','BVI'}
+                    cobj = getClassObj(obj,'Cases','CT_BeachAnalysis',msg);
+                    tabCalcs(cobj,src);
+                case 'Profile'                    
+                    cobj = getClassObj(obj,'Cases','CT_BeachAnalysis',msg);
             end
         end      
 %% ------------------------------------------------------------------------
@@ -313,11 +318,11 @@ classdef CoastalTools < muiModelUI
                     fname = sprintf('%s.loadData',classname);
                     callStaticFunction(obj,classname,fname); 
                 case 'Add'
-                    useCase(obj.Cases,mode,classname,'addData');
+                    useCase(obj.Cases,mode,{classname},'addData');
                 case 'Delete'
-                    useCase(obj.Cases,mode,classname,'deleteData');
+                    useCase(obj.Cases,mode,{classname},'deleteData');
                 case 'Quality Control'
-                    useCase(obj.Cases,mode,classname,'qcData');
+                    useCase(obj.Cases,mode,{classname},'qcData');
             end
             ht = findobj(obj.mUI.Tabs.Children,'Tag','Data');
             DrawMap(obj,ht);
@@ -328,19 +333,19 @@ classdef CoastalTools < muiModelUI
             tabname = [];
             switch src.Text
                 case 'Wave propagation'
-                    ctWaveParameters.setParamInput(obj);
+                    ctWaveParameters.setInput(obj);
                     tabname = 'Waves';
                 case 'Wind-wave hindcast'
-                    ctHindcastParameters.setParamInput(obj);
+                    ctHindcastParameters.setInput(obj);
                     tabname = 'Waves';
                 case 'Structure parameters'
-                    ctStructureInput.setParamInput(obj);
+                    ctStructureInput.setInput(obj);
                     tabname = 'Waves';
                 case 'YGOR simulation parameters'
-                    Sim_YGORinput.setParamInput(obj);
+                    Sim_YGORinput.setInput(obj);
                     tabname = 'Simulation';
                 case 'BMV simulation parameters'
-                    Sim_BMVinput.setParamInput(obj);
+                    Sim_BMVinput.setInput(obj);
                     tabname = 'Simulation';
                 case 'Model constants'
                     obj.Constants = editProperties(obj.Constants);
@@ -369,10 +374,13 @@ classdef CoastalTools < muiModelUI
                 case 'BVI site'  %vulnerability for single location
                     ct_sitevulnerability(obj);
                 case 'BVI profile set'     %vulnerability for set of profiles
-                    obj.h_CT_BeachAnalysis = CT_BeachAnalysis.runModel(obj,src);
+                    CT_BeachAnalysis.runModel(obj,src);
+                    ht = findobj(obj.mUI.Tabs.Children,'Tag','Models');
+                    DrawMap(obj,ht);
                 case 'BVI set plot'     %plots for vulnerability index
-                    [isvalid,id_class,lobj] = check4instance(obj,5);
-                    if ~isvalid, return; end  
+                    msgtxt = 'No data available to plot';                    
+                    lobj = getClassObj(obj,'Cases','ctBeachAnalysis',msgtxt);
+                    if isempty(lobj), return; end  
                     getShoreTablePlot(lobj(id_class),obj,src.Text);
                 case 'User Model'
                     %run wave model to create inshore wave data
@@ -385,10 +393,10 @@ classdef CoastalTools < muiModelUI
             switch src.Text
                 case 'Nearshore Waves'
                     %run wave model to create inshore wave data
-                    ctWaveModel.runModel(obj,true);
+                    ctWaveModel.runModel(obj,true); %flag is for inshore case
                 case 'Deepwater waves'
                     %run wave model to create inshore wave data
-                    ctWaveModel.runModel(obj,false);
+                    ctWaveModel.runModel(obj,false);%flag is for offshore case
                 case 'Wind-Waves'
                     %run wave model to create inshore wave data
                     ctWindWaveModel.runModel(obj);    
@@ -416,57 +424,35 @@ classdef CoastalTools < muiModelUI
             %indices refer to model type in CT_BeachAnalysis
             %'Beach type','Volumes','Shoreline position','Shoreline',
             %'BVI profile set','Shore profile','Dean profile'
-            switch src.Text    
-                case 'Change plot'
-                    [isvalid,id_class,lobj] = check4instance(obj,[4,5]);
-                    if ~isvalid, return; end 
-                    getShorelinePlot(lobj(id_class(1)),obj);
-                 case 'Rates plot'
-                    [isvalid,id_class,lobj] = check4instance(obj,[4,5]);
-                    if ~isvalid, return; end 
-                    getShoreTablePlot(lobj(id_class),obj,src.Text); 
-                case 'Location plot'                    
-                    lobj = obj.Cases.DataSets.ctBeachProfileData;
-                    if isempty(lobj) %no data
-                        warndlg('No data avaialable to plot')
-                        return; 
-                    end                     
+            msgtxt = 'No data available to plot';
+            switch src.Text
+                case 'Location plot'
+                    lobj = getClassObj(obj,'Cases','ctBeachProfileData',msgtxt);
+                    if isempty(lobj), return; end
                     getProfileLocationsPlot(lobj,obj.Cases)
+                case 'Change plot'
+                    lobj = getClassObj(obj,'Cases','CT_BeachAnalysis',msgtxt);
+                    if isempty(lobj), return; end
+                    getShorelinePlot(lobj,obj);
+                case 'Rates plot'
+                    lobj = getClassObj(obj,'Cases','CT_BeachAnalysis',msgtxt);
+                    if isempty(lobj), return; end
+                    getShoreTablePlot(lobj,obj,src.Text);
                 case 'Centroid plot'
-                    [isvalid,id_class,lobj] = check4instance(obj,2);
-                    if ~isvalid, return; end 
-                    getProfileCentroidsPlot(lobj(id_class),obj);
+                    lobj = getClassObj(obj,'Cases','CT_BeachAnalysis',msgtxt);
+                    if isempty(lobj), return; end
+                    getProfileCentroidsPlot(lobj,obj);
                 case 'Space-time plot'
-                    [isvalid,id_class,lobj] = check4instance(obj,[1,2,3]);
-                    if ~isvalid, return; end 
-                    getProfileSpaceTimePlot(lobj(id_class),obj);
+                    lobj = getClassObj(obj,'Cases','CT_BeachAnalysis',msgtxt);
+                    if isempty(lobj), return; end
+                    getProfileSpaceTimePlot(lobj,obj);
                 otherwise
-                    CT_BeachAnalysis.runModel(obj,src);                     
-            end
-        end
-%%
-        function [isvalid,id_class,lobj] = check4instance(obj,ids)
-            %check whether the instances in CT_BeachAnalysis or CT_WaveModels
-            %defined by the ids vector exist or not. isvalid=true if exists.
-            isvalid = false; id_class = [];
-            count = 1;
-            lobj = obj.h_CT_BeachAnalysis;
-            if ~isempty(lobj)
-                for i=1:length(ids)
-                    [id_c,isnew] = getClassInstance(lobj,'ModelType',ids(i));
-                    if ~isnew && ~isempty(lobj(id_c).mtsc)            
-                        isvalid = true;
-                        id_class(count) = id_c; %#ok<AGROW>
-                        count = count+1;
-                    end
-                end 
-            end
-            %
-            if ~isvalid
-                warndlg('No data avaialable to plot')
-            end
-        end          
-        
+                    CT_BeachAnalysis.runModel(obj,src);
+                    ht = findobj(obj.mUI.Tabs.Children,'Tag','Models');
+                    DrawMap(obj,ht);
+            end           
+        end         
+
         %% Analysis menu ------------------------------------------------------
         function analysisMenuOptions(obj,src,~)
             switch src.Text
@@ -541,7 +527,7 @@ classdef CoastalTools < muiModelUI
             tc.ColumnName = headers;
             tc.RowName = {};
             tc.Data = cdata;
-            tc.ColumnWidth = {20 80 180 55 80 80 20};
+            tc.ColumnWidth = {25 80 180 50 75 75 25};
             tc.RowStriping = 'on';
             tc.Position(3:4)=[0.935 0.8];    %may need to use tc.Extent?
             tc.Position(2)=0.9-tc.Position(4);

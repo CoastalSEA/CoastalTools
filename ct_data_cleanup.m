@@ -55,7 +55,7 @@ function concatenate_ts(muicat)
     %get second time series
     promptxt = 'Select second timeseries';    
     [caserec2,isok] = selectRecord(muicat,'PromptText',promptxt,...
-                               'CaseClass',classname,'ListSize',[150,250]);
+                               'CaseClass',{classname},'ListSize',[150,250]);
     if isok<1, return; end %user cancelled  
     dst2 = getDataset(muicat,caserec2,1);
     range2 = dst2.RowRange;
@@ -305,7 +305,7 @@ function edit_delete_profile(muicat)
     promptxt = 'Select profile timeseries (Cancel to quit)';
     while isok>0
         [caserec,isok] = selectRecord(muicat,'PromptText',promptxt,...
-                              'CaseClass',classname,'ListSize',[150,250]);
+                              'CaseClass',{classname},'ListSize',[150,250]);
         if isok<1, return; end %user cancelled  
 
         [cobj,classrec,~] = getCase(muicat,caserec);
@@ -388,9 +388,9 @@ function edit_delete_profile(muicat)
                     ptime(idx) = [];
                 elseif strcmp(answer,'Edit')
                     %zero chainage can be repeated in some profiles
-                    [isall,idx] = isunique(y,false);
+                    [isall,idy] = isunique(y,false);
                     if ~isall                 %add a small offset to duplicate value
-                        y(idx) = y(idx)+eps;  %only works if there is just one duplicate
+                        y(idy) = y(idy)+eps;  %only works if there is just one duplicate
                     end
                     idd = ~isnan(y);  %remove nans
                     %create tablefigure for editing data
@@ -402,7 +402,7 @@ function edit_delete_profile(muicat)
                     newtable = tablefigureUI(title,header,oldtable,true,but);
                     if isempty(newtable), return; end  %user cancelled  
                     
-                    dst.Elevation(idx,:) = newtable{:,:};
+                    dst.Elevation(idx,idd) = newtable{:,:};
                     nvar = length(dst.VariableQCflags);
                     dst.VariableQCflags(1:nvar) = repmat({'qc'},1,nvar);
                 end
