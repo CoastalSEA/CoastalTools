@@ -39,13 +39,13 @@ classdef CoastalTools < muiModelUI
             %classes required to run model, format:           
             %obj.ModelInputs.<model classname> = {'Param_class1',Param_class2',etc}
             obj.ModelInputs.ctWaveModel = {'ctWaveParameters','ctWaveData'};  
-%             obj.ModelInputs.OffWaveModel = {'ctWaveParameters','ctWaveData'};
             obj.ModelInputs.ctWindWaveModel = {'ctHindcastParameters','ctWindData'};  
             obj.ModelInputs.ctTidalAnalysis = {'ctWaterLevelData'};
             obj.ModelInputs.CT_WaveModels = {'ctWaveParameters','ctWaveModel'};  
             obj.ModelInputs.CT_BeachAnalysis = {'ctBeachProfileData'}; 
             obj.ModelInputs.CT_UserModel = {'ctWaveParameters'}; 
-            
+            obj.ModelInputs.Sim_YGOR = {'Sim_YGORinput'}; 
+            obj.ModelInputs.Sim_BMV = {'Sim_BMVinput','CT_BeachAnalysis'}; 
             %tabs to include in DataUIs for plotting and statistical analysis
             %select which of the options are needed and delete the rest
             %Plot options: '2D','3D','4D','2DT','3DT','4DT'
@@ -161,7 +161,7 @@ classdef CoastalTools < muiModelUI
                             @obj.runBeachAnalysis,@obj.runBeachAnalysis};
             menu.Run(3).Separator = {'off','off','off','on','off'};
             
-            menu.Run(4).List = {'Volumes','Shoreline position',...
+            menu.Run(4).List = {'Volumes','Shore position',...
                         'Location plot','Centroid plot','Space-time plot'}; 
             menu.Run(4).Callback = repmat({@obj.runBeachAnalysis},[1,5]);
             menu.Run(4).Separator = {'off','off','on','off','off'};
@@ -245,8 +245,10 @@ classdef CoastalTools < muiModelUI
                 case {'Volumes','Shoreline','BVI'}
                     cobj = getClassObj(obj,'Cases','CT_BeachAnalysis',msg);
                     tabCalcs(cobj,src);
-                case 'Profile'                    
-                    cobj = getClassObj(obj,'Cases','CT_BeachAnalysis',msg);
+                case 'Profile'    
+                    %warns user if no data, otherwise displays whatever is
+                    %already plotted using the profile model menu options
+                    getClassObj(obj,'Cases','CT_BeachAnalysis',msg);
             end
         end      
 %% ------------------------------------------------------------------------
@@ -370,7 +372,10 @@ classdef CoastalTools < muiModelUI
                 case 'Derive Output'
                     obj.mUI.ManipUI = muiManipUI.getManipUI(obj);
                 case 'Simulation'
-                    obj.GuiSimulation = CT_Simulation.getCTSimGui(obj);
+                    if ~isfield(obj.mUI,'SimUI')
+                        obj.mUI.SimUI = [];
+                    end
+                    obj.mUI.SimUI = CT_SimUI.getCTSimUI(obj);
                 case 'BVI site'  %vulnerability for single location
                     ct_sitevulnerability(obj);
                 case 'BVI profile set'     %vulnerability for set of profiles
@@ -379,9 +384,9 @@ classdef CoastalTools < muiModelUI
                     DrawMap(obj,ht);
                 case 'BVI set plot'     %plots for vulnerability index
                     msgtxt = 'No data available to plot';                    
-                    lobj = getClassObj(obj,'Cases','ctBeachAnalysis',msgtxt);
+                    lobj = getClassObj(obj,'Cases','CT_BeachAnalysis',msgtxt);
                     if isempty(lobj), return; end  
-                    getShoreTablePlot(lobj(id_class),obj,src.Text);
+                    getShoreTablePlot(lobj,src.Text);
                 case 'User Model'
                     %run wave model to create inshore wave data
                     callClassFunction(obj,'CT_UserModel','runUserModel');
@@ -437,11 +442,11 @@ classdef CoastalTools < muiModelUI
                 case 'Rates plot'
                     lobj = getClassObj(obj,'Cases','CT_BeachAnalysis',msgtxt);
                     if isempty(lobj), return; end
-                    getShoreTablePlot(lobj,obj,src.Text);
+                    getShoreTablePlot(lobj,src.Text);
                 case 'Centroid plot'
                     lobj = getClassObj(obj,'Cases','CT_BeachAnalysis',msgtxt);
                     if isempty(lobj), return; end
-                    getProfileCentroidsPlot(lobj,obj);
+                    getProfileCentroidsPlot(lobj);
                 case 'Space-time plot'
                     lobj = getClassObj(obj,'Cases','CT_BeachAnalysis',msgtxt);
                     if isempty(lobj), return; end
@@ -498,8 +503,8 @@ classdef CoastalTools < muiModelUI
                 %
                 dst = getDataset(muicat,caserec(i),1);
                 range = getVarAttRange(dst,1,'Time');
-                if ~isempty(dst.RowRange)
-                    reclen = num2str(height(dst.DataTable));
+                reclen = num2str(height(dst.DataTable));
+                if ~isempty(dst.RowRange)                    
                     stdate = datestr(range{1},'dd-mmm-yyyy'); %use to datestr to control ouput format
                     endate = datestr(range{2},'dd-mmm-yyyy');
                     qualcl = '';
@@ -508,6 +513,10 @@ classdef CoastalTools < muiModelUI
                     end
                     cdata(irec,:) = {case_id,type,char(casedesc{i}),reclen,...
                                                      stdate,endate,qualcl};
+                    irec = irec+1;
+                else
+                    cdata(irec,:) = {case_id,type,char(casedesc{i}),reclen,...
+                                                             '','',qualcl};
                     irec = irec+1;
                 end                
             end

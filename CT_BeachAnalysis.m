@@ -17,11 +17,11 @@ classdef CT_BeachAnalysis < muiDataSet
     properties
         %inherits Data, RunParam, MetaData and CaseIndex from muiDataSet
         %Additional properties: 
-        VolumeCalcs      %struct for results from volume calcs
-        ShorelineCalcs   %struct for results from shoreline position calcs
-        FitCoeffs   %used to store BMV model coefficients with volume data
-                    %used to store regression results for shoreline position
-        BVI         %profile indices from BVI analysis
+        TabOutput    %output struct with results from model. Struct fields:
+                     % table - values saved for display on tabs
+                     % headtxt - source and metatext to be used as table header
+                     %BVI models also have a bvitable field
+        FitCoeffs    %used to store BMV model coefficients with volume data
     end
     
     properties (Hidden)
@@ -30,8 +30,9 @@ classdef CT_BeachAnalysis < muiDataSet
     end
     
     properties (Transient)
-        ModelList = {'Volumes','Shoreline position','Shoreline',...
-                     'BVI profile set','Shore profile','Dean profile'}          
+        MenuList = {'Volumes','Shore position','Shoreline',...
+                     'BVI profile set','Shore profile','Dean profile'} 
+        ModelName = {'Volumes','ShorePosition','ShoreLine','BVI'};
     end
     
     methods (Access = private)
@@ -44,7 +45,7 @@ classdef CT_BeachAnalysis < muiDataSet
         function runModel(mobj,src)
             %function to run a simple 2D diffusion model
             obj = CT_BeachAnalysis;    
-            id_model = find(strcmp(obj.ModelList,src.Text));  
+            id_model = find(strcmp(obj.MenuList,src.Text));  
             if isempty(id_model), return; end
             dsp = modelDSproperties(obj,id_model);
             
@@ -70,45 +71,47 @@ classdef CT_BeachAnalysis < muiDataSet
             switch id_model
                 case 1   %Volumes for individual profile
                     output = volumesModel(obj,mobj);
-                    mtype = 'Volumes_model';
-                    if ~isempty(output)
-                        obj.VolumeCalcs = output;
+                    if ~isempty(output)                        
                         src = findobj(mobj.mUI.Tabs.Children,'Tag','Volumes'); 
                         headtxt = sprintf('Profile: %s\nFor: %s',...
                                       output.source,output.metatxt);
+                        obj.TabOutput.table = output.table;
+                        obj.TabOutput.headtxt = headtxt;
                         tablefigure(src,headtxt,output.table);
                     end
                 case 2  %Shoreline position for individual profile
                     output = shorelinePositionModel(obj,mobj);
-                    mtype = 'ShorePos_model';
                     if ~isempty(output)
-                        obj.ShorelineCalcs = output.table;
                         src = findobj(mobj.mUI.Tabs.Children,'Tag','Shoreline'); 
                         headtxt = sprintf('Profile: %s\nFor: %s',...
                                       output.source,output.metatxt);
+                        obj.TabOutput.table = output.table;
+                        obj.TabOutput.headtxt = headtxt;          
                         tablefigure(src,headtxt,output.table);
                     end
                 case 3  %Shoreline (position extracted from set of profiles)
                     output = profiles2shoreline(obj,mobj);
-                    mtype = 'SLine_model';
-                    if ~isempty(output)
-                        obj.FitCoeffs = output.table;                
+                    if ~isempty(output)                
                         src = findobj(mobj.mUI.Tabs.Children,'Tag','BVI');
-                        headtxt = 'Shoreline fit coefficients';
+                        headtxt = sprintf('Shoreline fit coefficients\nSource: %s\nFor: %s',...
+                                            output.source,output.metatxt);
+                        obj.TabOutput.table = output.table;
+                        obj.TabOutput.headtxt = headtxt;
                         tablefigure(src,headtxt,output.table);
                     end
                 case 4 %beach vulnerability index
                     output = getBVindex(obj,mobj);
-                    mtype = 'BVI_model';
                     if ~isempty(output)
-                        obj.FitCoeffs = output.table;                
-                        obj.BVI = output.bvitable;
                         src = findobj(mobj.mUI.Tabs.Children,'Tag','BVI'); 
-                        headtxt = 'Beach vulnerability index table';
+                        headtxt = sprintf('Beach vulnerability index table\nSource: %s\nFor: %s',...
+                                            output.source,output.metatxt);
+                        obj.TabOutput.table = output.table;
+                        obj.TabOutput.bvitable = output.bvitable;
+                        obj.TabOutput.headtxt = headtxt;
                         tablefigure(src,headtxt,output.bvitable);
                     end
                 case 5  %plot an idealised profile and closure depths
-                    src = findobj(mobj.mUI.Tabs.Children,'Tag','Profile'); 
+                    src = findobj(mobj.mUI.Tabs.Children,'Tag','Profile');                    
                     bmvProfile(obj,mobj,src);
                     output = [];
                 case 6  %plot the Dean profile
@@ -131,81 +134,96 @@ classdef CT_BeachAnalysis < muiDataSet
             % Save results
             %--------------------------------------------------------------                        
             %assign metadata about model
-            obj.ModelType = obj.ModelList{id_model};
+            obj.ModelType = obj.ModelName{id_model};
             dst.Source = sprintf('Class %s, using %s',metaclass(obj).Name,...
                                                        obj.ModelType);
             dst.MetaData = output.metatxt;
             dst.UserData = output.proflist;
             %save results
             casename = {sprintf('%s-%s',obj.ModelType,output.source)};    
-            setDataSetRecord(obj,muicat,dst,mtype,casename,true);
+            setDataSetRecord(obj,muicat,dst,'model',casename,true);
             getdialog('Run complete');
         end
     end
- %%
-    methods
-        function tabPlot(obj,src) %abstract class for muiDataSet
-            %generate plot for display on Q-Plot tab
-            
-            %add code to define plot format or call default tabplot using:
-            tabDefaultPlot(obj,src);
-        end   
+%% ------------------------------------------------------------------------
+% UI Functions called directly from main menu
+%--------------------------------------------------------------------------
+    methods       
+        function tabPlot(obj,src)    %method for muiDataSet abstract class
+            %generate plot for display on Q-Plot tab 
+            ht = findobj(src,'Type','axes');
+            delete(ht);
+            ax = axes('Parent',src,'Tag','TS_Plot');            
+
+            dst = obj.Data.Dataset;
+            if isa(obj,'CT_BeachAnalysis') &&...
+                      (strcmp(obj.ModelType,'ShoreLine') ||...
+                                   strcmp(obj.ModelType,'BVI'))
+                 if strcmp(obj.ModelType,'BVI')  
+                     answer = questdlg('Shore or BVI?','tabPlot','Shore','BVI','BVI');
+                     if strcmp(answer,'BVI')
+                            getShoreTablePlot(obj,'BVI set plot',ax) 
+                         return;
+                     end
+                 end                  
+                %select whether to plot E&N or Chainage(->data in 'Eastings')
+                [dst_time,Xdata,Ydata,Loc,pid,vname] = ...
+                                            selectShorelineType(obj,dst);
+                time = cellstr(dst_time);
+                if isempty(Xdata)
+                    nint = subsampleprofiles(obj,length(Loc));
+                    plotShoreline_CH(obj,ax,time,Loc,Ydata,pid,vname,nint); 
+                else
+                    plotProfileBaseline(obj,mobj,ax,Loc);
+                    plotShoreline_EN(obj,ax,time,Xdata,Ydata,pid);
+                end
+                ax.Color = [0.96,0.96,0.96];  %needs to be set after plot 
+            else    
+                tabDefaultPlot(obj,src)
+            end            
+        end         
 %%
         function tabCalcs(obj,src)
-            %generate table to display calcs output
+            %generate table to display calcs output tab
             ht = src.Children;   %clear any existing tab content
             delete(ht);
             %prompt selection of compatible dataset for chosen tab
-            idx = strcmp({obj(:).ModelType},src.Tag);            
+            idx = find(strcmp({obj(:).ModelType},src.Tag));            
             caselist = arrayfun(@(x) x.Data.Dataset.Description,obj,'UniformOutput',false);
-            caselist(~idx) = [];   
+            caselist = caselist(idx);  
             if isempty(caselist)
                 warndlg(sprintf('Model ouput of type: %s not found',src.Tag));
                 return;
             end
 
             if length(caselist)>1
-                [classrec,ok] = listdlg('Name','CalcTab','PromptString','Select Case', ...                                 
+                [select,ok] = listdlg('Name','CalcTab','PromptString','Select Case', ...                                 
                                      'ListSize',[200,80],'SelectionMode','single', ...                                 
                                      'ListString',caselist);
                 if ok==0, return; end 
             else
-                classrec = 1;
+                select = 1;
             end
+            classrec = idx(select);
+            
             %display relevant table for selected tab
-            switch src.Tag
-                case  'Volumes'
-                    output = obj(classrec).VolumeCalcs;
-                    headtxt = sprintf('Profile: %s\nFor: %s',...
-                                      output.source,output.metatxt);
-                    tablefigure(src,headtxt,output.table);
-                case 'Shoreline'
-                    output = obj(classrec).ShorelineCalcs;
-                    headtxt = sprintf('Profile: %s\nFor: %s',...
-                                      output.source,output.metatxt);
-                    tablefigure(src,headtxt,output.table);                    
-                case 'BVI'
-                    if strcmp(obj(classrec).ModelType,'Shoreline')
-                        output = obj(classrec).FitCoeffs;
-                        headtxt = 'Shoreline regression fit coefficients';
-                        output_table = output.table;  
-                    else
-                        output = obj(classrec).BVI;
-                        headtxt = 'Beach vulnerability index table';
-                        output_table = output.bvitable;                    
-                    end
-                    tablefigure(src,headtxt,output_table);
+            output = obj(classrec).TabOutput;
+            if strcmp(src.Tag,'BVI')
+                 answer = questdlg('Fit coefficients or BVI?','Calcs tab',...
+                                        'Fit coeffs','BVI','BVI');
+                 if strcmp(answer,'BVI')                           
+                    output.table = output.bvitable;  
+                 end
             end
+            
+            tablefigure(src,output.headtxt,output.table);
         end
-%% ------------------------------------------------------------------------
-% UI Functions called directly from main menu
-%--------------------------------------------------------------------------
+%%
         function getShorelinePlot(obj,mobj)
             %plot the results generated by profiles2shoreline and stored 
             %as a set of shorelines over time
-            [tsc_time,Xdata,Ydata,Loc,pid,vname,caserec] = selectShoreline(obj,mobj);
+            [tsc_time,Xdata,Ydata,Loc,pid,vname,obj] = selectShoreline(obj);
             if isempty(tsc_time), return; end   
-            obj = getCase(mobj.Cases,caserec);
             time = cellstr(tsc_time);
             hf = figure('Name','Shorelines','Tag','PlotFig','Units','normalized');
             %move figure to top right
@@ -215,8 +233,7 @@ classdef CT_BeachAnalysis < muiDataSet
             set(groot,'defaultAxesColorOrder',jet(nline))
             ax = axes;
             if isempty(Xdata)      %user requested Chainage plot
-                lobj = mobj.Cases.DataSets.ctBeachProfileData;  %handle to beach profile data
-                nint = subsampleprofiles(lobj,length(Loc));
+                nint = subsampleprofiles(obj,length(Loc));
                 [Loc,Ydata] = checkDirection(obj,Loc,Ydata);
                 plotShoreline_CH(obj,ax,time,Loc,Ydata,pid,vname,nint);
             else                   %user requested E&N plot
@@ -225,55 +242,46 @@ classdef CT_BeachAnalysis < muiDataSet
             end
         end
 %%
-        function getShoreTablePlot(~,mobj,src)
-            %plot the indices for a BVI set analysis
-            
+        function getShoreTablePlot(obj,src,ax)
+            %plot the indices for a BVI set analysis            
             switch src
                 case 'Rates plot'
-                    type = {'SLine_model','BVI_model'};
+                    type = {'ShoreLine','BVI'};
                 case 'BVI set plot'
-                    type = {'BVI_model'};
+                    type = {'BVI'};
             end
-            muicat = mobj.Cases;
-            promptxt = 'Select shoreline';
-
-            [caserec,ok] = selectRecord(muicat,'PromptText',promptxt,...
-                        'CaseType',type,...       
-                        'SelectionMode','single','ListSize',[250,200]);
+            [obj,~,ok] = selectClassInstance(obj,'ModelType',type);
             if ok<1, return; end
-            obj = getCase(mobj.Cases,caserec);
+            
             dst = obj.Data.Dataset;
             pid = dst.Description;
             Loc = dst.UserData;          
             
-            hf = figure('Name','Shore change','Tag','PlotFig','Units','normalized');
-            %move figure to top right
-            hf.Position(1) = 1-hf.Position(3)-0.01;
-            hf.Position(2) = 1-hf.Position(4)-0.12;
-            ax = axes;
-            lobj = mobj.Cases.DataSets.ctBeachProfileData;  %handle to beach profile data
-            nint = subsampleprofiles(lobj,length(Loc));            
+            if nargin<3
+                hf = figure('Name','Shore change','Tag','PlotFig','Units','normalized');
+                %move figure to top right
+                hf.Position(1) = 1-hf.Position(3)-0.01;
+                hf.Position(2) = 1-hf.Position(4)-0.12;
+                ax = axes;
+            end
+            
+            nint = subsampleprofiles(obj,length(Loc));     %in ctBeachProfileData     
             switch src
                 case 'Rates plot'
-                    outtable = obj.FitCoeffs;
+                    outtable = obj.TabOutput.table;
                     [Loc,outtable] = checkDirection(obj,Loc,outtable);
                     plotShoreRates_CH(obj,ax,Loc,outtable,pid,nint);
                 case 'BVI set plot'
-                    outtable = obj.BVI;
+                    outtable = obj.TabOutput.bvitable;
                     [Loc,outtable] = checkDirection(obj,Loc,outtable);
                     plotBVI_CH(obj,ax,Loc,outtable,pid,nint);
             end           
         end
 %%
-        function getProfileCentroidsPlot(~,mobj)
+        function getProfileCentroidsPlot(obj)
             %setup call to function to plot centroids
-             muicat = mobj.Cases;
-            promptxt = 'Select profile volumes data set';
-            [caserec,ok] = selectRecord(muicat,'PromptText',promptxt,...
-                        'CaseType',{'Volumes_model'},...                    
-                        'SelectionMode','single','ListSize',[250,200]);
+            [~,dst,ok] = selectClassInstance(obj,'ModelType','Volumes');        
             if ok<1, return; end
-            [dst,~] = getDataset(muicat,caserec,1);   %idset=1 
             %reformat time to short form for use as labels
             dst_time = cellstr(dst.RowNames,'dd-MM-yyyy');
             x = dst.x1;        %N_D x-centroid
@@ -291,24 +299,22 @@ classdef CT_BeachAnalysis < muiDataSet
         function getProfileSpaceTimePlot(obj,mobj)
             %setup selection of profiles for plotting as a space-time plot
             muicat = mobj.Cases;
-            if length(obj)>1
-                type = {obj(:).ModelType};
-                utype = unique(type);
-                answer = questdlg('Which model','Space-time plot',utype{:},utype{1});
-                idobj = strcmp(type,answer);
-                obj = obj(idobj);                
-            end
-            caserec = getMinShorelineSet(obj,mobj,2);  %2=min number of profiles to select
+            [obj,ok] = getVolumePostionSet(obj);
+            if ok<1, return; end
+            caseid = [obj(:).CaseIndex];
+            caserec = caseRec(muicat,caseid);          
+            casedesc = muicat.Catalogue.CaseDescription(caserec);
+            subset = split(casedesc,'-');
+     
+            caserec = getMinShorelineSet(obj,mobj,3,subset(:,2));  %3=min number of profiles to select
             if isempty(caserec), return; end  %user cancelled
             profnames = muicat.Catalogue.CaseDescription(caserec);            
             j = 1;
-            catdesc = muicat.Catalogue.CaseDescription;
             for i=1:length(obj)
                 adst = obj(i).Data.Dataset;
                 matchcell = @(x) contains(adst.Description,x);
                 if any(cellfun(matchcell,profnames))
-                    dsts(j) = adst;
-                    selrecs(j) = find(strcmp(catdesc,adst.Description));                    
+                    dsts(j) = adst; %#ok<AGROW>                  
                     j = j+1;
                 end
             end
@@ -335,6 +341,73 @@ classdef CT_BeachAnalysis < muiDataSet
             
             plotSpaceTime(obj,time,profnames,datavar,vardesc)
         end   
+
+%% ------------------------------------------------------------------------
+% Open Access Functions used in other functions eg ct_beachvulnerability.m
+%--------------------------------------------------------------------------    
+        function [pos,stats,meta] = getPositionAndRates(obj,mobj,...
+                                                    caserec,time,zlevel,site)
+            %for each time interval of selected profiles compute position, 
+            %slope, orientation and associated rates of change                                            
+            npro = length(caserec);   %number of profiles
+            %check that profiles are in order along coast
+            [~,~,idd] = shorelineProfileOrder(obj,mobj,caserec);
+            caserec = caserec(idd);
+            %now analyse each time interval
+            if isscalar(zlevel), zlevel = repmat(zlevel,1,npro); end
+            ntime = length(time);     %composite time for all profiles
+            xD = NaN(ntime,npro); E = NaN(ntime,npro); N = E; BS = xD; %theta = xD;
+            bE = E; bN = N;
+            aX = zeros(npro,1); bX = aX; RsqX = aX; seX = aX;
+            aM = aX; bM = aX; RsqM = aX; seM = aX;
+%             aO = aX; bO = aX; RsqO = aX; seO = aX;
+            proflist{npro} = [];
+            for k=1:npro
+                [dst,~] = getDataset(mobj.Cases,caserec(k),1);  %idset=1
+%                 dst = getCaseDataSet(mobj.Cases,mobj,caserec(k));
+                x = dst.Chainage;
+                z = dst.Elevation;
+                xmin = max(min(x,[],2));
+                %find the distance to and slope at zlevel
+                [xdist,slope] = slope_points(x,z,zlevel(k),0.5,xmin);    
+                %ptime is in profile and time is unique set for all profiles   
+                ptime = dst.RowNames;  %time intervals for a profile
+                idp = find(ismember(time,ptime));   %ids of ptime in time           
+                xD(idp,k) = xdist;
+                BS(idp,k) = slope;               
+                proflist{k} = mobj.Cases.Catalogue.CaseDescription{caserec(k)};
+                %if the dataset includes E,N get the E,N of zlevel
+                if any(strcmp('Eastings',dst.VariableNames))
+                    [Es,Ns,Eb,Nb] = ENofShoreline(obj,dst,xdist);   
+                    E(idp,k) = Es;
+                    N(idp,k) = Ns; 
+                    bE(idp,k) = Eb;
+                    bN(idp,k) = Nb;
+                end
+%                 shoreang = shore_orientation(Es,Ns,Eb,Nb);
+%                 theta(idp,k) = shoreang;
+                %now get rate of change in distance and slope
+                %eps(0) to avoid divide by zero in linear regression
+                mtime = years(ptime-ptime(1)+eps(0)); 
+                [aX(k),bX(k),RsqX(k)] = regression_model(mtime,xdist,'Linear');
+                seX(k) = stderror(mtime,xdist,aX(k),bX(k),'Linear');
+                [aM(k),bM(k),RsqM(k)] = regression_model(mtime,-slope,'Linear');
+                seM(k) = stderror(mtime,-slope,aM(k),bM(k),'Linear');
+%                 [aO(k),bO(k),RsqO(k)] = regression_model(mtime,shoreang,'Linear');
+%                 seO(k) = stderror(mtime,theta(:,k),aO(k),bO(k),'Linear');
+            end
+            
+            [theta,ostats] = getShoreOrientation(obj,E,N,bE,bN,time,site);
+            
+            %package output
+            pos = {E,N,xD,BS,theta};
+            stats = table(aX,bX,RsqX,seX,aM,bM,RsqM,seM,...
+              'VariableNames',{'distIntercept','distSlope','distR2',...
+              'distStdErr','slopeIntercept','slopeSlope','slopeR2',...
+              'slopeStdErr'});
+            stats = horzcat(stats,ostats);
+            meta.xmin = xmin; meta.proflist = proflist; meta.npro = npro;
+        end
     end
 %%
 %--------------------------------------------------------------------------
@@ -502,27 +575,26 @@ classdef CT_BeachAnalysis < muiDataSet
         end
 %%
         function bmvProfile(~,mobj,src)
-            %plot the BMV profile with surf and shoal depths
-            %get handle to model input parameters
-            h_inp = getClassHandle(mobj,'Sim_BMVinput');
-            bmvinp = mobj.(h_inp);
-            if isempty(bmvinp)
-                warndlg('BMV input parameters have not been defined');
-                return;
-            end
+            %plot the BMV profile with surf and shoal depths 
+            msgtxt = 'BMV input parameters have not been defined';
+            inp = getClassObj(mobj,'Inputs','Sim_BMVinput',msgtxt);
+            if isempty(inp), return; end        
+
             %class instance for inshore wave data
-            inwaveobj = mobj.(getClassHandle(mobj,'InWaveModel'));
+            msgtxt = 'Nearshore wave data not defined';
+            inwaveobj = getClassObj(mobj,'Cases','ctWaveModel',msgtxt);
+            if isempty(inwaveobj), return; end
+
             %retrieve Hsi from inshore wave data set
-            [hsts,recnum] = getInWaveTS(inwaveobj,mobj,'Hsi');
-            tpts = getWavePeriod(inwaveobj,mobj,recnum);
+            wvdst = getWaveModelDataset(inwaveobj,mobj,{'Inwave_model'},{'Tp'});
             
             idx = [15,16];     %subset of variables to be checked
             bmv = setBMVmodelParams(bmvinp,mobj,idx);
             %mean(Hs),std(Hs),mean(Tp)used in option 3 of ClosureOption
             %for Hallermeier zones
-            bmv.meanWaves.mH = mean(hsts,'MissingData','remove');  
-            bmv.meanWaves.sH = std(hsts,'MissingData','remove');  
-            bmv.meanWaves.mT = mean(tpts,'MissingData','remove');
+            bmv.meanWaves.mH = mean(wvdst.Hsi,'omitnan');  
+            bmv.meanWaves.sH = std(wvdst.Hsi,'omitnan');  
+            bmv.meanWaves.mT = mean(wvdst.Tp,'omitnan');
             
             prompt = 'Specify Hs & Tp or a percentile (e.g. 95)';
             answer = inputdlg(prompt,'Wave definition',1);
@@ -564,11 +636,10 @@ classdef CT_BeachAnalysis < muiDataSet
         function getDeanProfile(~,mobj,src)
             %plot the Dean's profile using values specified for wave model
             %get handle to model input parameters
-            inp = mobj.Inputs.ctWaveParameters;
-            if isempty(inp)
-                warndlg('Input parameters have not been defined');
-                return;
-            end
+            msgtxt = 'Wave input parameters have not been defined';
+            inp = getClassObj(mobj,'Inputs','ctWaveParameters',msgtxt);
+            if isempty(inp), return; end
+            
             zBC = inp.BeachCrestLevel;
             z1km = inp.BedLevelat1km;
             ubs = inp.UpperBeachSlope;
@@ -628,36 +699,79 @@ classdef CT_BeachAnalysis < muiDataSet
             pid = dst.Description;
         end
 %%
-        function [dst_time,E,N,Loc,pid,vname,caserec] = selectShoreline(obj,mobj)
+        function nint = subsampleprofiles(~,nprof)
+            %prompt user for the number of intervals to sample at
+            %Note this function is the same as in ctBeachProfileData but
+            %included here for use in functions passed obj but not mobj
+            nint = 1;
+            if nprof>20
+                questxt = sprintf(...
+                'There are %g profiles\nDo you want to sub-sample?',nprof);
+                answer = questdlg(questxt,'BeachProfiles','Yes','No','Yes');
+                if strcmp(answer,'Yes')
+                    sub = inputdlg('What intervals?','BeachProfiles',1,{'2'});
+                    if isempty(sub), sub = '2'; end
+                    nint = str2double(sub);
+                end
+            end
+        end
+%%
+        function [obj,ok] = getVolumePostionSet(obj)
+            %Select to use Volumes or Shore position data and return
+            %instances of selected option
+            ok = 1;
+            msgtxt = 'A minimum of 3 datasets are needed for a space-time plot';
+            if length(obj)>2
+                type = {obj(:).ModelType}; 
+                utype = {'Volumes','ShorePosition'};
+                idv = strcmp(type,'Volumes');
+                ids = strcmp(type,'ShorePosition');
+                
+                if sum(idv)>2 && sum(ids)>2   %volumes and shore position
+                    answer = questdlg('Which model','Space-time plot',utype{:},utype{1});
+                    idobj = strcmp(type,answer);
+                    obj = obj(idobj);
+                elseif sum(idv)>2             %only volumes
+                    obj = obj(idv);
+                elseif sum(ids)>2             %only shore position
+                    obj = obj(ids);
+                else
+                    warndlg(msgtxt); ok = 0;
+                    return;
+                end
+            else
+                warndlg(msgtxt); ok = 0;
+                return;
+            end
+        end
+%%
+        function [dst_time,E,N,Loc,pid,vname,cobj] = selectShoreline(obj)
             %user selects a shoreline position data set - returns Eastings and
             %Northings time series
             vname = [];
-            muicat = mobj.Cases;
-            promptxt = 'Select shoreline';
-
-            [caserec,ok] = selectRecord(muicat,'PromptText',promptxt,...
-                                'CaseType',{'SLine_model'},...    
-                                'SelectionMode','single','ListSize',[250,200]);
+            [cobj,dst,ok] = selectClassInstance(obj,'ModelType','ShoreLine');
             if ok<1
                 warndlg('No selection made');
                 dst_time = []; E = []; N = []; Loc = []; pid = [];
                 return;
-            end
-            [dst,~] = getDataset(muicat,caserec,1);   %idset=1 
-            [dst_time,E,N,Loc,pid,vname] = selectShorelineType(obj,dst);
+            end 
+            [dst_time,E,N,Loc,pid,vname] = selectShorelineType(cobj,dst);
         end
 %%
         function [dst_time,E,N,Loc,pid,vname] = selectShorelineType(~,dst)
             %select whether to plot E&N or chainage and return data
             vname = [];
+            options = {'E&N','Profile location'};
             dst_time = dst.RowNames;
             pid = dst.Description;
             Loc = dst.UserData;  %list of profile ids;
             type = questdlg('Plot as E&N or Profile location?','Shoreline',...
-                              'E&N','Profile location','E&N');
+                                                        options{:},'E&N');
             if strcmp(type,'E&N')            
                 E = dst.Eastings;
-                N = dst.Northings;            
+                N = dst.Northings;   
+            elseif strcmp(type,'BVI') 
+                
             else
                 E = [];
                 vname = questdlg('Select variable to plot?','Shoreline',...
@@ -673,20 +787,18 @@ classdef CT_BeachAnalysis < muiDataSet
             end
         end
 %%
-        function caserec = getShorelineSet(obj,mobj)
+        function caserec = selectShorelineSet(obj,mobj,subset)
             %prompt user to select a set of profiles 
-%             h_prof = getClassHandle(mobj,'BeachProfileData');
             muicat = mobj.Cases.Catalogue;
-            idxlist = strcmp(muicat.CaseClass,'ctBeachProfileData');
+            caserec = find(strcmp(muicat.CaseClass,'ctBeachProfileData'));
             promptxt = 'Select profiles to be used:';
-            caselist = muicat.CaseDescription(idxlist)';
-            classid = muicat.CaseID(idxlist);
-            %convert class selection to caserec values
-            nselect = length(classid);
-            caserec = zeros(1,nselect);
-            for i=1:nselect
-                caserec(i) = find(muicat.CaseID==classid(i));
+            caselist = muicat.CaseDescription(caserec);
+            if nargin==3
+                %use subset of profile descriptions
+                [caselist,idc] = intersect(caselist,subset);
+                caserec = caserec(idc);
             end
+
             %check that profiles are in order along coast
             [~,~,idd] = shorelineProfileOrder(obj,mobj,caserec);
             caserec = caserec(idd);
@@ -697,12 +809,17 @@ classdef CT_BeachAnalysis < muiDataSet
             caserec = caserec(idp);
         end
 %%
-        function caserec = getMinShorelineSet(obj,mobj,nprof)
+        function caserec = getMinShorelineSet(obj,mobj,nprof,varargin)
             %get user to select a minimum number of profiles defined by nprof
+            msgtxt = sprintf('Need a minimum of %d profiles',nprof);
+            lobj = getClassObj(mobj,'Cases','ctBeachProfileData',msgtxt);
+            %check that the minimum number of profiles are available
+            if isempty(lobj) || length(lobj)<nprof, return; end
+            %select a subset from the available profiles
             caserec = [];
             ok = 0;
             while ok<1
-                caserec = getShorelineSet(obj,mobj);   
+                caserec = selectShorelineSet(obj,mobj,varargin{:});   
                 if isempty(caserec)
                     return;
                 elseif length(caserec)>=nprof
@@ -802,70 +919,6 @@ classdef CT_BeachAnalysis < muiDataSet
 %--------------------------------------------------------------------------
 % Geometry Functions called by beach models
 %--------------------------------------------------------------------------
-        function [pos,stats,meta] = getPositionAndRates(obj,mobj,...
-                                                    caserec,time,zlevel,site)
-            %for each time interval of selected profiles compute position, 
-            %slope, orientation and associated rates of change                                            
-            npro = length(caserec);   %number of profiles
-            %check that profiles are in order along coast
-            [~,~,idd] = shorelineProfileOrder(obj,mobj,caserec);
-            caserec = caserec(idd);
-            %now analyse each time interval
-            if isscalar(zlevel), zlevel = repmat(zlevel,1,npro); end
-            ntime = length(time);     %composite time for all profiles
-            xD = NaN(ntime,npro); E = NaN(ntime,npro); N = E; BS = xD; %theta = xD;
-            bE = E; bN = N;
-            aX = zeros(npro,1); bX = aX; RsqX = aX; seX = aX;
-            aM = aX; bM = aX; RsqM = aX; seM = aX;
-%             aO = aX; bO = aX; RsqO = aX; seO = aX;
-            proflist{npro} = [];
-            for k=1:npro
-                [dst,~] = getDataset(mobj.Cases,caserec(k),1);  %idset=1
-%                 dst = getCaseDataSet(mobj.Cases,mobj,caserec(k));
-                x = dst.Chainage;
-                z = dst.Elevation;
-                xmin = max(min(x,[],2));
-                %find the distance to and slope at zlevel
-                [xdist,slope] = slope_points(x,z,zlevel(k),0.5,xmin);    
-                %ptime is in profile and time is unique set for all profiles   
-                ptime = dst.RowNames;  %time intervals for a profile
-                idp = find(ismember(time,ptime));   %ids of ptime in time           
-                xD(idp,k) = xdist;
-                BS(idp,k) = slope;               
-                proflist{k} = mobj.Cases.Catalogue.CaseDescription{caserec(k)};
-                %if the dataset includes E,N get the E,N of zlevel
-                if any(strcmp('Eastings',dst.VariableNames))
-                    [Es,Ns,Eb,Nb] = ENofShoreline(obj,dst,xdist);   
-                    E(idp,k) = Es;
-                    N(idp,k) = Ns; 
-                    bE(idp,k) = Eb;
-                    bN(idp,k) = Nb;
-                end
-%                 shoreang = shore_orientation(Es,Ns,Eb,Nb);
-%                 theta(idp,k) = shoreang;
-                %now get rate of change in distance and slope
-                %eps(0) to avoid divide by zero in linear regression
-                mtime = years(ptime-ptime(1)+eps(0)); 
-                [aX(k),bX(k),RsqX(k)] = regression_model(mtime,xdist,'Linear');
-                seX(k) = stderror(mtime,xdist,aX(k),bX(k),'Linear');
-                [aM(k),bM(k),RsqM(k)] = regression_model(mtime,-slope,'Linear');
-                seM(k) = stderror(mtime,-slope,aM(k),bM(k),'Linear');
-%                 [aO(k),bO(k),RsqO(k)] = regression_model(mtime,shoreang,'Linear');
-%                 seO(k) = stderror(mtime,theta(:,k),aO(k),bO(k),'Linear');
-            end
-            
-            [theta,ostats] = getShoreOrientation(obj,E,N,bE,bN,time,site);
-            
-            %package output
-            pos = {E,N,xD,BS,theta};
-            stats = table(aX,bX,RsqX,seX,aM,bM,RsqM,seM,...
-              'VariableNames',{'distIntercept','distSlope','distR2',...
-              'distStdErr','slopeIntercept','slopeSlope','slopeR2',...
-              'slopeStdErr'});
-            stats = horzcat(stats,ostats);
-            meta.xmin = xmin; meta.proflist = proflist; meta.npro = npro;
-        end
-%%
         function [theta,stats] = getShoreOrientation(~,Es,Ns,Eb,Nb,time,site)
             %use the Es,Ns coordinates of shoreline points for a set of profiles
             %to assign an orientation to each profile. the baseline
@@ -1092,10 +1145,6 @@ classdef CT_BeachAnalysis < muiDataSet
                 [~,idminCh] = min(xi(:,1),[],'omitnan'); %minimum in first column
                 Eb(i,1) = Ei(idminCh,1);
                 Nb(i,1) = Ni(idminCh,1);
-                
-                
-%                 Eb(i,1) = Ei(1);                              %baseline
-%                 Nb(i,1) = Ni(1);
             end
         end
 %%
@@ -1193,8 +1242,8 @@ classdef CT_BeachAnalysis < muiDataSet
             xints = 1:nint:length(Location);
             nint = length(xints);
             Xi = 1:nint;
-            Yi = outtable.slopeSlope(Xi);
-            Ei = outtable.slopeStdErr(Xi);
+            Yi = outtable.slopeSlope(xints);
+            Ei = outtable.slopeStdErr(xints);
             
             s1 = subplot(2,1,1,h_ax);
             bar(Xi,Yi)
@@ -1209,8 +1258,8 @@ classdef CT_BeachAnalysis < muiDataSet
             s1.Position(2) = 0.56; s1.Position(4) = 0.36;
             legend('Rate of change','Std. Error')
             
-            Yi = outtable.distSlope(Xi);
-            Ei = outtable.distStdErr(Xi);
+            Yi = outtable.distSlope(xints);
+            Ei = outtable.distStdErr(xints);
             s2 = subplot(2,1,2);
             bar(Xi,Yi)
             hold on 
@@ -1233,6 +1282,7 @@ classdef CT_BeachAnalysis < muiDataSet
             xints = 1:nint:length(Location);
             nint = length(xints);
             Xi = 1:nint;
+            outtable = outtable(xints,:);
             fnames = outtable.Properties.VariableNames;
             marker = {'x-','d-','*-','s-','+-'};
             hold on            
@@ -1339,11 +1389,12 @@ classdef CT_BeachAnalysis < muiDataSet
                 if dim==2
                     inputvar = inputvar';
                 end
+                %
                 for i = 1:vardims(dim)
                     subvar = inputvar(:,i);              
                     mvar = mean(subvar,'omitnan');
                     svar = std(subvar,'omitnan');
-                    var(:,i) = (subvar-mvar)/svar;
+                    var(:,i) = (subvar-mvar)/svar; %#ok<AGROW>
                 end
                 %restore matrix if dim=2
                 if dim==2
@@ -1351,7 +1402,7 @@ classdef CT_BeachAnalysis < muiDataSet
                 end
             end
         end    
-    
+   
 %%
 %--------------------------------------------------------------------------
 % Define DSproperties for the various models

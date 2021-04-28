@@ -20,9 +20,15 @@ classdef CT_WaveModels < muiDataSet
         %Additional properties: 
     end
     
+    properties (Hidden)
+        ModelType        %model used for the particular instance
+    end
+    
     properties (Transient)
-        ModelList = {'Littoral Drift','X-shore Transport','Wave Energy',...
+        MenuList = {'Littoral Drift','X-shore Transport','Wave Energy',...
                      'Runup','Overtopping','Iribarren Number','Beach type'}
+        ModelName = {'Drift','Xshore','WaveEnergy','Runup','Overtopping',...
+                                                'Iribarren','BeachType'};
     end
     
     methods (Access = private)
@@ -38,7 +44,7 @@ classdef CT_WaveModels < muiDataSet
         function obj = runModel(mobj,src)
             %function to run a simple 2D diffusion model
             obj = CT_WaveModels;    
-            id_model = find(strcmp(obj.ModelList,src.Text));            
+            id_model = find(strcmp(obj.MenuList,src.Text));            
             dsp = modelDSproperties(obj,id_model);
             
             %now check that the input data has been entered
@@ -60,25 +66,18 @@ classdef CT_WaveModels < muiDataSet
             switch id_model
                 case 1              %Littoral Drift
                     output = driftModel(obj,mobj,site);
-                    mtype = 'drift_model';
                 case 2              %Cross-shore transport
                     output = xshoreModel(obj,mobj,site);
-                    mtype = 'xshore_model';
                 case 3              %Wave Energy
                     output = energyModel(obj,mobj,site);
-                    mtype = 'wavenergy_model';
                 case 4              %Runup                    
                     output = runupModel(obj,mobj,site);
-                    mtype = 'runup_model';
                 case 5              %Overtopping
                     output = overtopModel(obj,mobj,site);
-                    mtype = 'otop_model';
                 case 6              %Iribarren Number
                     output = iribarrenModel(obj,mobj,site); 
-                    mtype = 'iribarren_model';
                 case 7              %Beach type based on fall velocity
-                    output = beachTypeModel(obj,mobj,site);  
-                    mtype = 'beachtype_model';
+                    output = beachTypeModel(obj,mobj,site);
             end
             if isempty(output) || isempty(output.results{1})
                 return; %user cancelled or no results returned
@@ -94,11 +93,12 @@ classdef CT_WaveModels < muiDataSet
 % Save results
 %--------------------------------------------------------------------------                        
             %assign metadata about model
+            obj.ModelType = obj.ModelName{id_model};
             dst.Source = sprintf('Class %s, using %s',metaclass(obj).Name,...
-                                                obj.ModelList{id_model});
+                                                            obj.ModelType);
             dst.MetaData = output.metatxt;
             %save results
-            setDataSetRecord(obj,muicat,dst,mtype);
+            setDataSetRecord(obj,muicat,dst,'model');
             getdialog('Run complete');
         end
     end
