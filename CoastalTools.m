@@ -470,7 +470,7 @@ classdef CoastalTools < muiModelUI
 
         %% Help menu ------------------------------------------------------
         function Help(~,~,~)
-            doc CoastalTools
+            docsearch CoastalTools
         end 
 %% ------------------------------------------------------------------------
 % Overload muiModelUI.MapTable to customise Data and Model Tabs
