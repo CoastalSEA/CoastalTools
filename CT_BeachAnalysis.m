@@ -293,7 +293,7 @@ classdef CT_BeachAnalysis < muiDataSet
             labels.pname = 'Centroids';
             phaseplot(x,z,dst_time,labels);
             
-            complex_vectors(x,z);
+            complex_vector_plot(x,z);
         end
 %%
         function getProfileSpaceTimePlot(obj,mobj)
