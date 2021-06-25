@@ -188,7 +188,11 @@ classdef CT_BeachAnalysis < muiDataSet
             ht = src.Children;   %clear any existing tab content
             delete(ht);
             %prompt selection of compatible dataset for chosen tab
-            idx = find(strcmp({obj(:).ModelType},src.Tag));            
+            if strcmp(src.Tag,'Shoreline')
+                idx = find(contains({obj(:).ModelType},'Shore')); 
+            else
+                idx = find(strcmp({obj(:).ModelType},src.Tag));
+            end        
             caselist = arrayfun(@(x) x.Data.Dataset.Description,obj,'UniformOutput',false);
             caselist = caselist(idx);  
             if isempty(caselist)
@@ -198,7 +202,7 @@ classdef CT_BeachAnalysis < muiDataSet
 
             if length(caselist)>1
                 [select,ok] = listdlg('Name','CalcTab','PromptString','Select Case', ...                                 
-                                     'ListSize',[200,80],'SelectionMode','single', ...                                 
+                                     'ListSize',[250,200],'SelectionMode','single', ...                                 
                                      'ListString',caselist);
                 if ok==0, return; end 
             else
@@ -370,7 +374,7 @@ classdef CT_BeachAnalysis < muiDataSet
                 xmin = max(min(x,[],2));
                 %find the distance to and slope at zlevel
                 [xdist,slope] = slope_points(x,z,zlevel(k),0.5,xmin);    
-                %ptime is in profile and time is unique set for all profiles   
+                %ptime is for a profile and time is unique set for all profiles   
                 ptime = dst.RowNames;  %time intervals for a profile
                 idp = find(ismember(time,ptime));   %ids of ptime in time           
                 xD(idp,k) = xdist;
@@ -387,8 +391,11 @@ classdef CT_BeachAnalysis < muiDataSet
 %                 shoreang = shore_orientation(Es,Ns,Eb,Nb);
 %                 theta(idp,k) = shoreang;
                 %now get rate of change in distance and slope
-                %eps(0) to avoid divide by zero in linear regression
-                mtime = years(ptime-ptime(1)+eps(0)); 
+%                 %eps(0) to avoid divide by zero in linear regression
+%                 mtime = years(ptime-ptime(1)+eps(0)); 
+%                 %for scale coefficient to be correct for calendar time need
+%                 %to use ptime(0) = datetime(1,1,1)
+                mtime = set_time_units(ptime,0,'years');
                 [aX(k),bX(k),RsqX(k)] = regression_model(mtime,xdist,'Linear');
                 seX(k) = stderror(mtime,xdist,aX(k),bX(k),'Linear');
                 [aM(k),bM(k),RsqM(k)] = regression_model(mtime,-slope,'Linear');

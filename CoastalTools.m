@@ -211,8 +211,8 @@ classdef CoastalTools < muiModelUI
             subtabs.Calcs(3,:) = {'  BVI  ',@obj.setTabAction};
             subtabs.Calcs(4,:) = {' Profile ',@obj.setTabAction};
             tabs.Stats = {'   Stats   ','gcbo;'};
-            subtabs.Stats(1,:) = {' Descriptive ',@obj.getTabData};
-            subtabs.Stats(2,:) = {' Extremes ',@obj.getTabData};
+            subtabs.Stats(1,:) = {' Descriptive ',@obj.setTabAction};
+            subtabs.Stats(2,:) = {' Extremes ',@obj.setTabAction};
         end
        
 %%
@@ -240,10 +240,13 @@ classdef CoastalTools < muiModelUI
             switch src.Tag                             
                 case 'Plot' 
                     tabPlot(cobj,src);
-                case 'Stats'
+                case {'Descriptive','Extremes'}
+                    cobj = getClassObj(obj,'mUI','Stats',msg);
+                    if isempty(cobj), return; end
                     tabStats(cobj,src);    
                 case {'Volumes','Shoreline','BVI'}
                     cobj = getClassObj(obj,'Cases','CT_BeachAnalysis',msg);
+                    if isempty(cobj), return; end
                     tabCalcs(cobj,src);
                 case 'Profile'    
                     %warns user if no data, otherwise displays whatever is
