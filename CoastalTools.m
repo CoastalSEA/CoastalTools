@@ -49,7 +49,7 @@ classdef CoastalTools < muiModelUI
             %tabs to include in DataUIs for plotting and statistical analysis
             %select which of the options are needed and delete the rest
             %Plot options: '2D','3D','4D','2DT','3DT','4DT'
-            obj.DataUItabs.Plot = {'2D','3D','4D','2DT','3DT','4DT'}; %,'Profiles'};  
+            obj.DataUItabs.Plot = {'Timeseries','Profiles','Rose','2D','3D','2DT','3DT'}; %,'Profiles'};  
             %Statistics options: 'General','Timeseries','Taylor','Intervals'
             obj.DataUItabs.Stats = {'General','Timeseries','Taylor','Intervals'};              
             
@@ -465,7 +465,7 @@ classdef CoastalTools < muiModelUI
         function analysisMenuOptions(obj,src,~)
             switch src.Text
                 case 'Plots'
-                    obj.mUI.PlotsUI = muiPlotsUI.getPlotsUI(obj);
+                    obj.mUI.PlotsUI = CT_PlotsUI.getPlotsUI(obj);
                 case 'Statistics'
                     obj.mUI.StatsUI = muiStatsUI.getStatsUI(obj);
             end            

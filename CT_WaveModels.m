@@ -31,7 +31,7 @@ classdef CT_WaveModels < muiDataSet
                                                 'Iribarren','BeachType'};
     end
     
-    methods (Access = private)
+    methods (Access={?muiDataSet,?muiStats})
         function obj = CT_WaveModels()                    
             %class constructor
         end

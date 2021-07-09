@@ -35,7 +35,7 @@ classdef CT_BeachAnalysis < muiDataSet
         ModelName = {'Volumes','ShorePosition','ShoreLine','BVI'};
     end
     
-    methods (Access = private)
+    methods (Access={?muiDataSet,?muiStats})
         function obj = CT_BeachAnalysis()                    
             %class constructor
         end
@@ -322,7 +322,7 @@ classdef CT_BeachAnalysis < muiDataSet
                     j = j+1;
                 end
             end
-            time = getProfileTimes(obj,mobj,caserec);
+            time = get_profile_times(mobj,caserec);
             
             %if there is more than one variable prompt user to select one
             varnames = dsts(1).VariableNames;            
@@ -355,7 +355,7 @@ classdef CT_BeachAnalysis < muiDataSet
             %slope, orientation and associated rates of change                                            
             npro = length(caserec);   %number of profiles
             %check that profiles are in order along coast
-            [~,~,idd] = shorelineProfileOrder(obj,mobj,caserec);
+            [~,~,idd] = shore_profile_order(mobj,caserec);
             caserec = caserec(idd);
             %now analyse each time interval
             if isscalar(zlevel), zlevel = repmat(zlevel,1,npro); end
@@ -524,7 +524,7 @@ classdef CT_BeachAnalysis < muiDataSet
             site =  getClassObj(mobj,'Inputs','ctWaveParameters',msgtxt);   
             if isempty(site), return; end
             
-            time = getProfileTimes(obj,mobj,caserec);
+            time = get_profile_times(mobj,caserec);
             [pos,stats,meta] = getPositionAndRates(obj,mobj,caserec,time,zlevel,site);
             if isempty(pos), return; end
             %setup output for writing to stored dataset
@@ -794,7 +794,7 @@ classdef CT_BeachAnalysis < muiDataSet
             end
         end
 %%
-        function caserec = selectShorelineSet(obj,mobj,subset)
+        function caserec = selectShorelineSet(~,mobj,subset)
             %prompt user to select a set of profiles 
             muicat = mobj.Cases.Catalogue;
             caserec = find(strcmp(muicat.CaseClass,'ctBeachProfileData'));
@@ -807,7 +807,7 @@ classdef CT_BeachAnalysis < muiDataSet
             end
 
             %check that profiles are in order along coast
-            [~,~,idd] = shorelineProfileOrder(obj,mobj,caserec);
+            [~,~,idd] = shore_profile_order(mobj,caserec);
             caserec = caserec(idd);
             caselist = caselist(idd);
             [idp,ok] = listdlg('Name','Shoreline extraction', ...
@@ -862,17 +862,17 @@ classdef CT_BeachAnalysis < muiDataSet
                 end
             end
         end
-%%
-        function time = getProfileTimes(~,mobj,caserec)
-            %get the composite time intervals for all profiles
-            npro = length(caserec);            
-            time = [];           %time intervals in any of the surveys
-            for j=1:npro
-               [dst,~] = getDataset(mobj.Cases,caserec(j),1);  %idset=1 
-               newtime = dst.RowNames;
-               time = unique(vertcat(time,newtime));
-            end
-        end
+%% Now stand along function get_profile_times.m because used in CT_Plots
+%         function time = getProfileTimes(mobj,caserec)
+%             %get the composite time intervals for all profiles
+%             npro = length(caserec);            
+%             time = [];           %time intervals in any of the surveys
+%             for j=1:npro
+%                [dst,~] = getDataset(mobj.Cases,caserec(j),1);  %idset=1 
+%                newtime = dst.RowNames;
+%                time = unique(vertcat(time,newtime));
+%             end
+%         end
 %%
         function mxmn = getSampleBox(~,mxmn,h_but,h_ax)
             %get min and max dimensions of sample box to be used
@@ -1154,23 +1154,23 @@ classdef CT_BeachAnalysis < muiDataSet
                 Nb(i,1) = Ni(idminCh,1);
             end
         end
-%%
-        function [sortedE,sortedN,idd] = shorelineProfileOrder(~,mobj,caserec)
-            %sort the profile order based on the E,N of the base point - min(Chainage)
-            npro = length(caserec);   %number of profiles
-            Es = NaN(1,npro); Ns = Es;
-            for k=1:npro
-                [dst,~] = getDataset(mobj.Cases,caserec(k),1);  %idset=1
-                E = dst.Eastings;
-                N = dst.Northings; 
-                Ch = dst.Chainage;
-                [~,idminCh] = min(Ch(:,1),[],'omitnan'); %minimum in first column
-                Es(1,k) = E(idminCh,1);
-                Ns(1,k) = N(idminCh,1); 
-            end
-            %sort profiles into alongshore order
-            [sortedE,sortedN,idd] = sortENdata2line(Es,Ns);
-        end
+%% Now stand along function shore_profile_order.m because used in CT_Plots
+%         function [sortedE,sortedN,idd] = shorelineProfileOrder(mobj,caserec)
+%             %sort the profile order based on the E,N of the base point - min(Chainage)
+%             npro = length(caserec);   %number of profiles
+%             Es = NaN(1,npro); Ns = Es;
+%             for k=1:npro
+%                 [dst,~] = getDataset(mobj.Cases,caserec(k),1);  %idset=1
+%                 E = dst.Eastings;
+%                 N = dst.Northings; 
+%                 Ch = dst.Chainage;
+%                 [~,idminCh] = min(Ch(:,1),[],'omitnan'); %minimum in first column
+%                 Es(1,k) = E(idminCh,1);
+%                 Ns(1,k) = N(idminCh,1); 
+%             end
+%             %sort profiles into alongshore order
+%             [sortedE,sortedN,idd] = sortENdata2line(Es,Ns);
+%         end
 
 %--------------------------------------------------------------------------
 % Plot Functions called by beach models
