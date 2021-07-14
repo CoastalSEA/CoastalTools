@@ -391,8 +391,8 @@ classdef CoastalTools < muiModelUI
                     if isempty(lobj), return; end  
                     getShoreTablePlot(lobj,src.Text);
                 case 'User Model'
-                    %run wave model to create inshore wave data
-                    callClassFunction(obj,'CT_UserModel','runUserModel');
+                    %run a model in a user defined model class
+                    user_model(obj)
             end
         end
 %%
