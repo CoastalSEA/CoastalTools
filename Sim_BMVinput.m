@@ -79,11 +79,9 @@ classdef Sim_BMVinput < muiPropertyUI
         function obj = setInput(mobj,editflag)
             %gui for user to set Parameter Input values
             classname = 'Sim_BMVinput';  
-            if isfield(mobj.Inputs,classname) && ...
-                            isa(mobj.Inputs.(classname),classname)
-                obj = mobj.Inputs.(classname);  
-            else
-                obj = Sim_BMVinput(mobj);   
+            obj = getClassObj(mobj,'Inputs',classname);
+            if isempty(obj)
+                obj = Sim_BMVinput(mobj);            
             end
             %use muiPropertyUI function to generate UI
             if nargin<2 || editflag
@@ -91,7 +89,7 @@ classdef Sim_BMVinput < muiPropertyUI
                 obj = editProperties(obj);  
                 %add any additional manipulation of the input here
             end
-            mobj.Inputs.(classname) = obj;
+            setClassObj(mobj,'Inputs',classname,obj);
         end     
     end
 %%        

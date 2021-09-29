@@ -59,11 +59,9 @@ classdef Sim_YGORinput < muiPropertyUI
         function obj = setInput(mobj,editflag)
             %gui for user to set Parameter Input values
             classname = 'Sim_YGORinput';      
-            if isfield(mobj.Inputs,classname) && ...
-                            isa(mobj.Inputs.(classname),classname)
-                obj = mobj.Inputs.(classname);  
-            else
-                obj = Sim_YGORinput(mobj);  
+            obj = getClassObj(mobj,'Inputs',classname);
+            if isempty(obj)
+                obj = Sim_YGORinput(mobj);            
             end
             %use muiPropertyUI function to generate UI
             if nargin<2 || editflag
@@ -71,7 +69,7 @@ classdef Sim_YGORinput < muiPropertyUI
                 obj = editProperties(obj);  
                 %add any additional manipulation of the input here
             end
-            mobj.Inputs.(classname) = obj;
+            setClassObj(mobj,'Inputs',classname,obj);
         end     
     end
 %%        

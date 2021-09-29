@@ -353,7 +353,7 @@ classdef CoastalTools < muiModelUI
                     Sim_BMVinput.setInput(obj);
                     tabname = 'Simulation';
                 case 'Model constants'
-                    obj.Constants = editProperties(obj.Constants);
+                    obj.Constants = setInput(obj.Constants);
             end
             %
             if ~isempty(tabname)
