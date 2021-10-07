@@ -201,16 +201,16 @@ classdef CoastalTools < muiModelUI
             %where <tagname> is the struct fieldname for the top level tab.
             tabs.Data  = {'   Data  ',@obj.refresh};        
             tabs.Models = {'  Models  ',@obj.refresh};
-            tabs.Site = {'  Site  ','gcbo;'};
+            tabs.Site = {'  Site  ',''};
             subtabs.Site(1,:) = {'  Waves  ',@obj.InputTabSummary};
             subtabs.Site(2,:) = {' Simulation ',@obj.InputTabSummary};
             tabs.Plot = {'  Q-Plot  ',@obj.getTabData};
-            tabs.Calcs = {'  Calcs  ','gcbo;'};
+            tabs.Calcs = {'  Calcs  ',''};
             subtabs.Calcs(1,:) = {' Volumes ',@obj.setTabAction};
             subtabs.Calcs(2,:) = {' Shoreline ',@obj.setTabAction};
             subtabs.Calcs(3,:) = {'  BVI  ',@obj.setTabAction};
             subtabs.Calcs(4,:) = {' Profile ',@obj.setTabAction};
-            tabs.Stats = {'   Stats   ','gcbo;'};
+            tabs.Stats = {'   Stats   ',''};
             subtabs.Stats(1,:) = {' Descriptive ',@obj.setTabAction};
             subtabs.Stats(2,:) = {' Extremes ',@obj.setTabAction};
         end
