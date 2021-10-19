@@ -81,7 +81,8 @@ classdef CT_WaveModels < muiDataSet
             end
             if isempty(output) || isempty(output.results{1})
                 return; %user cancelled or no results returned
-            end       
+            end 
+            setRunParam(obj,mobj,output.wvrec); 
 %--------------------------------------------------------------------------
 % Assign model output to a dstable using the defined dsproperties meta-data
 %--------------------------------------------------------------------------                   
@@ -122,8 +123,10 @@ classdef CT_WaveModels < muiDataSet
             %class instance for inshore wave data
             inwave = mobj.Cases.DataSets.ctWaveModel;
             %retrieve an inshore wave data set
-            wv = getWaveModelDataset(inwave,mobj,{'Inwave_model'},{'Tp'});
-
+            [wv,output.wvrec] = getWaveModelDataset(inwave,mobj,...
+                                                {'Inwave_model'},{'Tp'});
+            if isempty(wv), return; end %user cancelled or no data
+            
             %bed slope within surf zone (half depth of inshore wave point)  
             ubs = site.UpperBeachSlope;
             z1km = site.BedLevelat1km;            
@@ -179,7 +182,9 @@ classdef CT_WaveModels < muiDataSet
             %class instance for inshore wave data
             inwave = mobj.Cases.DataSets.ctWaveModel;
             %retrieve an inshore wave data set
-            wv = getWaveModelDataset(inwave,mobj,{'Inwave_model'},{'Tp'});
+            [wv,output.wvrec] = getWaveModelDataset(inwave,mobj,...
+                                                {'Inwave_model'},{'Tp'});
+            if isempty(wv), return; end %user cancelled or no data
             
             %bed slope within surf zone (half depth of inshore wave point)  
             ubs = site.UpperBeachSlope;
@@ -225,7 +230,9 @@ classdef CT_WaveModels < muiDataSet
             %class instance for inshore wave data
             inwave = mobj.Cases.DataSets.ctWaveModel;
             %retrieve an inshore wave data set
-            wv = getWaveModelDataset(inwave,mobj,{'Inwave_model'},{'Tp'});
+            [wv,output.wvrec] = getWaveModelDataset(inwave,mobj,...
+                                                {'Inwave_model'},{'Tp'});
+            if isempty(wv), return; end %user cancelled or no data
             
             %average nearshore bed slope - for meta data only
             zi = mean((wv.swl-wv.depi),'omitnan');
@@ -269,7 +276,9 @@ classdef CT_WaveModels < muiDataSet
             %class instance for inshore wave data
             inwave = mobj.Cases.DataSets.ctWaveModel;
             %retrieve an inshore wave data set
-            wv = getWaveModelDataset(inwave,mobj,{'Inwave_model'},{'Tp'});
+            [wv,output.wvrec] = getWaveModelDataset(inwave,mobj,...
+                                                {'Inwave_model'},{'Tp'});
+            if isempty(wv), return; end %user cancelled or no data
             
             %get "effective" deepwater offshore wave conditions             
             dep0 = wv.depi;        %depth at inshore pint used by wave model
@@ -327,7 +336,10 @@ classdef CT_WaveModels < muiDataSet
             %class instance for inshore wave data
             inwave = mobj.Cases.DataSets.ctWaveModel;
             %retrieve an inshore wave data set
-            wv = getWaveModelDataset(inwave,mobj,{'Inwave_model'},{'Tp','Tz'});
+            [wv,output.wvrec] = getWaveModelDataset(inwave,mobj,...
+                                           {'Inwave_model'},{'Tp','Tz'});
+            if isempty(wv), return; end %user cancelled or no data
+                                       
             varnames = wv.VariableNames;
             if ~any(strcmp(varnames,'Tz'))
                 Tz = wv.Tp*0.7775;  %assumes JONSWAP with gamma=3.3
@@ -370,8 +382,10 @@ classdef CT_WaveModels < muiDataSet
             %class instance for inshore wave data
             inwave = mobj.Cases.DataSets.ctWaveModel;
             %retrieve an inshore wave data set
-            wv = getWaveModelDataset(inwave,mobj,{'Inwave_model'},{'Tp'});          
-
+            [wv,output.wvrec] = getWaveModelDataset(inwave,mobj,...
+                                                {'Inwave_model'},{'Tp'});        
+            if isempty(wv), return; end %user cancelled or no data
+            
             %find slope at swl on beach         
             ubs = site.UpperBeachSlope;
             z1km = site.BedLevelat1km;            
@@ -402,7 +416,8 @@ classdef CT_WaveModels < muiDataSet
             %class instance for inshore wave data
             inwave = mobj.Cases.DataSets.ctWaveModel;
             %retrieve an inshore wave data set
-            wv = getWaveModelDataset(inwave,mobj,{'Inwave_model'},{'Tp'});
+            [wv,output.wvrec] = getWaveModelDataset(inwave,mobj,...
+                                                {'Inwave_model'},{'Tp'});
             if isempty(wv), return; end %user cancelled or no data
 
             %calculate dimensionless fall velocity and add results to wave timeseries
