@@ -69,6 +69,7 @@ classdef Sim_BMV < muiDataSet
                 labtxt = sprintf('BMV fits for profile %s using %s',...
                                     prdst.Description,wvdst.Description);
                 [a,b,r2] = plotBMVfitting(obj,prtime(ipr),dfv,K,labtxt);
+                %a is intercept b is slope
                     %------
                 temp = array2table(K);
                 props = {'K1','K2','K3','K4','K5','K6','K7','K8'};
