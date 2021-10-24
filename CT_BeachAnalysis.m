@@ -391,11 +391,7 @@ classdef CT_BeachAnalysis < muiDataSet
 %                 shoreang = shore_orientation(Es,Ns,Eb,Nb);
 %                 theta(idp,k) = shoreang;
                 %now get rate of change in distance and slope
-%                 %eps(0) to avoid divide by zero in linear regression
-%                 mtime = years(ptime-ptime(1)+eps(0)); 
-%                 %for scale coefficient to be correct for calendar time need
-%                 %to use ptime(0) = datetime(1,1,1)
-                mtime = set_time_units(ptime,0,'years');
+                mtime = time2num(ptime);
                 [aX(k),bX(k),RsqX(k)] = regression_model(mtime,xdist,'Linear');
                 seX(k) = stderror(mtime,xdist,aX(k),bX(k),'Linear');
                 [aM(k),bM(k),RsqM(k)] = regression_model(mtime,-slope,'Linear');
