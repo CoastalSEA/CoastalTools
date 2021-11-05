@@ -23,9 +23,10 @@ classdef CT_SimUI < muiDataUI
 %
     properties (Transient)
         %Abstract variables for DataGUIinterface---------------------------
-        
-        %names of tabs providing different data accces options
-        TabOptions = {'YGOR model','BMV model'};              
+        % names of tabs providing different data accces options
+        TabOptions = {'YGOR model','BMV model'};
+        % selections that force a call to setVariableLists
+        updateSelections = {'Case','Dataset'};
         %Additional variables for application------------------------------
         Tabs2Use         %number of tabs to include  (set in getPlotGui)  
     end
