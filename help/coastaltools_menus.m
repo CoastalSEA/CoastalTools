@@ -25,6 +25,11 @@
 % * *Cases > View settings*: user selects a Case to display a table listing the parameters used for the selected Case. 
 % * *Export/Import > Export*: user selects a Case class instance to export as a mat file.
 % * *Export/Import > Import*: user selects an exported Case class instance (mat file) to be loaded.
+%%
+% *NB*: to export the data from a Case for use in another application 
+% (eg text file, Excel, etc), use the *Project>Cases>Edit Data Set* option 
+% to make a selection and then use the ‘Copy to Clipboard’ button to paste 
+% the selection to the clipboard.
 
 %% Setup > Import Data
 % Load data for Waves, Water Levels, Winds, Beach profiles, Shorelines,
