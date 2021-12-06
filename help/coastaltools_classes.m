@@ -96,8 +96,8 @@
 % * _shore_orientation_ - find the orientation for a series of coordinates
 % that define a line.
 % * _shore_profile_order_ - sort the profile order based on the E,N of the base point - min(Chainage)
-% * _simple_tide_ - function to compute a tidal water level time series using main
-% constituents scaled to required tidal amplitude.
+% * _simple_tide_ - function to compute a tidal water level time series using the main
+% constituents scaled to the required tidal amplitude.
 % * _slope_points_ - find point and slope on line (eg a shore profile)
 % nearest to zlevel.
 % * _sortENdata2line_ - sort the eastings and northings into an order that makes the best
