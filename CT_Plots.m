@@ -231,7 +231,6 @@ classdef CT_Plots < muiPlots
             yall = obj.Data.Y.DataTable{:,1};    %variable in extracted table
             tall = obj.Data.Y.RowNames; %time   
             talltxt = cellstr(tall);
-%             obj.UIsel.PlotType = 'line';
             %get the legend based on user selection (New, Add)
             tlist = getSelectionList(obj,talltxt);
             legtxt = getlegendText(obj,hfig,talltxt);
@@ -250,11 +249,6 @@ classdef CT_Plots < muiPlots
                     ok = plotAllProfiles(obj,hfig,xall,yall,tall,selection);
                 else
                     %add and delete selected profiles individually 
-%                     if strcmp(obj.UIset.callButton,'New')
-%                         tlist = tall;
-%                     else
-%                         tlist{h_dlg} = sprintf('%s - plotted',tlist{h_dlg});
-%                     end
                     tlist{h_dlg} = sprintf('%s - plotted',tlist{h_dlg});
                     plotSingleProfile(obj,hfig,...
                                              xall,yall,legtxt,h_dlg);
@@ -265,9 +259,6 @@ classdef CT_Plots < muiPlots
         function tlist = getSelectionList(obj,tall)
             %get the list of options depending on the call (New, add)
             tlist = tall;            %initialise date selection list
-%             if ~ischar(tlist) || ~iscellstr(tlist) || ~isstring(tlist)
-%                 tlist = cellstr(tlist);
-%             end
             %
             if strcmp(obj.UIset.callButton,'New')
                 adtxt = {'<   All profiles   >';'<  Winter profiles >';...
@@ -563,7 +554,11 @@ classdef CT_Plots < muiPlots
 
                 Xtext = 'Chainage (m)';
                 Ytext = 'Alongshore Profile Location';
-                obj.Title = sprintf('%s on %s',obj.Title,tlist{idt});
+                endidx = length(obj.Title);
+                if contains(obj.Title,' on ')
+                    endidx = regexp(obj.Title,' on ')-1;
+                end
+                obj.Title = sprintf('%s on %s',obj.Title(1:endidx),tlist{idt});
                 muiPlots.xySurface(xt,yt,zt,mxtm-1,mxch-1,Xtext,Ytext,...
                             obj.Legend,obj.Title,obj.UIset.Type.String);                             
                 figax = hfig.CurrentAxes; 
