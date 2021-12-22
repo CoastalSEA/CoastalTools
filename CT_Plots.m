@@ -84,10 +84,10 @@ classdef CT_Plots < muiPlots
                     legformat = repmat(legformat,1,2);
                     legformat(2).idx = [0 0 1]; %format as Case(Variable)Direction
                 case {'2D','2DT'}
-                    check4chainage(obj)   %check for use of chainage
+                    check4chainage(obj,mobj);   %check for use of chainage
                     legformat = repmat(legformat,1,2);
                 case {'3D','3DT'}
-                    check4chainage(obj)   %check for use of chainage
+                    check4chainage(obj,mobj);   %check for use of chainage
                     legformat = repmat(legformat,1,3);
             end
 
@@ -188,14 +188,19 @@ classdef CT_Plots < muiPlots
             end
         end
 %%
-        function check4chainage(obj)
+        function check4chainage(obj,mobj)
             %if noDim is being used for Chainage, reassign selection 
+            crec = obj.UIsel(1).caserec;
+            dset = obj.UIsel(1).dataset;
+            dst = getDataset(mobj.Cases,crec,dset);
+            varnames = dst.VariableNames;
             for i=2:length(obj.UIsel)
                 ui = obj.UIsel(i);
                 if length(ui.dims)>1 && strcmp(ui.dims(2).name,'noDim1') && ...
                         ui.property==3
                     %if profile change second variable to chainage 
-                    obj.UIsel(i).variable = 4;
+                    idx = find(strcmp(varnames,'Chainage')); %assumes Chainage is key word
+                    obj.UIsel(i).variable = idx;
                     obj.UIsel(i).property = 1;
                     obj.UIsel(i).dims = obj.UIsel(1).dims;
                 end
@@ -269,13 +274,10 @@ classdef CT_Plots < muiPlots
 %%
         function legtxt = getlegendText(obj,hfig,tall)
             %set the legend and update existing plot if different profile added
-%             tlist = tall;            %initialise date selection list
             datetxt = split(tall); 
             profname = obj.Data.Y.Description;
             if strcmp(obj.UIset.callButton,'New')
                 obj.AxisLabels.X = 'Chainage (m)';     
-%                 strtxt = split(obj.Ytext,';');
-%                 obj.AxisLabels.Y = strip(strtxt{2});
                 obj.Title = sprintf('Profile: %s',profname);
                 hfig.UserData = profname; 
                 legtxt = datetxt(:,1);
@@ -473,7 +475,9 @@ classdef CT_Plots < muiPlots
             nrows = zeros(nprof,1); mcols = nrows;
             obj.Data = [];
             for i=1:nprof
-                fname = profnames{i};
+                %Construct valid MATLAB identifiers from input strings
+                fname = matlab.lang.makeValidName(profnames{i},'ReplacementStyle','delete');
+                profnames{i} = fname;
                 obj.Data.(fname) = getDataset(mobj.Cases,profrec(i),1);
                 [nrows(i),mcols(i)] = size(obj.Data.(fname).Chainage);
             end
