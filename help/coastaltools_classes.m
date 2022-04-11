@@ -70,6 +70,8 @@
 % zone.
 % * _iribarren_ - function to calculate the Iribarren number which characterise the 
 %   wave breaker type.
+% * _lambertw_ - computes the Lambert W-Function. Author: Pascal Getreuer,
+% Matlab(TM) Exchange Forum.
 % * _littoraldrift_ - sediment transport drift rates for sand and shingle.
 % * _littoraldriftstats_ - estimate net drift over selected period from the
 % time series of drift rates.
@@ -110,10 +112,11 @@
 % wave conditions in the wave-currrent case.
 % * _ut_constants.mat_ - binary file of constituents used by
 % *ctTidalAnalysis* class.
-% * _ut_reconstr_ - reconstruct superposed harmonics (code from Matlab(TM)
+% * _ut_reconstr_ - reconstruct superposed harmonics. Author: D. Codiga,
+% Matlab(TM) Exchange Forum.
 % Forum).
-% * _ut_solv_ - execute harmonic tidal analysis (code from Matlab(TM)
-% Forum).
+% * _ut_solv_ - execute harmonic tidal analysis. Author: D. Codiga,
+% Matlab(TM) Exchange Forum.
 % * _waterlevelfreqplots_ - create various water level exceedance and
 % duration plots.
 % * _wave_energyflux_ - function to calculate the wave energy flux using
