@@ -190,8 +190,12 @@ classdef CT_Plots < muiPlots
 %%
         function check4chainage(obj,mobj)
             %if noDim is being used for Chainage, reassign selection 
+            %NB - specific to ctBeachProfileData beach profiles
             crec = obj.UIsel(1).caserec;
             dset = obj.UIsel(1).dataset;
+            if ~strcmp(mobj.Cases.Catalogue{crec,3},'ctBeachProfileData')
+                return;
+            end
             dst = getDataset(mobj.Cases,crec,dset);
             varnames = dst.VariableNames;
             for i=2:length(obj.UIsel)

@@ -130,6 +130,10 @@ classdef CT_BeachAnalysis < muiDataSet
             %if model returns single variable as array of doubles, use {results}
             dst = dstable(output.results{:},'RowNames',output.modeltime,...
                                                     'DSproperties',dsp);
+            if any(id_model==[3,4])
+                plist = output.proflist; %ordered list along coast, so retain order
+                dst.Dimensions.PID = categorical(plist,plist,'Ordinal',true);
+            end
             %--------------------------------------------------------------
             % Save results
             %--------------------------------------------------------------                        
@@ -858,17 +862,7 @@ classdef CT_BeachAnalysis < muiDataSet
                 end
             end
         end
-%% Now stand along function get_profile_times.m because used in CT_Plots
-%         function time = getProfileTimes(mobj,caserec)
-%             %get the composite time intervals for all profiles
-%             npro = length(caserec);            
-%             time = [];           %time intervals in any of the surveys
-%             for j=1:npro
-%                [dst,~] = getDataset(mobj.Cases,caserec(j),1);  %idset=1 
-%                newtime = dst.RowNames;
-%                time = unique(vertcat(time,newtime));
-%             end
-%         end
+%% getProfileTimes now stand alone function get_profile_times.m because used in CT_Plots
 %%
         function mxmn = getSampleBox(~,mxmn,h_but,h_ax)
             %get min and max dimensions of sample box to be used
@@ -1150,24 +1144,7 @@ classdef CT_BeachAnalysis < muiDataSet
                 Nb(i,1) = Ni(idminCh,1);
             end
         end
-%% Now stand along function shore_profile_order.m because used in CT_Plots
-%         function [sortedE,sortedN,idd] = shorelineProfileOrder(mobj,caserec)
-%             %sort the profile order based on the E,N of the base point - min(Chainage)
-%             npro = length(caserec);   %number of profiles
-%             Es = NaN(1,npro); Ns = Es;
-%             for k=1:npro
-%                 [dst,~] = getDataset(mobj.Cases,caserec(k),1);  %idset=1
-%                 E = dst.Eastings;
-%                 N = dst.Northings; 
-%                 Ch = dst.Chainage;
-%                 [~,idminCh] = min(Ch(:,1),[],'omitnan'); %minimum in first column
-%                 Es(1,k) = E(idminCh,1);
-%                 Ns(1,k) = N(idminCh,1); 
-%             end
-%             %sort profiles into alongshore order
-%             [sortedE,sortedN,idd] = sortENdata2line(Es,Ns);
-%         end
-
+%% shorelineProfileOrder now stand alone function shore_profile_order.m because used in CT_Plots
 %--------------------------------------------------------------------------
 % Plot Functions called by beach models
 %--------------------------------------------------------------------------
@@ -1462,18 +1439,29 @@ classdef CT_BeachAnalysis < muiDataSet
                                    'Shoreline angle (degTN)'},...
                         'QCflag',repmat({'model'},1,5));
             end
+            
             dsp.Row = struct(...
                 'Name',{'Time'},...
                 'Description',{'Time'},...
                 'Unit',{'h'},...
                 'Label',{'Time'},...
-                'Format',{'dd-MM-yyyy HH:mm:ss'});        
-            dsp.Dimensions = struct(...    
-                'Name',{''},...
-                'Description',{''},...
-                'Unit',{''},...
-                'Label',{''},...
-                'Format',{''});    
+                'Format',{'dd-MM-yyyy HH:mm:ss'});   
+            
+            if any(id_model==[3,4])
+                dsp.Dimensions = struct(...    
+                    'Name',{'PID'},...
+                    'Description',{'Profile ID'},...
+                    'Unit',{'-'},...
+                    'Label',{'Profile ID'},...
+                    'Format',{''});                    
+            else
+                dsp.Dimensions = struct(...    
+                    'Name',{''},...
+                    'Description',{''},...
+                    'Unit',{''},...
+                    'Label',{''},...
+                    'Format',{''});    
+            end
         end
     end  
 end
