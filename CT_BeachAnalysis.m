@@ -153,7 +153,7 @@ classdef CT_BeachAnalysis < muiDataSet
 % UI Functions called directly from main menu
 %--------------------------------------------------------------------------
     methods       
-        function tabPlot(obj,src)    %method for muiDataSet abstract class
+        function tabPlot(obj,src,mobj)    %method for muiDataSet abstract class
             %generate plot for display on Q-Plot tab 
             ht = findobj(src,'Type','axes');
             delete(ht);
@@ -924,16 +924,12 @@ classdef CT_BeachAnalysis < muiDataSet
             theta = NaN(size(Es));  %bE = NaN(1,size(Es,2));  bN = bE;
             shoreang = site.ShorelineAngle;
             for i=1:length(time)
-%                 [sE,sN,idist] = sortENdata2line(Es(i,:),Ns(i,:));
-%                 bE(idist) = Eb(i,:);
-%                 bN(idist) = Nb(i,:);
                 temp = shore_orientation(Es(i,:),Ns(i,:),Eb(i,:),Nb(i,:));
                 invangle = mod(mean(temp,'omitnan')+180, 360);
                 if invangle>shoreang-89 && invangle<shoreang+89
                     temp = mod(temp+180, 360);
                 end
                 theta(i,:) = temp;
-%                 theta(i,:) = shore_orientation(Es(i,:),Ns(i,:),Eb(i,:),Nb(i,:));
             end
             %
             npro = size(theta,2);

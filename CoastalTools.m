@@ -239,7 +239,11 @@ classdef CoastalTools < muiModelUI
             msg = 'No results to display';
             switch src.Tag                             
                 case 'Plot' 
-                    tabPlot(cobj,src);
+                    if isa(cobj,'CT_BeachAnalysis')
+                        tabPlot(cobj,src,obj);
+                    else
+                        tabPlot(cobj,src);
+                    end
                 case {'Descriptive','Extremes'}
                     cobj = getClassObj(obj,'mUI','Stats',msg);
                     if isempty(cobj), return; end

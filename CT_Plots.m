@@ -216,9 +216,15 @@ classdef CT_Plots < muiPlots
 %--------------------------------------------------------------------------
         function setProfilePlot(obj)
             %generate new profile plot in figure            
-            if isempty(obj.Data.X)
+            if isempty(obj.Data.X) 
                 %plot multiple X-Z profiles
-                getDistPlot(obj);                
+                getDistPlot(obj);  
+            elseif isempty(obj.Data.X.DataTable)
+                %user selected chainage dimension rather than time
+                idx = obj.Plot.FigNum==obj.Plot.CurrentFig.Number;
+                hf = findobj('Number',obj.Plot.FigNum(idx));
+                delete(hf)
+                obj.Plot.FigNum(idx)=[];
             elseif isdatetime(obj.Data.X.DataTable{1,1})
                 %plot surface plot of time variation at one location
                 timeProfilePlot(obj);
