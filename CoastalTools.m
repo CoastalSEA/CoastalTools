@@ -509,7 +509,8 @@ classdef CoastalTools < muiModelUI
                 end
                 %
                 dst = getDataset(muicat,caserec(i),1);
-                range = getVarAttRange(dst,1,'Time');
+                %range = getVarAttRange(dst,1,'Time');
+                range = dst.RowRange;
                 reclen = num2str(height(dst.DataTable));
                 if ~isempty(dst.RowRange)                    
                     stdate = datestr(range{1},'dd-mmm-yyyy'); %use to datestr to control ouput format
