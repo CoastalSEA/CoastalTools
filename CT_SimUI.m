@@ -157,11 +157,11 @@ classdef CT_SimUI < muiDataUI
                 idum = find(strcmp(muicat.Catalogue.CaseClass,'muiUserModel'));                
                 caseidx = getClassInstances(lobj,'ModelType','ShorePosition');
                 idps = caseRec(muicat,caseidx);
-                idx = sort([idwv;idum;idps]);
+                idx = sort([idwv;idum;idps']);
             else
                 caseidx = getClassInstances(lobj,'ModelType','Volumes');
                 idps = caseRec(muicat,caseidx);
-                idx = sort([idwv,idps]);
+                idx = sort([idwv;idps']);
             end
             caserec = idx(caserec);
         end
