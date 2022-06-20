@@ -40,7 +40,7 @@ classdef Sim_YGOR < muiDataSet
             obj = Sim_YGOR;                            
             %check that the input data has been entered
             msgtxt = ('Shore position data required to run model');
-            lobj = getClassObj(mobj,'Inputs','CT_BeachAnalysis',msgtxt);
+            lobj = getClassObj(mobj,'Cases','CT_BeachAnalysis',msgtxt);
             if isempty(lobj), return; end
             muicat = mobj.Cases;
             %assign the run parameters to the model instance
@@ -102,6 +102,7 @@ classdef Sim_YGOR < muiDataSet
             if strcmp(answer,'Quit'), return; end
             %SAVE to Sim_YGORinput
             lobj = getClassObj(mobj,'Inputs','Sim_YGORinput');
+            if isempty(lobj), lobj = Sim_YGORinput(mobj); end
             vals = getProperties(lobj);            
             vals(3:7,1) = num2cell(C');
             vals{8} = rmse;
@@ -305,7 +306,9 @@ classdef Sim_YGOR < muiDataSet
                     newvals = interp1(wvtime,wvvals,newtime,'linear','extrap');
                     newdst= dstable(newvals,'RowNames',cellstr(newtime),...
                                         'VariableNames',wvdst.VariableNames);         
-                    newvdst = mergerows(wvdst,newdst);                    
+                    newvdst = mergerows(wvdst,newdst);   
+                else
+                    newvdst = wvdst;  %no wave data in profile interval
                 end
             else
                 %find mean wave for waveint days before times of profile

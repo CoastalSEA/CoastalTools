@@ -561,7 +561,7 @@ classdef CT_BeachAnalysis < muiDataSet
             %setup output for writing to stored dataset
             output.results = mnpos;
             output.modeltime = meta.time;
-            output.metatxt = {sprintf('zlevel = %g; z +/- %g',0,0.5)};                                                                 
+            output.metatxt = sprintf('zlevel = %g; z +/- %g',0,0.5);                                                                 
             output.source = sprintf('using %d profiles at %.1f mOD',npro,0);
             %list of profiles used to construct shoreline
             output.proflist = meta.proflist;

@@ -40,7 +40,7 @@ classdef Sim_YGORinput < muiPropertyUI
     end    
 
 %%   
-    methods (Access=protected)
+    methods (Access=?Sim_YGOR)
         function obj = Sim_YGORinput(mobj)   
             %constructor code:            
             %values defined in UI function setTabProperties used to assign

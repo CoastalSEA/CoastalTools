@@ -88,14 +88,14 @@ classdef CT_SimUI < muiDataUI
         end        
       
 %%
-        function setVariableLists(obj,src,mobj,caserec)
+        function setVariableLists(obj,src,mobj)
             %initialise the variable lists or values
             %Abstract function required by muiDataUI
-%             muicat = mobj.Cases.Catalogue;
             itab = strcmp(obj.Tabs2Use,src.Tag);
             S = obj.TabContent(itab);
             sel_uic = S.Selections;
-            [caserec,idx] = subSelectCases(obj,src,mobj,caserec);            
+            listrec = sel_uic{strcmp(S.Order,'Case')}.Value; 
+            [caserec,idx] = subSelectCases(obj,src,mobj,listrec);           
             cobj = getCase(mobj.Cases,caserec);
             for i=1:length(sel_uic)                
                 switch sel_uic{i}.Tag

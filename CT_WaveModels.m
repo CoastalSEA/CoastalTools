@@ -25,9 +25,9 @@ classdef CT_WaveModels < muiDataSet
     end
     
     properties (Transient)
-        MenuList = {'Littoral Drift','X-shore Transport','Wave Energy',...
+        MenuList = {'Littoral Drift','X-shore Transport','Wave Power',...
                      'Runup','Overtopping','Iribarren Number','Beach type'}
-        ModelName = {'Drift','Xshore','WaveEnergy','Runup','Overtopping',...
+        ModelName = {'Drift','Xshore','WavePower','Runup','Overtopping',...
                                                 'Iribarren','BeachType'};
     end
     
@@ -68,7 +68,7 @@ classdef CT_WaveModels < muiDataSet
                     output = driftModel(obj,mobj,site);
                 case 2              %Cross-shore transport
                     output = xshoreModel(obj,mobj,site);
-                case 3              %Wave Energy
+                case 3              %Wave Power
                     output = energyModel(obj,mobj,site);
                 case 4              %Runup                    
                     output = runupModel(obj,mobj,site);
@@ -210,9 +210,9 @@ classdef CT_WaveModels < muiDataSet
         end
 %%
         function output = energyModel(~,mobj,site)
-            %calculate the inshore wave energy using linear wave theory and
-            %the refracted, shoaled and breaking wave conditions at the 
-            %defined inshore point
+            %calculate the inshore wave power (wave energy flux) using 
+            %linear wave theory and the refracted, shoaled and 
+            %breaking wave conditions at the defined inshore point
             % INPUTS
             % mobj - handle to CoastlTools class objects
             % Variables used by model:
@@ -488,12 +488,12 @@ classdef CT_WaveModels < muiDataSet
                         'Unit',{'m^3/s'},...
                         'Label',{'Transport rate (m^3/s)'},...
                         'QCflag',{'model'});
-                case 3             %Energy flux
+                case 3             %Energy flux/wave power
                     dsp.Variables = struct(...                       
                         'Name',{'Eflux'},...
-                        'Description',{'Inshore energy flux'},...
+                        'Description',{'Inshore wave power'},...
                         'Unit',{'J/ms'},...
-                        'Label',{'Energy flux (J/ms)'},...
+                        'Label',{'Wave Power (J/ms)'},...
                         'QCflag',{'model'});
                 case 4              %Runup
                     dsp.Variables = struct(...                       

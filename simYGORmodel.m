@@ -2,7 +2,7 @@ function [tt,ss,mtxt] = simYGORmodel(wv,sh,wvb,coeffs,isfcast)
 %
 %-------function help------------------------------------------------------
 % NAME
-%   Sim_YGOTmodel.m
+%   Sim_YGORmodel.m
 % PURPOSE
 %   Function to clean data and call optimization algorithm to find
 %   the best fit for the five free parameters in the Yates et al model
@@ -108,8 +108,8 @@ function [lastC,rmse] = getYGORfit(ss,ts,Es,Et,tt,ssdt,idx,trend,labels)
     end
     %plot goodness of fit
     YGORfitplot(ss,smod,lastC,R2);
-    skill = muiStats.setTaylorParams([]);
-    if strcmp(skill.Inc,'Yes')                
+    [skill,ok] = setskillparameters();
+    if ok>0 && skill.Inc             
         metatxt{1} = 'Data';
         metatxt{2} = 'Model';
         radial_limit = 2;
@@ -123,7 +123,7 @@ function [tt,smod,mtxt] = getYGORfcast(ss,ts,Et,tt,coeffs,pfitss,labels)
     [smod, ~] = YGORts(0,Et,tf,coeffs.C);
     smod = smod+polyval(pfitss,tf);  
     %adjust position to a defined point at offsetdate       
-    offsetdate = datetime([coeffs.Dat0,' 00:00:00'],'InputFormat','dd-MM-uuuu HH:mm:ss');
+    offsetdate = datetime([coeffs.Dat0,' 00:00:00'],'InputFormat','dd-MM-yyyy HH:mm:ss');
     idt = tt==offsetdate;
     if any(idt)
        offset = smod(idt)-coeffs.Sh0;
@@ -332,7 +332,8 @@ end
 %%
 function C = getC(C)
     %allow user to modify esitmated values of C
-    prompt = {'a:','b:','C(+):','C(-):','d:'};
+    p1 = sprintf('Press "OK" to change values\nPress "Cancel" to use current values\na: ');
+    prompt = {p1,'b:','C(+):','C(-):','d:'};
     title = 'Adjust free parameters';
     numlines = 1;
     defaultvalues = {num2str(C(1)),num2str(C(2)),num2str(C(3)),...

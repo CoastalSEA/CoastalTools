@@ -284,6 +284,7 @@ function trim_ts(muicat)
     values = editrange_ui(dst.RowRange);
     startime = datetime(values{1})-minutes(1);  %offset ensures selected 
     endtime = datetime(values{2})+minutes(1);   %range is extracted
+    if isempty(startime) || isempty(endtime), return; end
     timeidx = isbetween(dst.RowNames,startime,endtime);    
     newdst = getDSTable(dst,timeidx);
     

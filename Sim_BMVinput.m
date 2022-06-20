@@ -60,7 +60,7 @@ classdef Sim_BMVinput < muiPropertyUI
     end    
   
 %%   
-    methods (Access=protected)
+    methods (Access={?Sim_BMV,?Sim_BMVmodel})
         function obj = Sim_BMVinput(mobj)  
             %constructor code:            
             %values defined in UI function setTabProperties used to assign
