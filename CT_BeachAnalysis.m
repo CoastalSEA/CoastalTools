@@ -35,7 +35,7 @@ classdef CT_BeachAnalysis < muiDataSet
         ModelName = {'Volumes','ShorePosition','ShoreLine','BVI'};
     end
     
-    methods (Access={?muiDataSet,?muiStats})
+    methods
         function obj = CT_BeachAnalysis()                    
             %class constructor
         end

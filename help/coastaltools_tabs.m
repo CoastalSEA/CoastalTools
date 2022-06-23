@@ -24,7 +24,7 @@
 % * _Stats>Extremes_: tabulates the results of the most recent extremes analysis. Includes a button to copy results to the clipboard.
 
 %% Accessing Case meta-data
-% On the *Data* and *Model* tabs, using the mouse to click on a case record generates a
+% On the *Data* and *Model* tabs, using the mouse to click on  the fist column of a case record generates a
 % table figure with a summary of the meta-data for the selected case. The
 % figure includes buttons to Copy the data to the clipboard, view the
 % DSproperties of the selected dataset and examine the Source of the

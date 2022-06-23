@@ -84,6 +84,8 @@ function concatenate_ts(muicat)
         %adjust dst1 to account far any change in end date
         startime = range1{1}-minutes(1);  %offset ensures selected 
         endtime = range1{2}+minutes(1);   %range is extracted
+        if ~checkdates(startime,endtime,dst.RowRange), return; end
+        
         timeidx = isbetween(dst1.RowNames,startime,endtime);
         dst1 = getDSTable(dst1,timeidx);        
         %trim dst2 to date after dst1 endtime
@@ -284,7 +286,8 @@ function trim_ts(muicat)
     values = editrange_ui(dst.RowRange);
     startime = datetime(values{1})-minutes(1);  %offset ensures selected 
     endtime = datetime(values{2})+minutes(1);   %range is extracted
-    if isempty(startime) || isempty(endtime), return; end
+    if ~checkdates(startime,endtime,dst.RowRange), return; end
+  
     timeidx = isbetween(dst.RowNames,startime,endtime);    
     newdst = getDSTable(dst,timeidx);
     
@@ -532,4 +535,16 @@ function [varname,vidx] = getVariable(dst)
     end
     varname = vars{idx};
     vidx = (1:nrec)==idx;
+end
+%%
+function isok = checkdates(startime,endtime,RowRange)
+    %check that start and end times not empty, are within range and in
+    %correct order
+    if isempty(startime) || isempty(endtime)
+        msg = 'Incorrect date selection. No date selected for start or end';
+        warndlg(msg);
+        isok = false;
+    else
+        isok  = isvalidrange({startime,endtime},RowRange);
+    end
 end
