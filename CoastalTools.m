@@ -15,8 +15,8 @@ classdef CoastalTools < muiModelUI
 % 
     properties  (Access = protected)
         %implement properties defined as Abstract in muiModelUI
-        vNumber = '3.1'
-        vDate   = 'June 2022'
+        vNumber = '3.2'
+        vDate   = 'November 2022'
         modelName = 'CoastalTools'                        
         %Properties defined in muiModelUI that need to be assigned in setGui
         % ModelInputs  %classes required by model: used in isValidModel check 
@@ -156,10 +156,11 @@ classdef CoastalTools < muiModelUI
             
             % submenu for Beach properties
             menu.Run(3).List = {'Profiles','Shore change','Beach type',...
-                                           'Shore profile','Dean profile'}; 
-            menu.Run(3).Callback = {'gcbo;','gcbo;',@obj.runWaveModel...
-                            @obj.runBeachAnalysis,@obj.runBeachAnalysis};
-            menu.Run(3).Separator = {'off','off','off','on','off'};
+                                'Crenulate Bay','Shore profile','Dean profile'}; 
+            runbeach = repmat({@obj.runBeachAnalysis},[1,3]);               
+            menu.Run(3).Callback = [{'gcbo;'},{'gcbo;'},{@obj.runWaveModel},...
+                                                            runbeach(:)'];
+            menu.Run(3).Separator = {'off','off','off','off','on','off'};
             
             menu.Run(4).List = {'Volumes','Shore position',...
                         'Location plot','Centroid plot','Space-time plot'}; 

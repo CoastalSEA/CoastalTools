@@ -30,9 +30,9 @@ classdef CT_BeachAnalysis < muiDataSet
     end
     
     properties (Transient)
-        MenuList = {'Volumes','Shore position','Shoreline',...
-                     'BVI profile set','Shore profile','Dean profile'} 
-        ModelName = {'Volumes','ShorePosition','ShoreLine','BVI'};
+        MenuList = {'Volumes','Shore position','Shoreline','BVI profile set',...
+                    'Crenulate Bay','Shore profile','Dean profile'}                     
+        ModelName = {'Volumes','ShorePosition','ShoreLine','BVI'}
     end
     
     methods
@@ -110,11 +110,14 @@ classdef CT_BeachAnalysis < muiDataSet
                         obj.TabOutput.headtxt = headtxt;
                         tablefigure(src,headtxt,output.bvitable);
                     end
-                case 5  %plot an idealised profile and closure depths
+                case 5 %crenulate bay plots
+                    crenulateBay(obj,mobj);
+                    output = [];
+                case 6  %plot an idealised profile and closure depths
                     src = findobj(mobj.mUI.Tabs.Children,'Tag','Profile');                    
                     bmvProfile(obj,mobj,src);
                     output = [];
-                case 6  %plot the Dean profile
+                case 7  %plot the Dean profile
                     src = findobj(mobj.mUI.Tabs.Children,'Tag','Profile'); 
                     getDeanProfile(obj,mobj,src);
                     output = [];
@@ -364,15 +367,18 @@ classdef CT_BeachAnalysis < muiDataSet
             %now analyse each time interval
             if isscalar(zlevel), zlevel = repmat(zlevel,1,npro); end
             ntime = length(time);     %composite time for all profiles
-            xD = NaN(ntime,npro); E = NaN(ntime,npro); N = E; BS = xD; %theta = xD;
-            bE = E; bN = N;
-            aX = zeros(npro,1); bX = aX; RsqX = aX; seX = aX;
-            aM = aX; bM = aX; RsqM = aX; seM = aX;
-%             aO = aX; bO = aX; RsqO = aX; seO = aX;
+            %initialise shoreline properties
+            E = NaN(ntime,npro); N = E; %eastings and northings of shoreline
+            bE = E; bN = N;             %eastings and northings of baseline
+            xD = NaN(ntime,npro);       %distance along profle to zlevel
+            BS = NaN(ntime,npro);       %slope at zlevel
+            %initialise statistical properties (intercept, slope,R2,std.err)
+            aX = zeros(npro,1); bX = aX; RsqX = aX; seX = aX; %distance stats
+            aM = aX; bM = aX; RsqM = aX; seM = aX;            %slope stats
+
             proflist{npro} = [];
             for k=1:npro
                 [dst,~] = getDataset(mobj.Cases,caserec(k),1);  %idset=1
-%                 dst = getCaseDataSet(mobj.Cases,mobj,caserec(k));
                 x = dst.Chainage;
                 z = dst.Elevation;
                 xmin = max(min(x,[],2));
@@ -392,18 +398,16 @@ classdef CT_BeachAnalysis < muiDataSet
                     bE(idp,k) = Eb;
                     bN(idp,k) = Nb;
                 end
-%                 shoreang = shore_orientation(Es,Ns,Eb,Nb);
-%                 theta(idp,k) = shoreang;
+
                 %now get rate of change in distance and slope
                 mtime = time2num(ptime);
                 [aX(k),bX(k),RsqX(k)] = regression_model(mtime,xdist,'Linear');
                 seX(k) = stderror(mtime,xdist,aX(k),bX(k),'Linear');
                 [aM(k),bM(k),RsqM(k)] = regression_model(mtime,-slope,'Linear');
                 seM(k) = stderror(mtime,-slope,aM(k),bM(k),'Linear');
-%                 [aO(k),bO(k),RsqO(k)] = regression_model(mtime,shoreang,'Linear');
-%                 seO(k) = stderror(mtime,theta(:,k),aO(k),bO(k),'Linear');
             end
             
+            %get the angle of the shore at each profile location and time
             [theta,ostats] = getShoreOrientation(obj,E,N,bE,bN,time,site);
             
             %package output
@@ -579,6 +583,40 @@ classdef CT_BeachAnalysis < muiDataSet
             output.bvitable = itable;
             output.bvitable.Properties.Description = ...
                 sprintf('Profile indices for %d profiles with "exposure” period of N = %g years',npro,meta.Nyear);                       
+        end
+%%
+        function crenulateBay(obj,mobj)
+            %plot a crenulate bay against a user selected shoreline
+            output = profiles2shoreline(obj,mobj);
+            hfig = figure('Name','Crenulate Bay','Units','normalized',...                
+                          'Resize','on','HandleVisibility','on','Tag','PlotFig');
+            ax = axes(hfig);
+            E = mean(output.results{1},1,'omitnan'); 
+            N = mean(output.results{2},1,'omitnan'); 
+            
+            plot(ax,E,N,'-b','LineWidth',1,'DisplayName','Profile shoreline')
+            promptxt = {'Select control point','Select end of control line'};
+            c_point = gd_setpoint(ax,promptxt(1),false);
+            e_point = gd_setpoint(ax,promptxt(2),false);
+            %input struct to define default values for crenulate_bays
+            %Easting and Northing of control point
+            inp.Eo = c_point.x; inp.No = c_point.y;
+            %length of control line
+            inp.Ro = sqrt((c_point.x-e_point.x)^2+(c_point.y-e_point.y)^2);
+            ptxt = {
+              'Angle between control line and wave crest (1 to 89deg)',...
+              'Angle of wave crest to TN (deg)',...
+              'Spiral rotation about control point (1=clockwise and 0=anticlockwise)'};     
+            defaultvalues = {'45','90','0'};
+            answer = inputdlg(ptxt,'Crenulate Bay',1,defaultvalues);
+            inp.beta = str2double(answer{1});  %Angle between control line and wave crest
+            inp.alpha = str2double(answer{2}); %Angle of wave crest to TN
+            inp.p = str2double(answer{3});     %Spiral rotation (1=clockwise outwards and 0=counter-clockwise           
+            inp.ax = ax;                       %handle to figure axes
+            
+            hpts = findobj(ax,'Tag','mypoints');
+            delete(hpts)
+            crenulate_bays(inp);
         end
 %%
         function bmvProfile(~,mobj,src)
@@ -1282,7 +1320,7 @@ classdef CT_BeachAnalysis < muiDataSet
         end
 %%
         function plotProfileBaseline(~,mobj,ax,Loc)
-            %use the selevcted profiles to generate a base plot
+            %use the selected profiles to generate a base plot
             muicat = mobj.Cases;
             lobj = muicat.DataSets.ctBeachProfileData;  %handle to beach profile data
             %convert class selection to caserec values
