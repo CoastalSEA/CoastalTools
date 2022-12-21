@@ -1,8 +1,8 @@
 %% CoastalTools Examples
 % A number of models are provided to illustrate a range of possible
 % applications. The details of each model set-up are given in the 
-% <matlab:open_manual manual>. The mat files for a demonstration project can be found in
-% the DemoModels folder <matlab:demo_folder here>. 
+% <matlab:ct_open_manual manual>. The mat file for a demonstration project can be found in
+% the examples folder <matlab:ct_example_folder here>. 
 %%
 % Data formats for use in CoastalTools include simple date-record formats
 % and a number of formats adopted by UK national archives. This includes

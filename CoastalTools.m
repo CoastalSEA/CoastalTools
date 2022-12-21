@@ -330,8 +330,10 @@ classdef CoastalTools < muiModelUI
                 case 'Add'
                     useCase(obj.Cases,mode,{classname},'addData');
                 case 'Delete'
+                    if strcmp(mode,'none'), mode = 'single'; end
                     useCase(obj.Cases,mode,{classname},'deleteData');
                 case 'Quality Control'
+                    if strcmp(mode,'none'), mode = 'single'; end
                     useCase(obj.Cases,mode,{classname},'qcData');
             end
             ht = findobj(obj.mUI.Tabs.Children,'Tag','Data');

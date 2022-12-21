@@ -30,9 +30,9 @@
 % <<screenshot.png>>
 
 %% Manual
-% The <matlab:open_manual manual> provides further details of setup and 
+% The <matlab:ct_open_manual manual> provides further details of setup and 
 % applications available in CoastalTools. The files for the example 
-% use case can be found in the example folder <matlab:example_folder here>. 
+% use case can be found in the example folder <matlab:ct_example_folder here>. 
 
 %% See Also
 % <matlab:doc('muitoolbox') muitoolbox>, <matlab:doc('dstoolbox') dstoolbox>.

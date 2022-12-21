@@ -39,7 +39,7 @@
 %%
 % * *Load data*: prompts user for file format to be loaded. The options available vary with Data type. The user then selects one or more files to be loaded. Once files have been read, user is prompted for a description (working title) for the data set. 
 % * *Add data*: prompts user for file to be loaded (only one file at a time can be added). Only files with the format used to create the data set can be used to Add data to a data record.
-% * *Quality control*: runs a series of checks on the data. This is only available for waves and water levels in this version. See <matlab:open_manual manual> for details of the checks applied. Once run, the last column of the Data tab is updated to show that qc has been applied.
+% * *Quality control*: runs a series of checks on the data. This is only available for waves and water levels in this version. See <matlab:ct_open_manual manual> for details of the checks applied. Once run, the last column of the Data tab is updated to show that qc has been applied.
 
 %% Setup > Site Parameters
 % * *Site parameters>Wave propagation*: input dialogue allows user to define characteristic properties of the site. The current values can be viewed on the _Site/Waves_ tab.
@@ -163,5 +163,5 @@
 % * *Help*: access the online documentation for CoastalTools.
 
 %% See Also
-% The <matlab:open_manual manual> provides further details of setup and 
+% The <matlab:ct_open_manual manual> provides further details of setup and 
 % configuration of the model.
