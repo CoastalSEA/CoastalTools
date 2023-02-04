@@ -115,7 +115,7 @@ classdef CT_WaveModels < muiDataSet
                 % Tp   - peak wave period (s)
                 % Diri - wave direction (degrees TN)
                 % depi  - water depth at wave point (m)
-                % theta- angle of shoreline fron north (degrees TN)                
+                % theta- angle of shoreline from north (degrees TN)                
                 % d50  - grain size d50 (m)
                 % Kc   - drift coefficient (-)
             % FUNCTION CALLS (external) - littoraldrift
