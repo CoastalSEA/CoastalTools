@@ -57,6 +57,7 @@
 % * *Patch timeseries*: allows gaps in a selected timeseries to be patched using the data from another timeseries that overlaps the primary timeseries (at least for some or all of the gaps). 
 % * *Delete multiple profiles*: allows all profile data sets with less than ‘N’ surveys available to be deleted. 
 % * *Edit or Delete profile in timeseries*: options to scroll through all profiles in the data set of select individual profiles and then to either edit or delete individual profiles. For editing profiles this is easier to use than the _Project>Scenarios>Edit Data Set_ option.
+% * *Trim timeseries*: clip the ends of a time series between specified dates.
 
 %% Run > Wave properties
 % Models that use the time series data to compute

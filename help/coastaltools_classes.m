@@ -53,6 +53,7 @@
 % * _celerity_ - calculate the wave celerity using Hunt's equation.
 % * _coeff_AB_ - function called by overtopping functions otop_Q and
 % otop_C.
+% * _crenulate_bay_ - generate the shoreline for an equilibrium crenulate bay using the method of Hsu and Evans, 1989 (Hsu and Evans, 1989).
 % * _deanbeachprofile_ - find the bed slope across the surf zone.
 %   the profile is based on a user defined slope between Hw and SWL (0mOD)
 %   and a Dean profile below this level. 
