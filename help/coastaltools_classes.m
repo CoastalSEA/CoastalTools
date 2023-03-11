@@ -123,7 +123,12 @@
 % * _wave_energyflux_ - function to calculate the wave energy flux using
 % linear wave theory.
 % * _wave_friction_ - compute the wave friction factor for rough and smooth turbulent
-%   conditions and smooth laminar conditions.
+% conditions and smooth laminar conditions.
+% * _wave_scatter_ - plot H-T scatter diagram that uses the wave celerity based on water depth 
+% to add contours of wave steepness, plot a 3D contoured histogram or
+% various combinations of height, period, depth and steepness.
+% * _wave_steepness_ - compute the wave steepness for given wave height, 
+% wave period and water depth.
 % * _xshore_bailard_ - computes the cross-shore transport for given wave
 % and beach conditions.
 
