@@ -71,6 +71,10 @@
 % plane bed refraction. This can be to a specified still water depth, or
 % the edge of the surf zone.
 % * *Wind-waves*: uses an input wind data set and defined fetch lengths. The effective fetch ic calculated using the method of Donelan (1985), or the method given in the Shore Protection Manual (1992). Wave height and period are computed using the effective fetch lengths and the TMA spectrum (Hughes, 1984; Bouws et al., 1985; 1987). 
+% * *Spectral Transfer*: uses a Spectral Transfer table from the
+% WaveRayModel to transfer an offshore timeseries to an inshore point.
+% Requires a SpectralTransfer table to have been imported from the WaveRayModel
+% App.
 % * *Wave Energy*: uses selected wave data set (input or modelled) to
 % compute the wave energy flux using linear wave theory.
 % * *Runup*: uses selected wave data set (input or modelled) to

@@ -147,12 +147,15 @@ classdef CoastalTools < muiModelUI
             menu.Run(1).Separator = {'off','off','off','on','on','off','on'};
             
             % submenu for Wave properties
-            menu.Run(2).List = {'Deepwater waves','Nearshore Waves',...
-                                'Wind-Waves','Wave Power','Runup',...
+            menu.Run(2).List = {'Deepwater Waves','Nearshore Waves',...
+                                'Wind-Waves','Spectral Transfer',...
+                                'Wave Power','Runup',...
                                 'Littoral Drift','X-shore Transport',...
                                 'Overtopping','Iribarren Number'}; 
             nitems = length(menu.Run(2).List);
             menu.Run(2).Callback = repmat({@obj.runWaveModel},[1,nitems]);
+            sep = repmat({'off'},[1,10]);   sep{5} = 'on';
+            menu.Run(2).Separator = sep;
             
             % submenu for Beach properties
             menu.Run(3).List = {'Profiles','Shore change','Beach type',...
@@ -409,12 +412,14 @@ classdef CoastalTools < muiModelUI
                 case 'Nearshore Waves'
                     %run wave model to create inshore wave data
                     ctWaveModel.runModel(obj,true); %flag is for inshore case
-                case 'Deepwater waves'
+                case 'Deepwater Waves'
                     %run wave model to create inshore wave data
                     ctWaveModel.runModel(obj,false);%flag is for offshore case
                 case 'Wind-Waves'
                     %run wave model to create inshore wave data
                     ctWindWaveModel.runModel(obj);    
+                case 'Spectral Transfer'
+                    WRM_WaveModel.runModel(obj);     
                 otherwise
                     CT_WaveModels.runModel(obj,src);   
             end
