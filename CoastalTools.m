@@ -45,7 +45,8 @@ classdef CoastalTools < muiModelUI
             obj.ModelInputs.CT_BeachAnalysis = {'ctBeachProfileData'}; 
             obj.ModelInputs.CT_UserModel = {'ctWaveParameters'}; 
             obj.ModelInputs.Sim_YGOR = {'Sim_YGORinput'}; 
-            obj.ModelInputs.Sim_BMV = {'Sim_BMVinput','CT_BeachAnalysis'}; 
+            obj.ModelInputs.Sim_BMV = {'Sim_BMVinput','CT_BeachAnalysis'};
+            obj.ModelInputs.WRM_WaveModel = {''};
             %tabs to include in DataUIs for plotting and statistical analysis
             %select which of the options are needed and delete the rest
             %Plot options: '2D','3D','4D','2DT','3DT','4DT'
@@ -419,7 +420,10 @@ classdef CoastalTools < muiModelUI
                     %run wave model to create inshore wave data
                     ctWindWaveModel.runModel(obj);    
                 case 'Spectral Transfer'
-                    WRM_WaveModel.runModel(obj);     
+                    msgtxt =  'WaveRayModel not found. Required for this option.';
+                    ok = initialise_mui_app('WaveRayModel',msgtxt,'wrm_functions');
+                    if ok<1, return; end
+                    WRM_WaveModel.runModel(obj);  
                 otherwise
                     CT_WaveModels.runModel(obj,src);   
             end
@@ -520,10 +524,10 @@ classdef CoastalTools < muiModelUI
                 %range = getVarAttRange(dst,1,'Time');
                 range = dst.RowRange;
                 reclen = num2str(height(dst.DataTable));
+                qualcl = '';
                 if ~isempty(dst.RowRange)                    
-                    stdate = datestr(range{1},'dd-mmm-yyyy'); %use to datestr to control ouput format
-                    endate = datestr(range{2},'dd-mmm-yyyy');
-                    qualcl = '';
+                    stdate = char(range{1},'dd-MMM-yyyy'); %control ouput format
+                    endate = char(range{2},'dd-MMM-yyyy');                    
                     if ~isempty(dst.VariableQCflags)
                         qualcl = dst.VariableQCflags{1};
                     end
