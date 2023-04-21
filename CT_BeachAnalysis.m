@@ -586,15 +586,48 @@ classdef CT_BeachAnalysis < muiDataSet
         end
 %%
         function crenulateBay(obj,mobj)
-            %plot a crenulate bay against a user selected shoreline
-            output = profiles2shoreline(obj,mobj);
-            hfig = figure('Name','Crenulate Bay','Units','normalized',...                
-                          'Resize','on','HandleVisibility','on','Tag','PlotFig');
-            ax = axes(hfig);
-            E = mean(output.results{1},1,'omitnan'); 
-            N = mean(output.results{2},1,'omitnan'); 
-            
-            plot(ax,E,N,'-b','LineWidth',1,'DisplayName','Profile shoreline')
+            %plot a crenulate bay against a user selected shoreline            
+            ans1 = questdlg('Use existing figure','Bay','Yes','No','No');
+
+            if strcmp(ans1,'No')
+                hfig = figure('Name','Crenulate Bay','Units','normalized',...  
+                          'WindowButtonDownFcn',@obj.getbayfigure,'UserData',false,...
+                          'Resize','on','HandleVisibility','on','Tag','BayPlotFig');
+                ax = axes(hfig);
+                %select and generate background image
+                ans2 = questdlg('Use image or shoreline','Bay','Image','Shoreline','Shoreline');
+
+                if strcmp(ans2,'Image')
+                    [filename,path,~] = getfiles('MultiSelect','off','PromptText','Select file:');
+                    if filename==0, return; end  %user cancelled
+                    I = imread([path,filename]);
+                    gobj = GD_GridProps.getGridProps(mobj);
+                    [m,n] = size(I);
+                    gobj.Xint = n;
+                    gobj.Yint = m;
+                    gobj = setGridProperties(gobj);
+                    [x,y,~,~] = getGridDimensions(gobj);
+                    image(ax,'XData',x,'YData',y,'CData',flipud(I));
+                    ax.XLim = [x(1),x(end)];
+                    ax.YLim = [y(1),y(end)];
+                else
+                    output = profiles2shoreline(obj,mobj);            
+                    E = mean(output.results{1},1,'omitnan'); 
+                    N = mean(output.results{2},1,'omitnan');             
+                    plot(ax,E,N,'-b','LineWidth',1,'DisplayName','Profile shoreline')
+                end
+                inp.hold = false; %flag to control whether shotelines are held or deleted
+            else
+                %prompt user to select figure to use
+                h_plt = findobj('Type','figure','Tag','BayPlotFig');
+                hd = setdialog('Select figure to use');                 
+                waitfor(h_plt,'UserData')
+                h_plt.UserData = false;
+                delete(hd)
+                ax = gca;  
+                inp.hold = true; %flag to control whether shotelines are held or deleted  
+            end
+
             promptxt = {'Select control point','Select end of control line'};
             c_point = gd_setpoint(ax,promptxt(1),false);
             e_point = gd_setpoint(ax,promptxt(2),false);
@@ -609,14 +642,26 @@ classdef CT_BeachAnalysis < muiDataSet
               'Spiral rotation about control point (1=clockwise and 0=anticlockwise)'};     
             defaultvalues = {'45','90','0'};
             answer = inputdlg(ptxt,'Crenulate Bay',1,defaultvalues);
+            if isempty(answer), return; end
             inp.beta = str2double(answer{1});  %Angle between control line and wave crest
             inp.alpha = str2double(answer{2}); %Angle of wave crest to TN
             inp.p = str2double(answer{3});     %Spiral rotation (1=clockwise outwards and 0=counter-clockwise           
             inp.ax = ax;                       %handle to figure axes
-            
-            hpts = findobj(ax,'Tag','mypoints');
-            delete(hpts)
+
             crenulate_bays(inp);
+        end
+%%
+        function getbayfigure(~,src,~)
+            %WindowButtonDownFcn callback function for section figures. when user 
+            % clicks on figure. Resets the UserData value in figure panel (h_plt)
+            % which is used by waitfor when adding sections to detect when a 
+            % figure selection has sbeen made
+            %disp(src.Number);
+            if src.UserData
+                src.UserData = false;
+            else
+                src.UserData = true;
+            end
         end
 %%
         function bmvProfile(~,mobj,src)
