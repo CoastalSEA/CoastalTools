@@ -15,8 +15,8 @@ classdef CoastalTools < muiModelUI
 % 
     properties  (Access = protected)
         %implement properties defined as Abstract in muiModelUI
-        vNumber = '3.2'
-        vDate   = 'November 2022'
+        vNumber = '3.3'
+        vDate   = 'May 2023'
         modelName = 'CoastalTools'                        
         %Properties defined in muiModelUI that need to be assigned in setGui
         % ModelInputs  %classes required by model: used in isValidModel check 

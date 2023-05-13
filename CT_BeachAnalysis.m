@@ -1146,7 +1146,7 @@ classdef CT_BeachAnalysis < muiDataSet
             h3 = plot(h_ax,[xmin xmax],[0.5 0.5],':r','DisplayName','z0+offset');
             h4 = plot(h_ax,[xmin xmax],[-0.5 -0.5],':r','DisplayName','z0-offset');
             hold off
-            datelist = datestr(t,'dd-mmm-yy');
+            datelist = string(t,'dd-mmm-yy');
             if length(datelist)<20
                 legend(datelist);
             end
