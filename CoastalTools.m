@@ -556,7 +556,7 @@ classdef CoastalTools < muiModelUI
             tc.ColumnName = headers;
             tc.RowName = {};
             tc.Data = cdata;
-            tc.ColumnWidth = {25 80 180 50 75 75 25};
+            tc.ColumnWidth = {25 100 200 50 75 75 25};
             tc.RowStriping = 'on';
             tc.Position(3:4)=[0.935 0.8];    %may need to use tc.Extent?
             tc.Position(2)=0.9-tc.Position(4);
