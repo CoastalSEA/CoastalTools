@@ -95,7 +95,7 @@ classdef CT_WaveModels < muiDataSet
 %--------------------------------------------------------------------------                        
             %assign metadata about model
             obj.ModelType = obj.ModelName{id_model};
-            dst.Source = sprintf('Class %s, using %s',metaclass(obj).Name,...
+            dst.Source = sprintf('Class %s, using %s model',metaclass(obj).Name,...
                                                             obj.ModelType);
             dst.MetaData = output.metatxt;
             %save results
@@ -160,8 +160,10 @@ classdef CT_WaveModels < muiDataSet
             
             output.results = {Q};
             output.modeltime = wv.RowNames;
-            output.metatxt = sprintf('Drift using %s; Theta=%g; d50=%g; Kc=%g; Beach slope=1:%.1f; Zi=%g',...
-                                    formula,theta,d50,Kc,bs,zi);      
+            mtxt1 = sprintf('Drift using %s; Theta=%g; d50=%g; Kc=%g; Beach slope=1:%.1f; Zi=%g',...
+                                    formula,theta,d50,Kc,bs,zi);    
+            mtxt2 = sprintf('Using %s case for wave input',wv.Description);
+            output.metatxt = sprintf('%s\n%s',mtxt1,mtxt2);    
         end
 %%
         function output = xshoreModel(~,mobj,site)
@@ -205,8 +207,10 @@ classdef CT_WaveModels < muiDataSet
             
             output.results = {Qx};
             output.modeltime = wv.RowNames;
-            output.metatxt = sprintf('d50=%g; Beach slope=1:%.1f; Zi=%g',...
+            mtxt1 = sprintf('d50=%g; Beach slope=1:%.1f; Zi=%g',...
                                            d50,bs,zi);
+            mtxt2 = sprintf('Using %s case for wave input',wv.Description);
+            output.metatxt = sprintf('%s\n%s',mtxt1,mtxt2);  
         end
 %%
         function output = energyModel(~,mobj,site)
@@ -249,7 +253,9 @@ classdef CT_WaveModels < muiDataSet
  
             output.results = {Ef};
             output.modeltime = wv.RowNames;
-            output.metatxt = sprintf('Nearshore slope=1:%.1f; Zi=%g',bs,zi);   
+            mtxt1 = sprintf('Nearshore slope=1:%.1f; Zi=%g',bs,zi);   
+            mtxt2 = sprintf('Using %s case for wave input',wv.Description);
+            output.metatxt = sprintf('%s\n%s',mtxt1,mtxt2);  
         end
 %%
         function output = runupModel(obj,mobj,site)
@@ -304,7 +310,9 @@ classdef CT_WaveModels < muiDataSet
             
             output.results = {R2,zR,Rslope};
             output.modeltime = wv.RowNames;
-            output.metatxt = sprintf('Beach slope=1:%0.1f; mean zi=%g',bs,zi);  
+            mtxt1 = sprintf('Beach slope=1:%0.1f; mean zi=%g',bs,zi); 
+            mtxt2 = sprintf('Using %s case for wave input',wv.Description);
+            output.metatxt = sprintf('%s\n%s',mtxt1,mtxt2);  
         end
 %%
         function output = overtopModel(~,mobj,site)
@@ -361,7 +369,9 @@ classdef CT_WaveModels < muiDataSet
 
             output.results = {Q};
             output.modeltime = wv.RowNames;
-            output.metatxt = sprintf('Neashore slope=1:%0.1f; theta=%g',bs,theta); 
+            mtxt1 = sprintf('Neashore slope=1:%0.1f; theta=%g',bs,theta); 
+            mtxt2 = sprintf('Using %s case for wave input',wv.Description);
+            output.metatxt = sprintf('%s\n%s',mtxt1,mtxt2);  
         end
 %%
         function output = iribarrenModel(~,mobj,site)
@@ -399,7 +409,9 @@ classdef CT_WaveModels < muiDataSet
             
             output.results = {Iri,Ityp};
             output.modeltime = wv.RowNames;
-            output.metatxt = sprintf('Beach slope=1:%.1f; Zi=%g',bs,zi); 
+            mtxt1 = sprintf('Beach slope=1:%.1f; Zi=%g',bs,zi); 
+            mtxt2 = sprintf('Using %s case for wave input',wv.Description);
+            output.metatxt = sprintf('%s\n%s',mtxt1,mtxt2);  
         end
 %%
        function output = beachTypeModel(~,mobj,site)
@@ -433,7 +445,9 @@ classdef CT_WaveModels < muiDataSet
             %else  'reflective';
             output.results = {dfv};
             output.modeltime = wv.RowNames;
-            output.metatxt = {sprintf('d50=%g',d50)}; 
+            mtxt1 = {sprintf('d50=%g',d50)}; 
+            mtxt2 = sprintf('Using %s case for wave input',wv.Description);
+            output.metatxt = sprintf('%s\n%s',mtxt1,mtxt2);  
         end
 %%
         function Rslope = getRunupSlope(~,mobj,Hs0,Tp,site)
