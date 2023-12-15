@@ -75,23 +75,26 @@ function concatenate_ts(muicat)
     if range1{2}>range2{1}
         %there is an overlap
         promptxt = {'Adjust end of TS1', 'Adjust start of TS2'};
-        defaults = {datestr(range1{2}),datestr(range2{1})};
+        defaults = {char(range1{2}),char(range2{1})};
         values = inputdlg(promptxt,'Option to adjust',1,defaults);
         if ~isempty(values)
             range1{2} = datetime(values{1});
             range2{1} = datetime(values{2});
         end
         %adjust dst1 to account far any change in end date
-        startime = range1{1}-minutes(1);  %offset ensures selected 
-        endtime = range1{2}+minutes(1);   %range is extracted
+        startime = range1{1};
+        endtime = range1{2};
         if ~checkdates(startime,endtime,dst.RowRange), return; end
+        startime = startime-minutes(1); %offset ensures selected 
+        endtime = endtime+minutes(1);   %range is extracted. must be after check
+
         
         timeidx = isbetween(dst1.RowNames,startime,endtime);
         dst1 = getDSTable(dst1,timeidx);        
         %trim dst2 to date after dst1 endtime
         timeidx = isbetween(dst2.RowNames,endtime,range2{2}+minutes(1));
         dst2 = getDSTable(dst2,timeidx);        
-        switchtime = datestr(range1{2}); 
+        switchtime = char(range1{2}); 
     end
     
     if width(dst1)>1
@@ -284,10 +287,12 @@ function trim_ts(muicat)
     
     %get start and end time to use and extract dataset
     values = editrange_ui(dst.RowRange);
-    startime = datetime(values{1})-minutes(1);  %offset ensures selected 
-    endtime = datetime(values{2})+minutes(1);   %range is extracted
+    startime = datetime(values{1});
+    endtime = datetime(values{2});
     if ~checkdates(startime,endtime,dst.RowRange), return; end
-  
+    startime = startime-minutes(1); %offset ensures selected 
+    endtime = endtime+minutes(1);   %range is extracted. must be after check
+
     timeidx = isbetween(dst.RowNames,startime,endtime);    
     newdst = getDSTable(dst,timeidx);
     
@@ -426,7 +431,7 @@ function edit_delete_profile(muicat)
             end
             plot(hax,y,z,'Tag','EditLine');
             legend(sprintf('Profile: %s, Date: %s',dst.Description,...
-                                        datestr(ptime(idx),'dd-mmm-yyyy')));
+                                        string(ptime(idx),'dd-mmm-yyyy')));
 
             action = questdlg('Edit or Delete this profile?',dst.Description,...
                                     'Edit/Delete','Next','Cancel','Next');
