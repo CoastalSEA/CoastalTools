@@ -15,8 +15,8 @@ classdef CoastalTools < muiModelUI
 % 
     properties  (Access = protected)
         %implement properties defined as Abstract in muiModelUI
-        vNumber = '3.3'
-        vDate   = 'May 2023'
+        vNumber = '3.4'
+        vDate   = 'Jan 2024'
         modelName = 'CoastalTools'                        
         %Properties defined in muiModelUI that need to be assigned in setGui
         % ModelInputs  %classes required by model: used in isValidModel check 
@@ -190,7 +190,8 @@ classdef CoastalTools < muiModelUI
             menu.Analysis(1).Callback = repmat({@obj.analysisMenuOptions},[1,2]);
             
             %% Help menu --------------------------------------------------
-            menu.Help(1).Callback = {@obj.Help}; %make model specific?
+            menu.Help.List = {'Documentation','Manual'};
+            menu.Help.Callback = repmat({@obj.Help},[1,2]);
             
         end
         
@@ -491,7 +492,13 @@ classdef CoastalTools < muiModelUI
 
         %% Help menu ------------------------------------------------------
         function Help(~,~,~)
-            doc coastaltools   %must be name of html help file
+            
+            switch src.Text
+                case 'Documentation'
+                    doc coastaltools   %must be name of html help file  
+                case 'Manual'
+                    ct_open_manual;
+            end
         end 
 
         %% Check that toolboxes are installed------------------------------
