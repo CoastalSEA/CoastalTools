@@ -58,7 +58,7 @@ classdef CT_WaveModels < muiDataSet
             muicat = mobj.Cases;
             %assign the run parameters to the model instance
             %may need to be after input data selection to capture caserecs
-            setRunParam(obj,mobj); 
+            setRunParam(obj,mobj); %can be updated in model calls (eg drift)
 %--------------------------------------------------------------------------
 % Model code
 %--------------------------------------------------------------------------
@@ -79,10 +79,11 @@ classdef CT_WaveModels < muiDataSet
                 case 7              %Beach type based on fall velocity
                     output = beachTypeModel(obj,mobj,site);
             end
-            if isempty(output) || isempty(output.results{1})
+            if isempty(output) || ~isfield(output,'results') || isempty(output.results{1})
                 return; %user cancelled or no results returned
             end 
-            setRunParam(obj,mobj,output.wvrec); 
+            %setRunParam(obj,mobj,output.wvrec); 
+            setRunParam_InputDataSet(obj,mobj,output.wvrec)
 %--------------------------------------------------------------------------
 % Assign model output to a dstable using the defined dsproperties meta-data
 %--------------------------------------------------------------------------                   
@@ -105,7 +106,7 @@ classdef CT_WaveModels < muiDataSet
     end
 %%
     methods
-        function output = driftModel(~,mobj,site)
+        function output = driftModel(obj,mobj,site)
             % compute the littoral drift based on wave heights at the edge
             % of the surf zone
             % INPUTS
@@ -137,9 +138,8 @@ classdef CT_WaveModels < muiDataSet
             rhw = mobj.Constants.WaterDensity;
             rhs = mobj.Constants.SedimentDensity;
             vsc = mobj.Constants.KinematicViscosity;
-            theta = site.ShorelineAngle;
-            d50 = site.GrainSize;
-            Kc = site.DriftCoefficient;
+            [theta,d50,Kc] = getDriftSettings(obj,site);
+
             Qall = littoraldrift(wv.Hsi,wv.Tp,wv.Diri,wv.depi,...
                                         theta,bs,d50,Kc,g,rhs,rhw,vsc);            
             %user selects which model to use
@@ -479,6 +479,26 @@ classdef CT_WaveModels < muiDataSet
     end 
 %%    
     methods (Access = private) 
+        function [theta,d50,Kc] = getDriftSettings(obj,site)
+            %check that the current sit parameters settings are correct
+            %modifications used to update RunParams stored with Case
+            theta = site.ShorelineAngle;
+            d50 = site.GrainSize;
+            Kc = site.DriftCoefficient;
+            promptxt = {'Shoreline angle (degTN)','Sediment grain size (m)',...
+                        'CERC Drift coefficient, Kc'};
+            defaults = {num2str(theta),num2str(d50),num2str(Kc)};
+            data = inputdlg(promptxt,'Drift settings',1,defaults);
+            if isempty(data), return; end  %no change to default settings
+            theta = str2double(data{1});
+            d50 = str2double(data{2});
+            Kc = str2double(data{3}); 
+            %update RunParam settings
+            obj.RunParam.ctWaveParameters.ShorelineAngle = theta;
+            obj.RunParam.ctWaveParameters.GrainSize = d50;
+            obj.RunParam.ctWaveParameters.DriftCoefficient = Kc;
+        end
+%%
         function dsp = modelDSproperties(~,id_model) 
             %define a dsproperties struct and add the model metadata
             dsp = struct('Variables',[],'Row',[],'Dimensions',[]); 
