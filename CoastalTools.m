@@ -424,8 +424,8 @@ classdef CoastalTools < muiModelUI
                     ctWindWaveModel.runModel(obj);    
                 case 'Spectral Transfer'
                     msgtxt =  'WaveRayModel not found. Required for this option.';
-                    ok = initialise_mui_app('WaveRayModel',msgtxt,'wrm_functions');
-                    if ok<1, return; end
+                    isok = initialise_mui_app('WaveRayModel',msgtxt,'wrm_functions');
+                    if ~isok, return; end
                     WRM_WaveModel.runModel(obj);  
                 otherwise
                     CT_WaveModels.runModel(obj,src);   
