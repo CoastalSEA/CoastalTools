@@ -491,8 +491,8 @@ classdef CoastalTools < muiModelUI
         end
 
         %% Help menu ------------------------------------------------------
-        function Help(~,~,~)
-            
+        function Help(~,src,~)
+            %menu to access online documentation and manual pdf file
             switch src.Text
                 case 'Documentation'
                     doc coastaltools   %must be name of html help file  
