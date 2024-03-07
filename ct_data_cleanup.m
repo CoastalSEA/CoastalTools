@@ -78,13 +78,13 @@ function concatenate_ts(muicat)
         defaults = {char(range1{2}),char(range2{1})};
         values = inputdlg(promptxt,'Option to adjust',1,defaults);
         if ~isempty(values)
-            range1{2} = datetime(values{1});
-            range2{1} = datetime(values{2});
+            range1{2} = datetime(values{1},'InputFormat',range1{2}.Format);
+            range2{1} = datetime(values{2},'InputFormat',range2{1}.Format);
         end
         %adjust dst1 to account far any change in end date
         startime = range1{1};
         endtime = range1{2};
-        if ~checkdates(startime,endtime,dst.RowRange), return; end
+        if ~checkdates(startime,endtime,dst1.RowRange), return; end
         startime = startime-minutes(1); %offset ensures selected 
         endtime = endtime+minutes(1);   %range is extracted. must be after check
 
