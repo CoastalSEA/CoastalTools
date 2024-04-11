@@ -15,8 +15,8 @@ classdef CoastalTools < muiModelUI
 % 
     properties  (Access = protected)
         %implement properties defined as Abstract in muiModelUI
-        vNumber = '3.4'
-        vDate   = 'Jan 2024'
+        vNumber = '3.41'
+        vDate   = 'May 2024'
         modelName = 'CoastalTools'                        
         %Properties defined in muiModelUI that need to be assigned in setGui
         % ModelInputs  %classes required by model: used in isValidModel check 
@@ -115,7 +115,7 @@ classdef CoastalTools < muiModelUI
             % submenu for Import Data
             menu.Setup(2).List = {'Waves','Water levels','Winds',...
                                   'Beach profiles','Shorelines', ...
-                                  'BlueKenue data','User dataset'}; 
+                                  'Model data','User dataset'}; 
             nitems = length(menu.Setup(2).List);
             menu.Setup(2).Callback = repmat({'gcbo;'},[1,nitems]);
             menu.Setup(2).Separator = {'off','off','off','off','off','on','off'};
@@ -324,8 +324,8 @@ classdef CoastalTools < muiModelUI
                     mode = 'none';
                 case 'Shorelines'
                     classname = 'ctShorelineData';  
-                case 'BlueKenue data'
-                    classname = 'ctBlueKenueData';  
+                case 'Model data'
+                    classname = 'ctModelData';  
                 case 'User dataset'
                     classname = 'muiUserData';
             end
@@ -495,20 +495,11 @@ classdef CoastalTools < muiModelUI
             %menu to access online documentation and manual pdf file
             switch src.Text
                 case 'Documentation'
-                    if ~isdeployed
-                        doc coastaltools   %must be name of html help file
-                    end
+                    doc coastaltools   %must be name of html help file  
                 case 'Manual'
-                    if isdeployed
-                        %executable using the Matlab Runtime
-                        [~, result] = system('path');
-                        currentDir = char(regexpi(result, 'Path=(.*?);', 'tokens', 'once'));
-                        winopen([currentDir,filesep,'CoastalTools manual.pdf'])
-                    else
-                        ct_open_manual;
-                    end
+                    ct_open_manual;
             end
-        end
+        end 
 
         %% Check that toolboxes are installed------------------------------
         function isok = check4muitoolbox(~)

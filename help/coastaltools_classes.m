@@ -27,7 +27,8 @@
 % In the folder ../muiAppCoastalClasses.
 %%
 % * *ctBeachProfileData* – handle beach profiles as Chainage + Elevation and/or Easting, Northings + Elevation.
-% * *ctBlueKenueData* – Blue Kenue file formats for data a point
+% * *ctModelData* – load numerical model output (e.g. Blue Kenue file
+% formats)
 % * *ctHindcastParameters* – input parameters for the wind-wave model
 % * *ctShorelineData* – shoreline position data (e.g. distance to mean tide level)
 % * *ctStructureInput* – definition of a beach or structure used to estimate overtopping quantities
