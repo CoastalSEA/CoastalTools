@@ -254,7 +254,9 @@ classdef CoastalTools < muiModelUI
                     end
                 case {'Descriptive','Extremes'}
                     cobj = getClassObj(obj,'mUI','Stats',msg);
-                    if isempty(cobj), return; end
+                    if isempty(cobj)
+                        delete(src.Children);   return; 
+                    end
                     tabStats(cobj,src);    
                 case {'Volumes','Shoreline','BVI'}
                     cobj = getClassObj(obj,'Cases','CT_BeachAnalysis',msg);
