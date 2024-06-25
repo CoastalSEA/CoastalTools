@@ -51,6 +51,7 @@
 % * _addslrtotides_ – add a linear, or exponentially varying, rate of sea level rise to a tidal record.
 % * _beachtransportratio_ - compute the ratio of onshore to alongshore wave
 % action given by tan(alp).
+% * _binned_wave_climate_ – compute equal energy flux bins for the wave height-direction scatter.
 % * _celerity_ - calculate the wave celerity using Hunt's equation.
 % * _coeff_AB_ - function called by overtopping functions otop_Q and
 % otop_C.
