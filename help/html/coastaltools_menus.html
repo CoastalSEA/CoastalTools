@@ -1,0 +1,245 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>Menu Options</title><meta name="generator" content="MATLAB 9.13"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2023-03-17"><meta name="DC.source" content="coastaltools_menus.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img, h1 img, h2 img { margin-bottom:0px; }
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, code { font-size:12px; }
+tt { font-size: 1.2em; }
+pre { margin:0px 0px 20px; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+pre.error { color:red; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+span.typesection { color:#A0522D }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><h1>Menu Options</h1><!--introduction--><p>Summary of the options available for each drop down menu.</p><!--/introduction--><h2>Contents</h2><div><ul><li><a href="#1">File</a></li><li><a href="#2">Tools</a></li><li><a href="#3">Project</a></li><li><a href="#5">Setup &gt; Import Data</a></li><li><a href="#7">Setup &gt; Site Parameters</a></li><li><a href="#8">Setup &gt; Model Parameters</a></li><li><a href="#9">Setup &gt; Data Clean-up</a></li><li><a href="#10">Run &gt; Wave properties</a></li><li><a href="#12">Run &gt; Beach properties</a></li><li><a href="#16">Run &gt; Tidal analysis</a></li><li><a href="#18">Run (other options)</a></li><li><a href="#20">Analysis</a></li><li><a href="#21">Help</a></li><li><a href="#22">See Also</a></li></ul></div><h2 id="1">File</h2><div><ul><li><b>New</b>: clears any existing model (prompting to save if not already saved) and a popup dialog box prompts for Project name and Date (default is current date).</li><li><b>Open</b>: existing Asmita models are saved as *.mat files. User selects a model from dialog box.</li><li><b>Save</b>: save a file that has already been saved.</li><li><b>Save as</b>: save a file with a new or different name.</li><li><b>Exit</b>: exit the program. The close window button has the same effect.</li></ul></div><h2 id="2">Tools</h2><div><ul><li><b>Refresh</b>: updates Scenarios tab.</li><li><b>Clear all &gt; Project</b>: deletes the current project, including all Setup data and all Cases.</li><li><b>Clear all &gt; Figures</b>: deletes all results plot figures (useful if a large number of plots have been produced).</li><li><b>Clear all &gt; Data</b>: deletes all cases listed on the <i>Data</i> tab but does not affect Site setup.</li><li><b>Clear all &gt; Models</b>: deletes all cases listed on the <i>Models</i> tab but does not affect Site setup.</li></ul></div><h2 id="3">Project</h2><div><ul><li><b>Project Info</b>: edit the Project name and Date</li><li><b>Cases &gt; Edit Description</b>: user selects a Case to edit Case description.</li><li><b>Cases &gt; Edit Data Set</b>: initialises the Edit Data UI for editing data sets.</li><li><b>Cases &gt; Save</b>: user selects a data set to be saved from a list box of scenarios and the is then prompted to name the file. The data are written to an Excel spreadsheet.</li><li><b>Cases &gt; Delete</b>: user selects the Case(s) to be deleted from a list box of Cases and these are then deleted (model setup is not changed).</li><li><b>Cases &gt; Reload</b>: user selects a Case to reload as the current parameter settings.</li><li><b>Cases &gt; View settings</b>: user selects a Case to display a table listing the parameters used for the selected Case.</li><li><b>Export/Import &gt; Export</b>: user selects a Case class instance to export as a mat file.</li><li><b>Export/Import &gt; Import</b>: user selects an exported Case class instance (mat file) to be loaded.</li></ul></div><p><b>NB</b>: to export the data from a Case for use in another application (eg text file, Excel, etc), use the <b>Project&gt;Cases&gt;Edit Data Set</b> option to make a selection and then use the &#8216;Copy to Clipboard&#8217; button to paste the selection to the clipboard.</p><h2 id="5">Setup &gt; Import Data</h2><p>Load data for Waves, Water Levels, Winds, Beach profiles, Shorelines, BlueKenue and User defined data sets. To create a new instance (e.g. for a different location or data source) use Load. To add data to an existing data set, use Add.</p><div><ul><li><b>Load data</b>: prompts user for file format to be loaded. The options available vary with Data type. The user then selects one or more files to be loaded. Once files have been read, user is prompted for a description (working title) for the data set.</li><li><b>Add data</b>: prompts user for file to be loaded (only one file at a time can be added). Only files with the format used to create the data set can be used to Add data to a data record.</li><li><b>Quality control</b>: runs a series of checks on the data. This is only available for waves and water levels in this version. See <a href="matlab:ct_open_manual">manual</a> for details of the checks applied. Once run, the last column of the Data tab is updated to show that qc has been applied.</li></ul></div><h2 id="7">Setup &gt; Site Parameters</h2><div><ul><li><b>Site parameters&gt;Wave propagation</b>: input dialogue allows user to define characteristic properties of the site. The current values can be viewed on the <i>Site/Waves</i> tab.</li><li><b>Site parameters&gt;Wind-wave hindcast</b>: input dialogue to define model parameters for the wind-wave hindcast model. The current values can be viewed on the <i>Site/Waves</i> tab.</li><li><b>Structure parameters</b>: input dialogue to define the parameters used when calculating wave overtopping. The current values can be viewed on the <i>Site/Waves</i> tab.</li></ul></div><h2 id="8">Setup &gt; Model Parameters</h2><div><ul><li><b>YGOR simulation parameters</b>: used to define the fit coefficients to be used in YGOR simulations. The current values can be viewed on the <i>Site/Simulation</i> tab.</li><li><b>BMV simulation parameters</b>: used to define the parameters needed to run the BMV simulation. The current values can be viewed on the <i>Site/Simulation</i> tab.</li><li><b>Model constants</b>: Various constants are defined for use in models, such as the acceleration due to gravity, viscosity and density of sea water, and density of sediment.</li></ul></div><h2 id="9">Setup &gt; Data Clean-up</h2><div><ul><li><b>Concatenate two timeseries</b>: allows two timeseries data sets to be joined. Two records, or two variables, of a similar type can be joined to form a single timeseries or timeseries collection.</li><li><b>Resample timeseries</b>: allows a selected timeseries to be resampled at user specified interval, using a user specified method (e.g. mean/max/min over the interval).</li><li><b>Patch timeseries</b>: allows gaps in a selected timeseries to be patched using the data from another timeseries that overlaps the primary timeseries (at least for some or all of the gaps).</li><li><b>Delete multiple profiles</b>: allows all profile data sets with less than &#8216;N&#8217; surveys available to be deleted.</li><li><b>Edit or Delete profile in timeseries</b>: options to scroll through all profiles in the data set of select individual profiles and then to either edit or delete individual profiles. For editing profiles this is easier to use than the <i>Project&gt;Scenarios&gt;Edit Data Set</i> option.</li><li><b>Trim timeseries</b>: clip the ends of a time series between specified dates.</li></ul></div><h2 id="10">Run &gt; Wave properties</h2><p>Models that use the time series data to compute various wave related properties. All of these models require the Site parameters to have been defined.</p><div><ul><li><b>Deepwater Waves</b>: use an input wave data set (and water levels if avaialble to compute the deepwater waves using linear wave theory for shoaling and plane bed refraction.</li><li><b>Nearshore Waves</b>: use an input wave data set (and water levels if avaialble to compute the nearshore waves using linear wave theory for shoaling and plane bed refraction. This can be to a specified still water depth, or the edge of the surf zone.</li><li><b>Wind-waves</b>: uses an input wind data set and defined fetch lengths. The effective fetch ic calculated using the method of Donelan (1985), or the method given in the Shore Protection Manual (1992). Wave height and period are computed using the effective fetch lengths and the TMA spectrum (Hughes, 1984; Bouws et al., 1985; 1987).</li><li><b>Spectral Transfer</b>: uses a Spectral Transfer table from the WaveRayModel to transfer an offshore timeseries to an inshore point. Requires a SpectralTransfer table to have been imported from the WaveRayModel App.</li><li><b>Wave Energy</b>: uses selected wave data set (input or modelled) to compute the wave energy flux using linear wave theory.</li><li><b>Runup</b>: uses selected wave data set (input or modelled) to compute wave run-up using the formulation of Stockdon et al (2006).</li><li><b>Littoral Drift</b>: uses selected wave data set (input or modelled) to compute the littoral drift using one of 4 options: US Army Corps CERC formula ((1992); SANDS formula; Kamphuis formula (1991) and the Damgaard and Soulsby formula (1997).</li><li><b>X-shore Transport</b>: uses selected wave data set (input or modelled) to compute cross-shore transport using the method proposed by Bailard and Inman (1981).</li><li><b>Overtopping</b>: uses selected wave data set (input or modelled) and water levels to compute the volume of water overtopping a sea wall, or beach crest, using the overtopping formula proposed by Owen (1980).</li><li><b>Iribarren Number</b>:  uses selected wave data set (input or modelled) to compute the Iribarren number and breaker type.</li></ul></div><h2 id="12">Run &gt; Beach properties</h2><p>Models that use the beach profile data to compute beach volume and shoreline change</p><div><ul><li><b>Profiles</b>: analysis options for indivivual profiles</li><li><i>Profiles &gt; Volumes</i>: compute the volume per metre run of beach, within a user defined control box (minimum lower level and shoreward position). Also saves the non-dimesional volume and centroid position.</li><li><i>Profiles &gt; Shoreline position</i>: compute the change in shoreline position at a user specified elevation. Also saves the beach slope at the defined position.</li><li><i>Profiles &gt; Location plot</i>: plot the location of the profiles available for analysis.</li><li><i>Profiles &gt; Centroid plot</i>: plot the time varying movement of the profile centroid.</li><li><i>Profiles &gt; Space-time plot</i>: plot the time varying change in a beach property such as volume, beach slope or shoreline position as a surface with axes of time and alongshore position. Requires the parameter to have been computed for all profiles to be included in the plot.</li></ul></div><div><ul><li><b>Shore change</b>: analysis options for a set of profiles that make a shoreline</li><li><i>Shore change &gt; Shoreline</i>: compute the change in shoreline position at a user specified elevation for a set of profiles.</li><li><i>Shore change &gt; Change plot</i>: plot of shoreline change as E,N line plot, or the distance, slope or orentation as a function of alongshore position</li><li><i>Shore change &gt; Rates plot</i>: plot rates of change in shoreline position and beach slope.</li></ul></div><div><ul><li><b>Beach type</b>: compute the Beach Type from the dimensionless fall velocity (&#937;) for the grain size defined in Site Parameters and the selected wave time series</li><li><b>Shore profile</b>: plots the profile based on the parameters defined for the BMV analysis</li><li><b>Dean profile</b>: an idealised beach profile based on a linear slope (upper beach slope) between the beach crest level and mean tide level (SWL=0mOD) and an equilibrium profile (Dean, 1977) out to deep water.</li></ul></div><h2 id="16">Run &gt; Tidal analysis</h2><p>Models to derive tidal constituents and generate a simulated tidal record</p><div><ul><li><b>Analysis</b>: a list box prompts the user to select a water level data set and the tidal consitutents are computed and saved along with the tidal record for the period of the input data set.</li><li><b>Reconstruction</b>: a list box prompts the user to select an existing tidal analysis data set and then to define the data range and time interval to be used for the predictions. The saved constituents are used to predict the tides for the defined date range and</li></ul></div><h2 id="18">Run (other options)</h2><p>Other modelling tools to derive new data sets, simulate shoreline change and estimate beach vulnerability</p><div><ul><li><b>Derive Output</b>: initialises the Derive Output UI to select and define manipulations of the data or call external functions and load the result as new data set.</li><li><b>Simulation</b>: opens the UI for two simulations tools. One fits the incident wave energy to shorline changes following the approach of Miller &amp; Dean, 2004 and Yates, et al, 2009. The other seeks to track the centroid of an idealised beach profile against the actual movement of the beach centroid.</li><li><b>Vulnerability</b>: tools to assess beach vulnerability index for a shoreline</li><li><i>Vulnerability &gt; BVI site</i>: uses ouput from the models for runup, littoral drift, cross-shore transport and shoreline position change rates to estimate the average BVI for a site. All input models need to have been run before using this option</li><li><i>Vulnerability &gt; BVI profile set</i>: the user selects a number of profiles to define a shoreline and the models needed to determine the variation at each profile are run (runup, littoral drift, x-shore drift and shoreline change at defined elevation). The shoreline change outputs can be viewed using the <i>Change plot</i> and <i>Rates plot</i> options.</li><li><i>Vulnerability &gt; BVI set plot</i>: generates a plot of beach vulenrability index and the contributing indices, as a function of beach profile location along the shore.</li><li><b>User model</b>: option provided for the user to add their own models. The demonstration code retrieves inshore wave data and returns the inshore wave energy and the ratio of alongshore to cross-shore transport.</li></ul></div><h2 id="20">Analysis</h2><div><ul><li><b>Plots</b>: initialises the Plot UI to select variables and produce various types of plot. The user selects the Case, Dataset and Variable to used, along with the Plot type and any Scaling to be applied from a series of drop down lists,</li><li><b>Statistics</b>: initialiss the Statistics UI to select data and run a range of standard statistical methods.</li><li><b>Output Definitions</b>: dialogue to edit the meta-data used to desctibe imported data or model outputs.</li></ul></div><h2 id="21">Help</h2><div><ul><li><b>Help</b>: access the online documentation for CoastalTools.</li></ul></div><h2 id="22">See Also</h2><p>The <a href="matlab:ct_open_manual">manual</a> provides further details of setup and configuration of the model.</p><p class="footer"><br><a href="https://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2022b</a><br></p></div><!--
+##### SOURCE BEGIN #####
+%% Menu Options
+% Summary of the options available for each drop down menu.
+
+%% File
+% * *New*: clears any existing model (prompting to save if not already saved) and a popup dialog box prompts for Project name and Date (default is current date). 
+% * *Open*: existing Asmita models are saved as *.mat files. User selects a model from dialog box.
+% * *Save*: save a file that has already been saved.
+% * *Save as*: save a file with a new or different name.
+% * *Exit*: exit the program. The close window button has the same effect.
+
+%% Tools
+% * *Refresh*: updates Scenarios tab.
+% * *Clear all > Project*: deletes the current project, including all Setup data and all Cases.
+% * *Clear all > Figures*: deletes all results plot figures (useful if a large number of plots have been produced).
+% * *Clear all > Data*: deletes all cases listed on the _Data_ tab but does not affect Site setup.
+% * *Clear all > Models*: deletes all cases listed on the _Models_ tab but does not affect Site setup.
+
+%% Project
+% * *Project Info*: edit the Project name and Date
+% * *Cases > Edit Description*: user selects a Case to edit Case description.
+% * *Cases > Edit Data Set*: initialises the Edit Data UI for editing data sets.
+% * *Cases > Save*: user selects a data set to be saved from a list box of scenarios and the is then prompted to name the file. The data are written to an Excel spreadsheet. 
+% * *Cases > Delete*: user selects the Case(s) to be deleted from a list box of Cases and these are then deleted (model setup is not changed).
+% * *Cases > Reload*: user selects a Case to reload as the current parameter settings.
+% * *Cases > View settings*: user selects a Case to display a table listing the parameters used for the selected Case. 
+% * *Export/Import > Export*: user selects a Case class instance to export as a mat file.
+% * *Export/Import > Import*: user selects an exported Case class instance (mat file) to be loaded.
+%%
+% *NB*: to export the data from a Case for use in another application 
+% (eg text file, Excel, etc), use the *Project>Cases>Edit Data Set* option 
+% to make a selection and then use the ‘Copy to Clipboard’ button to paste 
+% the selection to the clipboard.
+
+%% Setup > Import Data
+% Load data for Waves, Water Levels, Winds, Beach profiles, Shorelines,
+% BlueKenue and User defined data sets. To create a new instance (e.g. for a
+% different location or data source) use Load. To add data to an
+% existing data set, use Add.
+%%
+% * *Load data*: prompts user for file format to be loaded. The options available vary with Data type. The user then selects one or more files to be loaded. Once files have been read, user is prompted for a description (working title) for the data set. 
+% * *Add data*: prompts user for file to be loaded (only one file at a time can be added). Only files with the format used to create the data set can be used to Add data to a data record.
+% * *Quality control*: runs a series of checks on the data. This is only available for waves and water levels in this version. See <matlab:ct_open_manual manual> for details of the checks applied. Once run, the last column of the Data tab is updated to show that qc has been applied.
+
+%% Setup > Site Parameters
+% * *Site parameters>Wave propagation*: input dialogue allows user to define characteristic properties of the site. The current values can be viewed on the _Site/Waves_ tab.
+% * *Site parameters>Wind-wave hindcast*: input dialogue to define model parameters for the wind-wave hindcast model. The current values can be viewed on the _Site/Waves_ tab.
+% * *Structure parameters*: input dialogue to define the parameters used when calculating wave overtopping. The current values can be viewed on the _Site/Waves_ tab.
+
+%% Setup > Model Parameters
+% * *YGOR simulation parameters*: used to define the fit coefficients to be used in YGOR simulations. The current values can be viewed on the _Site/Simulation_ tab.
+% * *BMV simulation parameters*: used to define the parameters needed to run the BMV simulation. The current values can be viewed on the _Site/Simulation_ tab.
+% * *Model constants*: Various constants are defined for use in models, such as the acceleration due to gravity, viscosity and density of sea water, and density of sediment. 
+
+%% Setup > Data Clean-up
+% * *Concatenate two timeseries*: allows two timeseries data sets to be joined. Two records, or two variables, of a similar type can be joined to form a single timeseries or timeseries collection. 
+% * *Resample timeseries*: allows a selected timeseries to be resampled at user specified interval, using a user specified method (e.g. mean/max/min over the interval). 
+% * *Patch timeseries*: allows gaps in a selected timeseries to be patched using the data from another timeseries that overlaps the primary timeseries (at least for some or all of the gaps). 
+% * *Delete multiple profiles*: allows all profile data sets with less than ‘N’ surveys available to be deleted. 
+% * *Edit or Delete profile in timeseries*: options to scroll through all profiles in the data set of select individual profiles and then to either edit or delete individual profiles. For editing profiles this is easier to use than the _Project>Scenarios>Edit Data Set_ option.
+% * *Trim timeseries*: clip the ends of a time series between specified dates.
+
+%% Run > Wave properties
+% Models that use the time series data to compute
+% various wave related properties. All of these models require the Site parameters to have been defined. 
+%%
+% * *Deepwater Waves*: use an input wave data set (and water levels if
+% avaialble to compute the deepwater waves using linear wave theory for shoaling and 
+% plane bed refraction.
+% * *Nearshore Waves*: use an input wave data set (and water levels if
+% avaialble to compute the nearshore waves using linear wave theory for shoaling and 
+% plane bed refraction. This can be to a specified still water depth, or
+% the edge of the surf zone.
+% * *Wind-waves*: uses an input wind data set and defined fetch lengths. The effective fetch ic calculated using the method of Donelan (1985), or the method given in the Shore Protection Manual (1992). Wave height and period are computed using the effective fetch lengths and the TMA spectrum (Hughes, 1984; Bouws et al., 1985; 1987). 
+% * *Spectral Transfer*: uses a Spectral Transfer table from the
+% WaveRayModel to transfer an offshore timeseries to an inshore point.
+% Requires a SpectralTransfer table to have been imported from the WaveRayModel
+% App.
+% * *Wave Energy*: uses selected wave data set (input or modelled) to
+% compute the wave energy flux using linear wave theory.
+% * *Runup*: uses selected wave data set (input or modelled) to
+% compute wave run-up using the formulation of Stockdon et al (2006). 
+% * *Littoral Drift*: uses selected wave data set (input or modelled) to
+% compute the littoral drift using one of 4 options: US Army Corps CERC
+% formula ((1992); SANDS formula; Kamphuis formula (1991) and the Damgaard
+% and Soulsby formula (1997).
+% * *X-shore Transport*: uses selected wave data set (input or modelled) to
+% compute cross-shore transport using the method proposed by Bailard and Inman (1981). 
+% * *Overtopping*: uses selected wave data set (input or modelled) and water
+% levels to compute the volume of water overtopping a sea wall, or beach crest, 
+% using the overtopping formula proposed by Owen (1980). 
+% * *Iribarren Number*:  uses selected wave data set (input or modelled) to
+% compute the Iribarren number and breaker type.
+
+%% Run > Beach properties
+% Models that use the beach profile data to compute beach volume and shoreline change
+%%
+% * *Profiles*: analysis options for indivivual profiles
+% * _Profiles > Volumes_: compute the volume per metre run of beach, within
+% a user defined control box (minimum lower level and shoreward position).
+% Also saves the non-dimesional volume and centroid position.
+% * _Profiles > Shoreline position_: compute the change in shoreline position at
+% a user specified elevation. Also saves the beach slope at the defined
+% position.
+% * _Profiles > Location plot_: plot the location of the profiles
+% available for analysis.
+% * _Profiles > Centroid plot_: plot the time varying movement of the
+% profile centroid.
+% * _Profiles > Space-time plot_: plot the time varying change in a beach
+% property such as volume, beach slope or shoreline position as a surface with 
+% axes of time and alongshore position. Requires the parameter to have been
+% computed for all profiles to be included in the plot.
+%%
+% * *Shore change*: analysis options for a set of profiles that make a
+% shoreline
+% * _Shore change > Shoreline_: compute the change in shoreline position at
+% a user specified elevation for a set of profiles.
+% * _Shore change > Change plot_: plot of shoreline change as E,N line plot, or
+% the distance, slope or orentation as a function of alongshore position
+% * _Shore change > Rates plot_: plot rates of change in shoreline position
+% and beach slope.
+%%
+% * *Beach type*: compute the Beach Type from the dimensionless fall velocity (Ω) for the grain size defined in Site Parameters and the selected wave time series 
+% * *Shore profile*: plots the profile based on the parameters defined for
+% the BMV analysis
+% * *Dean profile*: an idealised beach profile based on a linear slope (upper beach slope) between the beach crest level and mean tide level (SWL=0mOD) and an equilibrium profile (Dean, 1977) out to deep water. 
+
+%% Run > Tidal analysis
+% Models to derive tidal constituents and generate a simulated tidal record
+%% 
+% * *Analysis*: a list box prompts the user to select a water level data
+% set and the tidal consitutents are computed and saved along with the
+% tidal record for the period of the input data set.
+% * *Reconstruction*: a list box prompts the user to select an existing tidal analysis data set and then to define the data range and time interval to be used for the predictions. The saved constituents are used to predict the tides for the defined date range and 
+
+%% Run (other options)
+% Other modelling tools to derive new data sets, simulate shoreline change
+% and estimate beach vulnerability
+%%
+% * *Derive Output*: initialises the Derive Output UI to select and define manipulations of the data or call external functions and load the result as new data set.
+% * *Simulation*: opens the UI for two simulations tools. One fits the
+% incident wave energy to shorline changes following the approach of Miller & Dean,
+% 2004 and Yates, et al, 2009. The other seeks to track the centroid of an
+% idealised beach profile against the actual movement of the beach
+% centroid.
+% * *Vulnerability*: tools to assess beach vulnerability index for a
+% shoreline
+% * _Vulnerability > BVI site_: uses ouput from the models for runup, littoral 
+% drift, cross-shore transport and shoreline position change rates to
+% estimate the average BVI for a site. All input models need to have been
+% run before using this option
+% * _Vulnerability > BVI profile set_: the user selects a number of
+% profiles to define a shoreline and the models needed to determine the
+% variation at each profile are run (runup, littoral drift, x-shore drift and
+% shoreline change at defined elevation). The shoreline change outputs can
+% be viewed using the _Change plot_ and _Rates plot_ options.
+% * _Vulnerability > BVI set plot_: generates a plot of beach vulenrability
+% index and the contributing indices, as a function of beach profile location along the shore.
+% * *User model*: option provided for the user to add their own models. The 
+% demonstration code retrieves inshore wave data and returns the inshore 
+% wave energy and the ratio of alongshore to cross-shore transport.
+
+%% Analysis
+% * *Plots*: initialises the Plot UI to select variables and produce various types of plot. The user selects the Case, Dataset and Variable to used, along with the Plot type and any Scaling to be applied from a series of drop down lists, 
+% * *Statistics*: initialiss the Statistics UI to select data and run a range of standard statistical methods.
+% * *Output Definitions*: dialogue to edit the meta-data used to desctibe imported data or model outputs.
+
+%% Help
+% * *Help*: access the online documentation for CoastalTools.
+
+%% See Also
+% The <matlab:ct_open_manual manual> provides further details of setup and 
+% configuration of the model.
+##### SOURCE END #####
+--></body></html>
