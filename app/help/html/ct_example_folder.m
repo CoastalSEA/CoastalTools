@@ -2,7 +2,7 @@ function ct_example_folder()
 %find the location of the asmita demo folder and open it
 appinfo = matlab.apputil.getInstalledAppInfo;
 idx = find(strcmp({appinfo.name},'CoastalTools'));
-fpath = [appinfo(idx(1)).location,[filesep,'CoastalTools',filesep,'example']];
+fpath = [appinfo(idx(1)).location,[filesep,'CoastalTools',filesep,'app',filesep,'example']];
 try
     winopen(fpath)
 catch
