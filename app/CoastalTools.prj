@@ -1,5 +1,5 @@
 <deployment-project plugin="plugin.apptool" plugin-version="1.0">
-  <configuration build-checksum="2678784893" file="D:\Matlab Code\MUImodels\muiApps\CoastalTools\CoastalTools.prj" location="D:\Matlab Code\MUImodels\muiApps\CoastalTools" name="CoastalTools" target="target.mlapps" target-name="Package App">
+  <configuration build-checksum="2002367497" file="D:\Matlab Code\muiModels\CoastalTools\app\CoastalTools.prj" location="D:\Matlab Code\muiModels\CoastalTools\app" name="CoastalTools" target="target.mlapps" target-name="Package App">
     <param.appname>CoastalTools</param.appname>
     <param.authnamewatermark>Ian Townend</param.authnamewatermark>
     <param.email>i.townend@soton.ac.uk</param.email>
@@ -13,7 +13,7 @@
     <param.summary>CoastalTools provides a range of tools to load, manipulate and analyse wave, water level and beach profile data.</param.summary>
     <param.description>The CoastalTools package was originally developed to access and manipulate coastal data, such as held by the Channel Coastal Observatory (CCO) and the British Oceanographic Data Centre (BODC) and has since been extended to handle other common data formats. CoastalTools provides a User Interface for time series data analysis, with many of the formats that are in routine use in the UK and elsewhere provided for in the data loading tools. Several models that use the measured data as input are also provided. These provide the ability to estimate near shore wave parameters and properties that describe how the beaches are changing over time. The models generally use simple algorithms to transform the data and are not intended to be a substitute for more detailed coastal process modelling. The focus is very much on providing a means to rapidly explore the data that is now available from national archives.</param.description>
     <param.screenshot>${PROJECT_ROOT}\CoastalTools_logo.jpg</param.screenshot>
-    <param.version>3.28</param.version>
+    <param.version>3.30</param.version>
     <param.products.name>
       <item>MATLAB</item>
     </param.products.name>
@@ -47,7 +47,6 @@
       <file>${PROJECT_ROOT}\Sim_BMVmodel.m</file>
       <file>${PROJECT_ROOT}\Sim_YGOR.m</file>
       <file>${PROJECT_ROOT}\Sim_YGORinput.m</file>
-      <file>${PROJECT_ROOT}\simYGORmodel.m</file>
     </fileset.depfun>
     <fileset.resources>
       <file>${PROJECT_ROOT}\CoastalTools_logo.jpg</file>
@@ -55,12 +54,11 @@
       <file>${PROJECT_ROOT}\example</file>
       <file>${PROJECT_ROOT}\help</file>
       <file>${PROJECT_ROOT}\info.xml</file>
-      <file>D:\Matlab Code\MUImodels\muiApps\muiAppCoastalClasses</file>
-      <file>D:\Matlab Code\MUImodels\muiApps\muiAppCoastalFcns</file>
+      <file>D:\Matlab Code\muiModels\muiAppLib</file>
     </fileset.resources>
     <fileset.package />
     <build-deliverables>
-      <file location="D:\Matlab Code\MUImodels\muiApps" name="CoastalTools" optional="false">D:\Matlab Code\MUImodels\muiApps\CoastalTools</file>
+      <file location="D:\Matlab Code\muiModels\CoastalTools" name="app" optional="false">D:\Matlab Code\muiModels\CoastalTools\app</file>
     </build-deliverables>
     <workflow />
     <matlab>
