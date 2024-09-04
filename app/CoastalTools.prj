@@ -1,5 +1,5 @@
 <deployment-project plugin="plugin.apptool" plugin-version="1.0">
-  <configuration build-checksum="2264315026" file="D:\Matlab Code\muiModels\CoastalTools\app\CoastalTools.prj" location="D:\Matlab Code\muiModels\CoastalTools\app" name="CoastalTools" target="target.mlapps" target-name="Package App">
+  <configuration build-checksum="1771286683" file="D:\Matlab Code\muiModels\CoastalTools\app\CoastalTools.prj" location="D:\Matlab Code\muiModels\CoastalTools\app" name="CoastalTools" target="target.mlapps" target-name="Package App">
     <param.appname>CoastalTools</param.appname>
     <param.authnamewatermark>Ian Townend</param.authnamewatermark>
     <param.email>i.townend@soton.ac.uk</param.email>
@@ -47,6 +47,7 @@
       <file>${PROJECT_ROOT}\Sim_BMVmodel.m</file>
       <file>${PROJECT_ROOT}\Sim_YGOR.m</file>
       <file>${PROJECT_ROOT}\Sim_YGORinput.m</file>
+      <file>${PROJECT_ROOT}\simYGORmodel.m</file>
     </fileset.depfun>
     <fileset.resources>
       <file>${PROJECT_ROOT}\CoastalTools_logo.jpg</file>
@@ -54,7 +55,8 @@
       <file>${PROJECT_ROOT}\example</file>
       <file>${PROJECT_ROOT}\help</file>
       <file>${PROJECT_ROOT}\info.xml</file>
-      <file>D:\Matlab Code\muiModels\muiAppLib</file>
+      <file>D:\Matlab Code\muiModels\muiAppLib\muiAppCoastalClasses</file>
+      <file>D:\Matlab Code\muiModels\muiAppLib\muiAppCoastalFcns</file>
     </fileset.resources>
     <fileset.package />
     <build-deliverables>
