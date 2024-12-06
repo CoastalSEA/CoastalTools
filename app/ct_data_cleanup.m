@@ -34,6 +34,10 @@ function ct_data_cleanup(muicat,src)
             patch_ts(muicat);
         case 'Trim timeseries'
             trim_ts(muicat);
+        case 'Delete interval'
+            del_interval(muicat);
+        case 'Merge cases'
+            merge_tables(muicat);
         case 'Delete multiple profiles'
             delete_profile_ts(muicat);
         case 'Edit or Delete profile in timeseries'
@@ -81,14 +85,12 @@ function concatenate_ts(muicat)
             range1{2} = datetime(values{1},'InputFormat',range1{2}.Format);
             range2{1} = datetime(values{2},'InputFormat',range2{1}.Format);
         end
-        %adjust dst1 to account far any change in end date
+        %adjust dst1 to account for any change in end date
         startime = range1{1};
         endtime = range1{2};
         if ~checkdates(startime,endtime,dst1.RowRange), return; end
         startime = startime-minutes(1); %offset ensures selected 
         endtime = endtime+minutes(1);   %range is extracted. must be after check
-
-        
         timeidx = isbetween(dst1.RowNames,startime,endtime);
         dst1 = getDSTable(dst1,timeidx);        
         %trim dst2 to date after dst1 endtime
@@ -138,7 +140,7 @@ function resample_ts(muicat)
     %resample a timeseries to a different time interval. 
     datasetname = 'Dataset';   %uses default dataset name
     %select record to be used    
-    promptxt = 'Select profile timeseries (Cancel to quit)';
+    promptxt = 'Select timeseries to resample (Cancel to quit)';
     [caserec,isok] = selectRecord(muicat,'PromptText',promptxt,...
                                                     'ListSize',[150,250]);
     if isok<1, return; end %user cancelled  
@@ -249,13 +251,31 @@ function patch_ts(muicat)
     
     %add the patch
     missing = isnan(newvar);
-    patch = interp1(t2,ds2,newtime,'linear');
-    newvar(missing)= patch(missing);
+    varpatch = interp1(t2,ds2,newtime,'linear');
+    newvar(missing)= varpatch(missing);
+    newvar = {newvar};
     
+    %adjust other variables in dst1 assuming the same gaps
+    answer = 'Yes';
+    while strcmp(answer,'Yes')
+        answer = questdlg('Patch another variable?','Cleanup','Yes','No','No');
+        if strcmp(answer,'Yes')
+            [varnamei,vidi] = getVariable(dst1);
+            newvari = dst1.(varnamei);
+            varnamej = getVariable(dst2);
+            dsj = dst2.(varnamej);
+            missing = isnan(newvari);
+            varpatch = interp1(t2,dsj,newtime,'linear');
+            newvari(missing)= varpatch(missing);
+            newvar = [newvar,{newvari}];
+            vidx = logical(vidx+vidi);
+        end
+    end
+
     %assign new dataset to a dstable
     dsp = dst1.DSproperties;
     dsp.Variables(~vidx) = [];
-    newdst = dstable(newvar,'RowNames',newtime,'DSproperties',dsp);
+    newdst = dstable(newvar{:},'RowNames',newtime,'DSproperties',dsp);
     newdst.Description = sprintf('%s and %s',dst1.Description,dst2.Description);
     if iscell(dst1.Source)
         srctxt = dst1.Source{1};
@@ -277,7 +297,7 @@ function trim_ts(muicat)
     %allow user to adjust the start and end data of a timeseries
     %select record to be used
     datasetname = 'Dataset';
-    promptxt = 'Select profile timeseries (Cancel to quit)';
+    promptxt = 'Select timeseries to trim (Cancel to quit)';
     [caserec,isok] = selectRecord(muicat,'PromptText',promptxt,...
                                                     'ListSize',[150,250]);
     if isok<1, return; end %user cancelled  
@@ -308,6 +328,83 @@ function trim_ts(muicat)
         setCase(muicat,obj,type);
         getdialog(sprintf('Data resampled for: %s',catrec.CaseDescription));
     end
+end
+%%
+function del_interval(muicat)
+    %select start and end dates and delete record between these dates
+    datasetname = 'Dataset';   %uses default dataset name
+
+    promptxt = 'Select primary timeseries';   
+    [caserec,isok] = selectRecord(muicat,'PromptText',promptxt,...
+                                                        'ListSize',[150,250]);
+    if isok<1, return; end %user cancelled  
+    [cobj,classrec,catrec] = getCase(muicat,caserec); %use getCase because need classrec
+    classname = catrec.CaseClass; 
+    dst = copy(cobj.Data.(datasetname));  %copy to avoid overwriting existing table
+    varname = getVariable(dst);
+    vardata = dst.(varname);
+
+    %get start and end time to use and extract dataset
+    values = editrange_ui(dst.RowRange);
+    startime = datetime(values{1});
+    endtime = datetime(values{2});
+    if ~checkdates(startime,endtime,dst.RowRange), return; end
+    startime = startime-minutes(1); %offset ensures selected 
+    endtime = endtime+minutes(1);   %range is extracted. must be after check
+
+    timeidx = isbetween(dst.RowNames,startime,endtime);    
+    vardata(timeidx) = NaN;
+    dst.(varname) = vardata;
+
+    answer = questdlg('Update or Add new record?','DelInt','Update','Add','Update');
+    if strcmp(answer,'Update')
+        muicat.DataSets.(classname)(classrec).Data.(datasetname) = dst;
+    else
+        %save results as a new Record in Catalogue
+        type = convertStringsToChars(catrec.CaseType);
+        heq = str2func(catrec.CaseClass);
+        obj = heq();  %new instance of class object
+        obj.Data.(datasetname) = dst;    
+        setCase(muicat,obj,type);
+        getdialog(sprintf('Data resampled for: %s',catrec.CaseDescription));
+    end
+end
+%%
+function merge_tables(muicat)
+    %some cleanup functions only work on one variable at a time and the
+    %data are then saved as a new case. This function compiles several
+    %variables backinto a single case (eg concatenating Hs, Tp and Dir).
+    datasetname = 'Dataset';   %uses default dataset name
+    
+    promptxt = 'Select cases to combine'; 
+    [caserecs,isok] = selectCase(muicat,promptxt,'multiple',0,0);
+    if isok<1, return; end %user cancelled  
+    
+    desc = 'Data merged for:';
+    cobj = getCases(muicat,caserecs);
+    for i=1:length(caserecs)
+        dst(i) = cobj(i).Data.(datasetname);
+        ht(i) = height(dst(i));
+        desc = sprintf('%s\n%s',desc,dst.Description);
+    end
+    if all(diff(ht)==0)
+        newdst = dst(1);
+        for j=2:length(caserecs)
+            newdst = [newdst,dst(j)];
+        end
+    else
+        warndlg('Selected cases are not the same length')
+    end
+
+    %save results as a new Record in Catalogue
+    [~,~,catrec] = getCase(muicat,caserecs(1));
+    type = convertStringsToChars(catrec.CaseType);
+    heq = str2func(catrec.CaseClass);
+    obj = heq();  %new instance of class object
+    newdst = activatedynamicprops(newdst); 
+    obj.Data.(datasetname) = newdst;    
+    setCase(muicat,obj,type);
+    getdialog(desc);
 end
 %%
 function delete_profile_ts(muicat)
