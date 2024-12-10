@@ -59,6 +59,8 @@
 % * *Trim timeseries*: allows the start and end dates of a timeseries to be modified.
 % * *Delete interval*: set an interval within a selected variable to NaN. This maintains the length of the record for plotting, etc but removes the data. Can be useful when cleaning up tidal data and similar time series where this option can be used in conjunction with the Patch option to create a "clean" timeseries.
 % * *Merge cases*: some cleanup functions only work on one variable at a time and the data are then saved as a new case. This function compiles several variables back into a single case (e.g., when concatenating Hs, Tp and Dir for use in models).
+% * *Scale variables*: scale selected variables in a dataset based on user defined factors for each variable.
+% * *Scale range*: scale the water levels based on factors for above and below zero.
 % * *Delete multiple profiles*: allows all profile data sets with less than ‘N’ surveys available to be deleted. 
 % * *Edit or Delete profile in timeseries*: options to scroll through all profiles in the data set of select individual profiles and then to either edit or delete individual profiles. For editing profiles this is easier to use than the _Project>Scenarios>Edit Data Set_ option.
 

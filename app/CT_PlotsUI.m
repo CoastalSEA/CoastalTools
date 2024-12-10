@@ -117,15 +117,16 @@ classdef CT_PlotsUI < muiDataUI
                 switch sel_uic{i}.Tag
                     case 'Case'                        
                         sel_uic{i}.String = subCaseList(obj,src,muicat);
-%                         sel_uic{i}.String = muicat.CaseDescription;
                         sel_uic{i}.UserData = sel_uic{i}.Value; %used to track changes
                     case 'Dataset'
-                        sel_uic{i}.String = dsnames;
+                        sel_uic{i}.String = dsnames;                        
+                        if sel_uic{i}.Value>length(dsnames)
+                            sel_uic{i}.Value = 1; %reset if case changed to
+                            ids = 1;              %case with fewer datasets
+                        end
                         sel_uic{i}.UserData = sel_uic{i}.Value; %used to track changes
                     case 'Variable' 
                         sel_uic{i}.String =  subVarList(obj,src,cobj,ids);
-%                         ds = fieldnames(cobj.Data);
-%                         sel_uic{i}.String = cobj.Data.(ds{1}).VariableDescriptions;
                         sel_uic{i}.Value = 1;
                     case 'Type'
                         sel_uic{i}.String = S.Type;
@@ -184,38 +185,12 @@ classdef CT_PlotsUI < muiDataUI
                     vdesc = varlist;
              end
         end
-%%
-%         function resetSubRecs(obj,src,mobj)
-%             %adjust UIselections to use the full record/variable id
-%             %Correct selections on Timeseries, Profiles and Rose tabs
-%             muicat = mobj.Cases.Catalogue;            
-%             switch src.Tag
-%                 case {'Timeseries','Rose'}
-%                    obj.UIselection.caserec = getCaseRec(1);
-%                 case 'Profiles'
-%                     for idx=1:length(obj.UIselection)
-%                         caserec = getCaseRec(idx);
-%                         obj.UIselection(idx).caserec = caserec;
-%                         %correct variable id
-%                         cobj = getCase(mobj.Cases,caserec);
-%                         listnum = obj.UIselection(idx).variable;
-%                         varnum = subVarRec(obj,src,cobj,listnum,ids);                        
-%                         obj.UIselection(idx).variable = varnum;
-%                     end
-%             end
-%             %
-%             function caserec = getCaseRec(idx)
-%                 listrec = obj.UIselection(idx).caserec;
-%                 caserec = subCaseRec(obj,src,muicat,listrec);
-%             end
-%         end
 %%        
         function useSelection(obj,src,mobj)  
             %make use of the selection made to create a plot of selected type
             %Abstract function required by muiDataUI
             if strcmp(src.String,'Save')   %save animation to file
                 saveAnimation(obj,src,mobj);
-%             elseif ismember(obj.UIset.callTab,{'Timeseries','Profiles'})
             else
                 %some tabs use sub-selections of Cases and/or Variables
                 %however muiDataUI already checks for subselection and adjusts

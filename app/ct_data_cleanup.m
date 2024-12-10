@@ -38,6 +38,10 @@ function ct_data_cleanup(muicat,src)
             del_interval(muicat);
         case 'Merge cases'
             merge_tables(muicat);
+        case 'Scale variables'
+            scale_vars(muicat)
+        case 'Scale range'
+            scale_wl_range(muicat)
         case 'Delete multiple profiles'
             delete_profile_ts(muicat);
         case 'Edit or Delete profile in timeseries'
@@ -405,6 +409,53 @@ function merge_tables(muicat)
     obj.Data.(datasetname) = newdst;    
     setCase(muicat,obj,type);
     getdialog(desc);
+end
+%%
+function scale_vars(muicat)
+    %set up call to scale_data to allow one or more variables in a
+    %dataset to be modified by factor
+    promptxt = 'Select cases to use to scale variables'; 
+    [cobj,~,datasets,idd] = selectCaseDataset(muicat,[],[],promptxt);
+    if isempty(cobj), return; end
+    dst =  cobj.Data.(datasets{idd});
+    newdst = scale_data(dst);
+
+    %save results as a new Record in Catalogue
+    caserec = caseRec(muicat,cobj.CaseIndex);
+    type = convertStringsToChars(muicat.Catalogue.CaseType{caserec});
+    heq = str2func(muicat.Catalogue.CaseClass{caserec});
+    obj = heq();  %new instance of class object
+    obj.Data.(datasets{idd}) = newdst;    
+    setCase(muicat,obj,type);
+    getdialog(sprintf('Data from %s rescaled',dst.Description));
+end
+%%
+function scale_wl_range(muicat)
+    %set up call to scale_waterlevels to allow range of a water level
+    %variable to be adjusted
+    promptxt = 'Select cases to use to scale water level range'; 
+    validclasses = {'ctWaterLevelData','ctTidalAnalysis','muiUserModel'};
+    [cobj,~,datasets,idd] = selectCaseDataset(muicat,[],validclasses,promptxt);
+    if isempty(cobj), return; end
+    dst =  cobj.Data.(datasets{idd});
+    varnames = dst.VariableNames;
+    vardesc = dst.VariableDescriptions;
+    selection = listdlg("ListString",vardesc,"PromptString",...
+                'Select water level variable to scale range:','SelectionMode','single',...
+                'ListSize',[150,200],'Name','Scale WLs');
+    if isempty(selection),return; end
+    wl = dst.(varnames{selection});
+    rows = dst.RowNames;
+    newdst = scale_waterlevels(wl,rows,true,true); %save data and plot
+
+    %save results as a new Record in Catalogue
+    caserec = caseRec(muicat,cobj.CaseIndex);
+    type = convertStringsToChars(muicat.Catalogue.CaseType{caserec});
+    heq = str2func(muicat.Catalogue.CaseClass{caserec});
+    obj = heq();  %new instance of class object
+    obj.Data.(datasets{idd}) = newdst;    
+    setCase(muicat,obj,type);
+    getdialog(sprintf('Data from %s rescaled',dst.Description));
 end
 %%
 function delete_profile_ts(muicat)
