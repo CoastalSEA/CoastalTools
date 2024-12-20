@@ -38,6 +38,8 @@ function ct_data_cleanup(muicat,src)
             del_interval(muicat);
         case 'Merge cases'
             merge_tables(muicat);
+        case 'Subsample case'
+            subsample_case(muicat);
         case 'Scale variables'
             scale_vars(muicat)
         case 'Scale range'
@@ -271,7 +273,7 @@ function patch_ts(muicat)
             missing = isnan(newvari);
             varpatch = interp1(t2,dsj,newtime,'linear');
             newvari(missing)= varpatch(missing);
-            newvar = [newvar,{newvari}];
+            newvar = [newvar,{newvari}]; %#ok<AGROW> 
             vidx = logical(vidx+vidi);
         end
     end
@@ -387,14 +389,15 @@ function merge_tables(muicat)
     desc = 'Data merged for:';
     cobj = getCases(muicat,caserecs);
     for i=1:length(caserecs)
-        dst(i) = cobj(i).Data.(datasetname);
-        ht(i) = height(dst(i));
+        dst(i) = cobj(i).Data.(datasetname); %#ok<AGROW> 
+        ht(i) = height(dst(i)); %#ok<AGROW> 
         desc = sprintf('%s\n%s',desc,dst.Description);
     end
+    %
     if all(diff(ht)==0)
         newdst = dst(1);
         for j=2:length(caserecs)
-            newdst = [newdst,dst(j)];
+            newdst = [newdst,dst(j)]; %#ok<AGROW> 
         end
     else
         warndlg('Selected cases are not the same length')
@@ -409,6 +412,54 @@ function merge_tables(muicat)
     obj.Data.(datasetname) = newdst;    
     setCase(muicat,obj,type);
     getdialog(desc);
+end
+%%
+function subsample_case(muicat)
+    %select variables from a case, rename variables and save as new case
+    datasetname = 'Dataset';   %uses default dataset name
+    
+    promptxt = 'Select cases to sample from'; 
+    [caserec,isok] = selectCase(muicat,promptxt,'single',0,0);
+    if isok<1, return; end %user cancelled  
+    [cobj,~,catrec] = getCase(muicat,caserec); %use getCase because need classrec
+    
+    dst = copy(cobj.Data.(datasetname));  %copy to avoid overwriting existing table
+    varnames = dst.VariableNames;
+    vardescs = dst.VariableDescriptions;
+    
+    %select variables to use in the new case
+    [idx,ok] = listdlg('Name','options','SelectionMode','multiple',...
+                            'PromptString','Select variables to use',...
+                            'ListString',vardescs,'ListSize',[300,150]);
+    if ok<1, return; end
+    
+    %remove unwanted variables
+    nvar = length(varnames);
+    isremove = ~ismember(1:nvar,idx);
+    newdst = removevars(dst,varnames(isremove));    
+
+    %rename variables and modify descriptions
+%     newdst.VariableRange = rmfield(newdst.VariableRange,newdst.VariableNames); 
+    nvar = length(newdst.VariableNames);
+    for i=1:nvar
+        defaults = {newdst.VariableNames{i},newdst.VariableDescriptions{i}};
+        promptxt = {'Name','Description'};
+        answers = inputdlg(promptxt,'Edit variables',1,defaults);
+        if isempty(answers), continue; end
+        newdst.VariableNames{i} = answers{1};
+        newdst.VariableDescriptions{i} = answers{2};
+    end
+
+    %save results as a new Record in Catalogue
+    type = convertStringsToChars(catrec.CaseType);
+    classname = catrec.CaseClass; 
+    heq = str2func(classname);
+    obj = heq();  %new instance of class object
+    newdst = activatedynamicprops(newdst); 
+    obj.Data.(datasetname) = newdst;    
+    setCase(muicat,obj,type);
+    getdialog(sprintf('Data from %s subsampled',dst.Description));
+
 end
 %%
 function scale_vars(muicat)
@@ -663,7 +714,7 @@ function [tint,newdst] = get_timeinterval(dst,isresample)
             else
                 oldvar = dst.(varnames{i});
             end
-            newvar{i} = interp1(time,oldvar,newtime,'linear','extrap');
+            newvar{i} = interp1(time,oldvar,newtime,'linear','extrap'); %#ok<AGROW> 
         end
         newdst = dstable(newvar{:},'RowNames',newtime,'DSproperties',dst.DSproperties);
         if iscell(dst.Source)    %restore Source desctiption

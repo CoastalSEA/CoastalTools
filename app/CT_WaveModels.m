@@ -445,7 +445,7 @@ classdef CT_WaveModels < muiDataSet
             %else  'reflective';
             output.results = {dfv};
             output.modeltime = wv.RowNames;
-            mtxt1 = {sprintf('d50=%g',d50)}; 
+            mtxt1 = sprintf('d50=%g',d50); 
             mtxt2 = sprintf('Using %s case for wave input',wv.Description);
             output.metatxt = sprintf('%s\n%s',mtxt1,mtxt2);  
         end
