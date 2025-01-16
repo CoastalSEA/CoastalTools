@@ -164,7 +164,8 @@ classdef CT_Plots < muiPlots
                 dst = getDataset(mobj.Cases,crec,dset);
                 idvar = find(contains(dst.VariableNames,'Dir'));
                 obj.UIsel(2).variable = idvar;
-                varange = dst.VariableRange.(dst.VariableNames{idvar});
+                %varange = dst.VariableRange.(dst.VariableNames{idvar});
+				varange = dst.VariableRange.(dst.VariableNames{idvar(1)}); %temp fix to handle multiple direction variables
                 obj.UIsel(2).range = var2range(varange);                
                 obj.UIsel(2).desc = 'Direction';
                 obj.UIset.Polar = true;

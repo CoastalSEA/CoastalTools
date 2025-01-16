@@ -157,7 +157,8 @@ classdef CT_PlotsUI < muiDataUI
                 case 'Profiles'
                     idx = ismember(classes,'ctBeachProfileData');
                 case 'Rose'
-                    roseclasses = {'ctWaveData','ctWindData','ctWaveModel','ctWindWaveModel'};
+                    roseclasses = {'ctWaveData','ctWindData','ctWaveModel',...
+                                   'ctWindWaveModel','WRM_WaveModel'};
                     idx = ismember(classes,roseclasses);
                 otherwise
                     idx = true(length(classes),1);
