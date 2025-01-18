@@ -365,11 +365,13 @@ classdef CT_Plots < muiPlots
             obj.Data.Z = [];
             datetxt = split(cellstr(tall));
             obj.Legend = datetxt{1,1};
+            obj.MetaData = datetxt{1,1};  %replace case selection with date to interrogate interactively on plot
             new2Dplot(obj)
             for ip=2:nline
                 obj.Data.X = x(ip,:);
                 obj.Data.Y = y(ip,:);
                 obj.Legend = datetxt{ip,1};
+                obj.MetaData = datetxt{ip,1};  %replace selection with date to interrogate interactively on plot
                 add2Dplot(obj)                          
             end
             set(groot,'defaultAxesColorOrder','remove')
@@ -393,6 +395,7 @@ classdef CT_Plots < muiPlots
             obj.Data.Y = yall(h_dlg,:);
             obj.Data.Z = [];           
             obj.Legend = legtxt{h_dlg};
+            obj.MetaData = legtxt{h_dlg};  %replace case selection with date to interrogate interactively on plot
             switch obj.UIset.callButton
                 case 'New'
                     new2Dplot(obj);
@@ -429,7 +432,7 @@ classdef CT_Plots < muiPlots
                                 'Chainage');
             xall = obj.Data.Y.DataTable{:,idchain}; %chainage in extracted table            
             xall(isnan(xall)) = 0;  %X and Y co-ordinates cannot be NaN
-            dates = datenum(obj.Data.Y.RowNames);       %time
+            dates = datenum(obj.Data.Y.RowNames);  %time as number for use in griddata
 %             dates.Format = 'dd-MMM-yyyy';
             yall = repmat(dates,1,size(xall,2));
             zall = obj.Data.Y.DataTable{:,~idchain}; %variable in extracted table           
@@ -497,7 +500,7 @@ classdef CT_Plots < muiPlots
             times = get_profile_times(mobj,profrec);
             times.Format = 'dd-MMM-yyyy';
             
-            %extractt he data from each profile dataset
+            %extract the data from each profile dataset
             mxtm = length(times);             
             x = zeros(nprof,mxch,mxtm); 
             y = repmat(1:nprof,length(times),1,mxch);
