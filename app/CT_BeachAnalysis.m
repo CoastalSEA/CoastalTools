@@ -629,8 +629,8 @@ classdef CT_BeachAnalysis < muiDataSet
             end
 
             promptxt = {'Select control point','Select end of control line'};
-            c_point = gd_setpoint(ax,promptxt(1),false);
-            e_point = gd_setpoint(ax,promptxt(2),false);
+            c_point = gd_setpoint(ax,promptxt(1),'cpoint',false);
+            e_point = gd_setpoint(ax,promptxt(2),'cpoint',false);
             %input struct to define default values for crenulate_bays
             %Easting and Northing of control point
             inp.Eo = c_point.x; inp.No = c_point.y;
