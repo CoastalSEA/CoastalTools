@@ -481,7 +481,7 @@ end
             K = zeros(nc,1);
             for i=1:nc
                 ab = obj.(props{i});
-                if length(ab)==1, ab(2)=0; end %handle constant values
+                if isscalar(ab), ab(2)=0; end %handle constant values
                 K(i) = ab(1)+ab(2)*dfv;
                 if K(i)<0, K(i) = 0; end
             end

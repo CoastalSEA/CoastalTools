@@ -1,12 +1,17 @@
-
-<!DOCTYPE html
-  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
-<html><head>
-      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-   <!--
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<META http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<!--
 This HTML was auto-generated from MATLAB code.
 To make changes, update the MATLAB code and republish this document.
-      --><title>CoastalTools classes and functions</title><meta name="generator" content="MATLAB 9.13"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2025-01-16"><meta name="DC.source" content="coastaltools_classes.m"><style type="text/css">
+      -->
+<title>CoastalTools classes and functions</title>
+<meta name="generator" content="MATLAB 24.2">
+<link rel="schema.DC" href="http://purl.org/dc/elements/1.1/">
+<meta name="DC.date" content="2025-04-24">
+<meta name="DC.source" content="coastaltools_classes.m">
+<style type="text/css">
 html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
 
 html { min-height:100%; margin-bottom:1px; }
@@ -67,7 +72,223 @@ table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px soli
 
 
 
-  </style></head><body><div class="content"><h1>CoastalTools classes and functions</h1><!--introduction--><p>CoastalTools uses the <a href="matlab:doc('muitoolbox')">muitoolbox</a> and <a href="matlab:doc('dstoolbox')">dstoolbox</a>. In addition it includes the following classes and functions.</p><!--/introduction--><h2>Contents</h2><div><ul><li><a href="#1">CoastalTools Classes</a></li><li><a href="#2">CoastalTools Functions</a></li><li><a href="#3">Additional Coastal Classes</a></li><li><a href="#5">Import format functions</a></li><li><a href="#6">Additional Coastal Functions</a></li><li><a href="#8">See Also</a></li></ul></div><h2 id="1">CoastalTools Classes</h2><div><ul><li><b>CoastalTools</b> &#8211; main UI</li><li><b>CT_BeachAnalysis</b> &#8211; tools to analyse beach profile data</li><li><b>CT_ModelPlots</b> &#8211; UI for CoastalToools plots (modifies ModelPlot class)</li><li><b>CT_PlotFig</b> &#8211; extension of PlotFig class to plot profile data</li><li><b>CT_SimUI</b> &#8211; UI for shoreline and profile simulation models</li><li><b>CT_WaveModels</b> &#8211; models using wind, wave and water level data</li><li><b>Sim_BMV</b> - runs the BMV beach profile simulation model</li><li><b>Sim_BMVinput</b> &#8211; data input for the BMV model</li><li><b>Sim_BMVmodel</b> &#8211; setup and running of BMV simulation</li><li><b>Sim_YGOR</b> - runs the YGOR shoreline simulation model</li><li><b>Sim_YGORinput</b> &#8211; data input for the YGOR model</li></ul></div><h2 id="2">CoastalTools Functions</h2><div><ul><li><i>data_cleanup</i> &#8211; set of functions to help clean up timeseries and beach profile data</li><li><i>ct_sitevulnerability</i> &#8211; function to compute Beach Vulnerability Index for a single site</li><li><i>ct_sitevulnerability</i> &#8211; function to compute Beach Vulnerability Index for a set of beach profiles</li><li><i>simBMVfitting</i> &#8211; functions to fit the BMV model to a profile data set</li><li><i>simYGORmodel</i> &#8211; functions to run the YGOR model</li></ul></div><h2 id="3">Additional Coastal Classes</h2><p>In the folder ../muiAppCoastalClasses.</p><div><ul><li><b>ctBeachProfileData</b> &#8211; handle beach profiles as Chainage + Elevation and/or Easting, Northings + Elevation.</li><li><b>ctModelData</b> &#8211; load numerical model output (e.g. Blue Kenue file formats)</li><li><b>ctHindcastParameters</b> &#8211; input parameters for the wind-wave model</li><li><b>ctShorelineData</b> &#8211; shoreline position data (e.g. distance to mean tide level)</li><li><b>ctStructureInput</b> &#8211; definition of a beach or structure used to estimate overtopping quantities</li><li><b>ctTidalAnalysis</b> &#8211; analyse water level data to extract tidal constituents and use constituents to construct tidal elevation timeseries.</li><li><b>ctWaterLevelData</b> &#8211; import water level data</li><li><b>ctWaveData</b> &#8211; import wave data</li><li><b>ctWaveModel</b> &#8211; model of wave propagation to a nearshore or deep-water locations</li><li><b>ctWaveParameters</b> &#8211; input parameters for the wave models</li><li><b>ctWindData</b> &#8211; import wind data</li><li><b>ctWindWaveModel</b> &#8211; model wind-wave generation over varying fetch lengths</li></ul></div><h2 id="5">Import format functions</h2><p>The folder ../muiAppCoastalClasses/FormatFiles contains a range of format files for loading a number of different data formats (eg waves, water levels, etc) and some generic QC functions.</p><h2 id="6">Additional Coastal Functions</h2><p>In the folder ../muiAppCoastalFcns.</p><div><ul><li><i>addslrtotides</i> &#8211; add a linear, or exponentially varying, rate of sea level rise to a tidal record.</li><li><i>beachtransportratio</i> - compute the ratio of onshore to alongshore wave action given by tan(alp).</li><li><i>binned_wave_climate</i> &#8211; compute equal energy flux bins for the wave height-direction scatter.</li><li><i>celerity</i> - calculate the wave celerity using Hunt's equation.</li><li><i>coeff_AB</i> - function called by overtopping functions otop_Q and otop_C.</li><li><i>crenulate_bay</i> - generate the shoreline for an equilibrium crenulate bay using the method of Hsu and Evans, 1989 (Hsu and Evans, 1989).</li><li><i>deanbeachprofile</i> - find the bed slope across the surf zone.   the profile is based on a user defined slope between Hw and SWL (0mOD)   and a Dean profile below this level.</li><li><i>eff_fetch</i> - compute the effective fetch for each mean direction based on the   directional distribution function.</li><li><i>get_profile_times</i> - get the composite time intervals for all profiles.</li><li><i>getalp</i> - find the angle between the wave crest and the bed contour.</li><li><i>hallermeier_zones</i> - computes the limits of the surf and shoal zones and returning the surf zone limit and the closure depth or shoal limit.</li><li><i>hb_break</i> - wave height after breaking for given water depth.</li><li><i>hs_break</i> - significant wave height after breaking for given water depth.</li><li><i>hs_surf</i> - calculate the inshore wave height at the edge of the surf zone.</li><li><i>iribarren</i> - function to calculate the Iribarren number which characterise the   wave breaker type.</li><li><i>lambertw</i> - computes the Lambert W-Function. Author: Pascal Getreuer, Matlab&#8482; Exchange Forum.</li><li><i>littoraldrift</i> - sediment transport drift rates for sand and shingle.</li><li><i>littoraldriftstats</i> - estimate net drift over selected period from the time series of drift rates.</li><li><i>otop_Q</i> - function to calculate the overtopping discharge for a simple sloping   structure based on the Method proposed by Owen.</li><li><i>posneg_dv_stats</i> - computes the rate of change of variable and plot histograms for positive and negative components.</li><li><i>profileslope</i> - calculate the bed slope at some depth within the surf zone.</li><li><i>readfetchfile</i> - read the file that contains the fetch lengths as a function of direction.</li><li><i>refraction</i> - plane bed wave refraction and shoaling using linear wave theory.</li><li><i>rmswaveorbitalvelocity</i> - calculate the root mean square wave orbital velocity.</li><li><i>runup</i> - wave runup magnitude.</li><li><i>runup_slope</i> - calculate runup beach slope using Reis A H and Gama C, 2010.</li><li><i>section_centroid</i> - find centroid and area of a cross-section defined by points (xi,zi).</li><li><i>settling_velocity</i> - calcualte the settling velocity using Soulsby equation.</li><li><i>shoaling</i> - plane bed wave shoaling using linear wave theory.</li><li><i>shore_orientation</i> - find the orientation for a series of coordinates that define a line.</li><li><i>shore_profile_order</i> - sort the profile order based on the E,N of the base point - min(Chainage)</li><li><i>simple_tide</i> - function to compute a tidal water level time series using the main constituents scaled to the required tidal amplitude.</li><li><i>slope_points</i> - find point and slope on line (eg a shore profile) nearest to zlevel.</li><li><i>sortENdata2line</i> - sort the eastings and northings into an order that makes the best continuous line</li><li><i>tau_crit</i> - calculate the critical erosion shear stress and erosion rate for sand, mud or mixed sediments.</li><li><i>tma_spectrum</i> - calculate the TMA spectrum for waves that are depth limited.</li><li><i>ucrit</i> - compute the critical flow velocity for a given critical shear stress and wave conditions in the wave-currrent case.</li><li><i>ut_constants.mat</i> - binary file of constituents used by <b>ctTidalAnalysis</b> class.</li><li><i>ut_reconstr</i> - reconstruct superposed harmonics. Author: D. Codiga, Matlab&#8482; Exchange Forum. Forum).</li><li><i>ut_solv</i> - execute harmonic tidal analysis. Author: D. Codiga, Matlab&#8482; Exchange Forum.</li><li><i>waterlevelfreqplots</i> - create various water level exceedance and duration plots.</li><li><i>wave_energyflux</i> - function to calculate the wave energy flux using linear wave theory.</li><li><i>wave_friction</i> - compute the wave friction factor for rough and smooth turbulent conditions and smooth laminar conditions.</li><li><i>wave_scatter</i> - plot H-T scatter diagram that uses the wave celerity based on water depth to add contours of wave steepness, plot a 3D contoured histogram or various combinations of height, period, depth and steepness.</li><li><i>wave_scatter_3d</i> - plot H-T-D scatter diagram of wave height, period and direction.</li><li><i>wave_steepness</i> - compute the wave steepness for given wave height, wave period and water depth.</li><li><i>xshore_bailard</i> - computes the cross-shore transport for given wave and beach conditions.</li></ul></div><h2 id="8">See Also</h2><p>See <a href="matlab:doc('coastaltools')">CoastalTools</a>, <a href="matlab:doc('muitoolbox')">muitoolbox</a> <a href="matlab:doc('dstoolbox')">dstoolbox</a></p><p class="footer"><br><a href="https://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2022b</a><br></p></div><!--
+  </style>
+</head>
+<body>
+<div class="content">
+<h1>CoastalTools classes and functions</h1>
+<!--introduction-->
+<p>CoastalTools uses the <a href="matlab:doc('muitoolbox')">muitoolbox</a> and <a href="matlab:doc('dstoolbox')">dstoolbox</a>. In addition it includes the following classes and functions.</p>
+<!--/introduction-->
+<h2>Contents</h2>
+<div>
+<ul>
+<li>
+<a href="#1">CoastalTools Classes</a>
+</li>
+<li>
+<a href="#2">CoastalTools Functions</a>
+</li>
+<li>
+<a href="#3">Additional Coastal Classes</a>
+</li>
+<li>
+<a href="#5">Import format functions</a>
+</li>
+<li>
+<a href="#6">Additional Coastal Functions</a>
+</li>
+<li>
+<a href="#8">See Also</a>
+</li>
+</ul>
+</div>
+<h2 id="1">CoastalTools Classes</h2>
+<div>
+<ul>
+<li>
+<b>CoastalTools</b> &ndash; main UI</li>
+<li>
+<b>CT_BeachAnalysis</b> &ndash; tools to analyse beach profile data</li>
+<li>
+<b>CT_ModelPlots</b> &ndash; UI for CoastalToools plots (modifies ModelPlot class)</li>
+<li>
+<b>CT_PlotFig</b> &ndash; extension of PlotFig class to plot profile data</li>
+<li>
+<b>CT_SimUI</b> &ndash; UI for shoreline and profile simulation models</li>
+<li>
+<b>CT_WaveModels</b> &ndash; models using wind, wave and water level data</li>
+<li>
+<b>Sim_BMV</b> - runs the BMV beach profile simulation model</li>
+<li>
+<b>Sim_BMVinput</b> &ndash; data input for the BMV model</li>
+<li>
+<b>Sim_BMVmodel</b> &ndash; setup and running of BMV simulation</li>
+<li>
+<b>Sim_YGOR</b> - runs the YGOR shoreline simulation model</li>
+<li>
+<b>Sim_YGORinput</b> &ndash; data input for the YGOR model</li>
+</ul>
+</div>
+<h2 id="2">CoastalTools Functions</h2>
+<div>
+<ul>
+<li>
+<i>data_cleanup</i> &ndash; set of functions to help clean up timeseries and beach profile data</li>
+<li>
+<i>ct_sitevulnerability</i> &ndash; function to compute Beach Vulnerability Index for a single site</li>
+<li>
+<i>ct_sitevulnerability</i> &ndash; function to compute Beach Vulnerability Index for a set of beach profiles</li>
+<li>
+<i>simBMVfitting</i> &ndash; functions to fit the BMV model to a profile data set</li>
+<li>
+<i>simYGORmodel</i> &ndash; functions to run the YGOR model</li>
+</ul>
+</div>
+<h2 id="3">Additional Coastal Classes</h2>
+<p>In the folder ../muiAppCoastalClasses.</p>
+<div>
+<ul>
+<li>
+<b>ctBeachProfileData</b> &ndash; handle beach profiles as Chainage + Elevation and/or Easting, Northings + Elevation.</li>
+<li>
+<b>ctModelData</b> &ndash; load numerical model output (e.g. Blue Kenue file formats)</li>
+<li>
+<b>ctHindcastParameters</b> &ndash; input parameters for the wind-wave model</li>
+<li>
+<b>ctShorelineData</b> &ndash; shoreline position data (e.g. distance to mean tide level)</li>
+<li>
+<b>ctStructureInput</b> &ndash; definition of a beach or structure used to estimate overtopping quantities</li>
+<li>
+<b>ctTidalAnalysis</b> &ndash; analyse water level data to extract tidal constituents and use constituents to construct tidal elevation timeseries.</li>
+<li>
+<b>ctWaterLevelData</b> &ndash; import water level data</li>
+<li>
+<b>ctWaveData</b> &ndash; import wave data</li>
+<li>
+<b>ctWaveModel</b> &ndash; model of wave propagation to a nearshore or deep-water locations</li>
+<li>
+<b>ctWaveParameters</b> &ndash; input parameters for the wave models</li>
+<li>
+<b>ctWindData</b> &ndash; import wind data</li>
+<li>
+<b>ctWindWaveModel</b> &ndash; model wind-wave generation over varying fetch lengths</li>
+</ul>
+</div>
+<h2 id="5">Import format functions</h2>
+<p>The folder ../muiAppCoastalClasses/FormatFiles contains a range of format files for loading a number of different data formats (eg waves, water levels, etc) and some generic QC functions.</p>
+<h2 id="6">Additional Coastal Functions</h2>
+<p>In the folder ../muiAppCoastalFcns.</p>
+<div>
+<ul>
+<li>
+<i>addslrtotides</i> &ndash; add a linear, or exponentially varying, rate of sea level rise to a tidal record.</li>
+<li>
+<i>beachtransportratio</i> - compute the ratio of onshore to alongshore wave action given by tan(alp).</li>
+<li>
+<i>binned_wave_climate</i> &ndash; compute equal energy flux bins for the wave height-direction scatter.</li>
+<li>
+<i>celerity</i> - calculate the wave celerity using Hunt's equation.</li>
+<li>
+<i>coeff_AB</i> - function called by overtopping functions otop_Q and otop_C.</li>
+<li>
+<i>crenulate_bay</i> - generate the shoreline for an equilibrium crenulate bay using the method of Hsu and Evans, 1989 (Hsu and Evans, 1989).</li>
+<li>
+<i>deanbeachprofile</i> - find the bed slope across the surf zone. the profile is based on a user defined slope between Hw and SWL (0mOD) and a Dean profile below this level.</li>
+<li>
+<i>eff_fetch</i> - compute the effective fetch for each mean direction based on the directional distribution function.</li>
+<li>
+<i>extract_wave_data</i> - extract Hs, Tp and Dir from a dataset that does not use default naming convention (e.g. Copernicus re-analysis data).</li>
+<li>
+<i>get_profile_times</i> - get the composite time intervals for all profiles.</li>
+<li>
+<i>getalp</i> - find the angle between the wave crest and the bed contour.</li>
+<li>
+<i>hallermeier_zones</i> - computes the limits of the surf and shoal zones and returning the surf zone limit and the closure depth or shoal limit.</li>
+<li>
+<i>hb_break</i> - wave height after breaking for given water depth.</li>
+<li>
+<i>hs_break</i> - significant wave height after breaking for given water depth.</li>
+<li>
+<i>hs_surf</i> - calculate the inshore wave height at the edge of the surf zone.</li>
+<li>
+<i>iribarren</i> - function to calculate the Iribarren number which characterise the wave breaker type.</li>
+<li>
+<i>lambertw</i> - computes the Lambert W-Function. Author: Pascal Getreuer, Matlab&trade; Exchange Forum.</li>
+<li>
+<i>littoraldrift</i> - sediment transport drift rates for sand and shingle.</li>
+<li>
+<i>littoraldriftstats</i> - estimate net drift over selected period from the time series of drift rates.</li>
+<li>
+<i>otop_Q</i> - function to calculate the overtopping discharge for a simple sloping structure based on the Method proposed by Owen.</li>
+<li>
+<i>posneg_dv_stats</i> - computes the rate of change of variable and plot histograms for positive and negative components.</li>
+<li>
+<i>profileslope</i> - calculate the bed slope at some depth within the surf zone.</li>
+<li>
+<i>readfetchfile</i> - read the file that contains the fetch lengths as a function of direction.</li>
+<li>
+<i>refraction</i> - plane bed wave refraction and shoaling using linear wave theory.</li>
+<li>
+<i>rmswaveorbitalvelocity</i> - calculate the root mean square wave orbital velocity.</li>
+<li>
+<i>runup</i> - wave runup magnitude.</li>
+<li>
+<i>runup_slope</i> - calculate runup beach slope using Reis A H and Gama C, 2010.</li>
+<li>
+<i>section_centroid</i> - find centroid and area of a cross-section defined by points (xi,zi).</li>
+<li>
+<i>settling_velocity</i> - calcualte the settling velocity using Soulsby equation.</li>
+<li>
+<i>shoaling</i> - plane bed wave shoaling using linear wave theory.</li>
+<li>
+<i>shore_orientation</i> - find the orientation for a series of coordinates that define a line.</li>
+<li>
+<i>shore_profile_order</i> - sort the profile order based on the E,N of the base point - min(Chainage)</li>
+<li>
+<i>simple_tide</i> - function to compute a tidal water level time series using the main constituents scaled to the required tidal amplitude.</li>
+<li>
+<i>slope_points</i> - find point and slope on line (eg a shore profile) nearest to zlevel.</li>
+<li>
+<i>sortENdata2line</i> - sort the eastings and northings into an order that makes the best continuous line</li>
+<li>
+<i>tau_crit</i> - calculate the critical erosion shear stress and erosion rate for sand, mud or mixed sediments.</li>
+<li>
+<i>tma_spectrum</i> - calculate the TMA spectrum for waves that are depth limited.</li>
+<li>
+<i>ucrit</i> - compute the critical flow velocity for a given critical shear stress and wave conditions in the wave-currrent case.</li>
+<li>
+<i>ut_constants.mat</i> - binary file of constituents used by <b>ctTidalAnalysis</b> class.</li>
+<li>
+<i>ut_reconstr</i> - reconstruct superposed harmonics. Author: D. Codiga, Matlab&trade; Exchange Forum. Forum).</li>
+<li>
+<i>ut_solv</i> - execute harmonic tidal analysis. Author: D. Codiga, Matlab&trade; Exchange Forum.</li>
+<li>
+<i>waterlevelfreqplots</i> - create various water level exceedance and duration plots.</li>
+<li>
+<i>wave_energyflux</i> - function to calculate the wave energy flux using linear wave theory.</li>
+<li>
+<i>wave_friction</i> - compute the wave friction factor for rough and smooth turbulent conditions and smooth laminar conditions.</li>
+<li>
+<i>wave_scatter</i> - plot H-T scatter diagram that uses the wave celerity based on water depth to add contours of wave steepness, plot a 3D contoured histogram or various combinations of height, period, depth and steepness.</li>
+<li>
+<i>wave_scatter_3d</i> - plot H-T-D scatter diagram of wave height, period and direction.</li>
+<li>
+<i>wave_steepness</i> - compute the wave steepness for given wave height, wave period and water depth.</li>
+<li>
+<i>xshore_bailard</i> - computes the cross-shore transport for given wave and beach conditions.</li>
+</ul>
+</div>
+<h2 id="8">See Also</h2>
+<p>See <a href="matlab:doc('coastaltools')">CoastalTools</a>, <a href="matlab:doc('muitoolbox')">muitoolbox</a> <a href="matlab:doc('dstoolbox')">dstoolbox</a>
+</p>
+<p class="footer">
+<br>
+<a href="https://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2024b</a>
+<br>
+</p>
+</div>
+<!--
 ##### SOURCE BEGIN #####
 %% CoastalTools classes and functions
 % CoastalTools uses the <matlab:doc('muitoolbox') muitoolbox> and 
@@ -132,6 +353,8 @@ table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px soli
 %   and a Dean profile below this level. 
 % * _eff_fetch_ - compute the effective fetch for each mean direction based on the 
 %   directional distribution function.
+% * _extract_wave_data_ - extract Hs, Tp and Dir from a dataset that does not use default naming
+%   convention (e.g. Copernicus re-analysis data).
 % * _get_profile_times_ - get the composite time intervals for all
 % profiles.
 % * _getalp_ - find the angle between the wave crest and the bed contour.
@@ -212,4 +435,6 @@ table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px soli
 % <matlab:doc('dstoolbox') dstoolbox>
 
 ##### SOURCE END #####
---></body></html>
+-->
+</body>
+</html>

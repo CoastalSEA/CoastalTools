@@ -481,7 +481,7 @@ function [p1,p2,mdxdt] = dSdt_plot(x,y,t,labels)
     load 'cmapanomalie.mat'  cmapanomalie %colormap from red to blue with white as 0.
     colormap(cmapanomalie);
     dxscale = dxmax/2;
-    caxis([-dxscale dxscale]);
+    clim([-dxscale dxscale]);
     set(gcf,'color','w');
 
     %now get only points with dxdt close to zero

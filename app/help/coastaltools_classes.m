@@ -61,6 +61,8 @@
 %   and a Dean profile below this level. 
 % * _eff_fetch_ - compute the effective fetch for each mean direction based on the 
 %   directional distribution function.
+% * _extract_wave_data_ - extract Hs, Tp and Dir from a dataset that does not use default naming
+%   convention (e.g. Copernicus re-analysis data).
 % * _get_profile_times_ - get the composite time intervals for all
 % profiles.
 % * _getalp_ - find the angle between the wave crest and the bed contour.

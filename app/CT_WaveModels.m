@@ -122,7 +122,8 @@ classdef CT_WaveModels < muiDataSet
             % FUNCTION CALLS (external) - littoraldrift
 
             %class instance for inshore wave data
-            inwave = mobj.Cases.DataSets.ctWaveModel;
+            promptxt = 'Select nearshore wave data set:'; 
+            inwave = selectCaseObj(mobj.Cases,[],{'ctWaveModel','WRM_WaveModel'},promptxt);
             %retrieve an inshore wave data set
             [wv,output.wvrec] = getWaveModelDataset(inwave,mobj,...
                                                 {'Inwave_model'},{'Tp'});
@@ -182,7 +183,8 @@ classdef CT_WaveModels < muiDataSet
             % xshore_bailard
             
             %class instance for inshore wave data
-            inwave = mobj.Cases.DataSets.ctWaveModel;
+            promptxt = 'Select nearshore wave data set:'; 
+            inwave = selectCaseObj(mobj.Cases,[],{'ctWaveModel','WRM_WaveModel'},promptxt);
             %retrieve an inshore wave data set
             [wv,output.wvrec] = getWaveModelDataset(inwave,mobj,...
                                                 {'Inwave_model'},{'Tp'});
@@ -232,7 +234,8 @@ classdef CT_WaveModels < muiDataSet
             % wave_energyflux
             
             %class instance for inshore wave data
-            inwave = mobj.Cases.DataSets.ctWaveModel;
+            promptxt = 'Select nearshore wave data set:'; 
+            inwave = selectCaseObj(mobj.Cases,[],{'ctWaveModel','WRM_WaveModel'},promptxt);
             %retrieve an inshore wave data set
             [wv,output.wvrec] = getWaveModelDataset(inwave,mobj,...
                                                 {'Inwave_model'},{'Tp'});
@@ -280,7 +283,8 @@ classdef CT_WaveModels < muiDataSet
             % shoaling, runup, iribarren, runup_slope          
             
             %class instance for inshore wave data
-            inwave = mobj.Cases.DataSets.ctWaveModel;
+            promptxt = 'Select nearshore wave data set:'; 
+            inwave = selectCaseObj(mobj.Cases,[],{'ctWaveModel','WRM_WaveModel'},promptxt);
             %retrieve an inshore wave data set
             [wv,output.wvrec] = getWaveModelDataset(inwave,mobj,...
                                                 {'Inwave_model'},{'Tp'});
@@ -342,10 +346,11 @@ classdef CT_WaveModels < muiDataSet
             end
             
             %class instance for inshore wave data
-            inwave = mobj.Cases.DataSets.ctWaveModel;
+            promptxt = 'Select nearshore wave data set:'; 
+            inwave = selectCaseObj(mobj.Cases,[],{'ctWaveModel','WRM_WaveModel'},promptxt);
             %retrieve an inshore wave data set
             [wv,output.wvrec] = getWaveModelDataset(inwave,mobj,...
-                                           {'Inwave_model'},{'Tp','Tz'});
+                                                {'Inwave_model'},{'Tp'});
             if isempty(wv), return; end %user cancelled or no data
                                        
             varnames = wv.VariableNames;
@@ -390,10 +395,11 @@ classdef CT_WaveModels < muiDataSet
             % Iribarren (uses Hs_break, Hb_break)
             
             %class instance for inshore wave data
-            inwave = mobj.Cases.DataSets.ctWaveModel;
+            promptxt = 'Select nearshore wave data set:'; 
+            inwave = selectCaseObj(mobj.Cases,[],{'ctWaveModel','WRM_WaveModel'},promptxt);
             %retrieve an inshore wave data set
             [wv,output.wvrec] = getWaveModelDataset(inwave,mobj,...
-                                                {'Inwave_model'},{'Tp'});        
+                                                {'Inwave_model'},{'Tp'});
             if isempty(wv), return; end %user cancelled or no data
             
             %find slope at swl on beach         
@@ -425,8 +431,10 @@ classdef CT_WaveModels < muiDataSet
                 % rhos- sediment density(kg/m3)   
                 % visc- kinematic viscosity (m2/s)
                 % d50 - sediment grain size(m)
+                
             %class instance for inshore wave data
-            inwave = mobj.Cases.DataSets.ctWaveModel;
+            promptxt = 'Select nearshore wave data set:'; 
+            inwave = selectCaseObj(mobj.Cases,[],{'ctWaveModel','WRM_WaveModel'},promptxt);
             %retrieve an inshore wave data set
             [wv,output.wvrec] = getWaveModelDataset(inwave,mobj,...
                                                 {'Inwave_model'},{'Tp'});
