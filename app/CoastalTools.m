@@ -250,7 +250,7 @@ classdef CoastalTools < muiModelUI
             msg = 'No results to display';
             switch src.Tag                             
                 case 'Plot' 
-                    if isa(cobj,'CT_BeachAnalysis')
+                    if isa(cobj,'CT_BeachAnalysis') || isa(cobj,'SpectralTransfer')  
                         tabPlot(cobj,src,obj);
                     else
                         tabPlot(cobj,src);
