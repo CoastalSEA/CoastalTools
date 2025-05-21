@@ -124,6 +124,7 @@ classdef CT_WaveModels < muiDataSet
             %class instance for inshore wave data
             promptxt = 'Select nearshore wave data set:'; 
             inwave = selectCaseObj(mobj.Cases,[],{'ctWaveModel','WRM_WaveModel'},promptxt);
+            if isempty(inwave), output = []; return; end
             %retrieve an inshore wave data set
             [wv,output.wvrec] = getWaveModelDataset(inwave,mobj,...
                                                 {'Inwave_model'},{'Tp'});
@@ -185,6 +186,7 @@ classdef CT_WaveModels < muiDataSet
             %class instance for inshore wave data
             promptxt = 'Select nearshore wave data set:'; 
             inwave = selectCaseObj(mobj.Cases,[],{'ctWaveModel','WRM_WaveModel'},promptxt);
+            if isempty(inwave), output = []; return; end           
             %retrieve an inshore wave data set
             [wv,output.wvrec] = getWaveModelDataset(inwave,mobj,...
                                                 {'Inwave_model'},{'Tp'});
@@ -200,9 +202,10 @@ classdef CT_WaveModels < muiDataSet
             rhw = mobj.Constants.WaterDensity;
             rhs = mobj.Constants.SedimentDensity;
             vsc = mobj.Constants.KinematicViscosity;
-%             theta = site.ShorelineAngle;
+            theta = site.ShorelineAngle;
             d50 = site.GrainSize;
-            Qx = xshore_bailard(wv.Hsi,[],[],[],bs,d50,g,rhw,rhs,vsc);
+            Qx = xshore_bailard(wv.Hsi,wv.Tp,wv.Diri,wv.depi,...
+                                            theta,bs,d50,g,rhw,rhs,vsc);
             
             bs = mean(bs,'omitnan');
             zi = mean((wv.swl-wv.depi),'omitnan');
@@ -236,6 +239,7 @@ classdef CT_WaveModels < muiDataSet
             %class instance for inshore wave data
             promptxt = 'Select nearshore wave data set:'; 
             inwave = selectCaseObj(mobj.Cases,[],{'ctWaveModel','WRM_WaveModel'},promptxt);
+            if isempty(inwave), output = [];  return; end
             %retrieve an inshore wave data set
             [wv,output.wvrec] = getWaveModelDataset(inwave,mobj,...
                                                 {'Inwave_model'},{'Tp'});
@@ -285,6 +289,7 @@ classdef CT_WaveModels < muiDataSet
             %class instance for inshore wave data
             promptxt = 'Select nearshore wave data set:'; 
             inwave = selectCaseObj(mobj.Cases,[],{'ctWaveModel','WRM_WaveModel'},promptxt);
+            if isempty(inwave), output = [];   return; end            
             %retrieve an inshore wave data set
             [wv,output.wvrec] = getWaveModelDataset(inwave,mobj,...
                                                 {'Inwave_model'},{'Tp'});
@@ -348,6 +353,7 @@ classdef CT_WaveModels < muiDataSet
             %class instance for inshore wave data
             promptxt = 'Select nearshore wave data set:'; 
             inwave = selectCaseObj(mobj.Cases,[],{'ctWaveModel','WRM_WaveModel'},promptxt);
+            if isempty(inwave), output = [];  return; end 
             %retrieve an inshore wave data set
             [wv,output.wvrec] = getWaveModelDataset(inwave,mobj,...
                                                 {'Inwave_model'},{'Tp'});
@@ -397,6 +403,7 @@ classdef CT_WaveModels < muiDataSet
             %class instance for inshore wave data
             promptxt = 'Select nearshore wave data set:'; 
             inwave = selectCaseObj(mobj.Cases,[],{'ctWaveModel','WRM_WaveModel'},promptxt);
+            if isempty(inwave), output = [];  return; end         
             %retrieve an inshore wave data set
             [wv,output.wvrec] = getWaveModelDataset(inwave,mobj,...
                                                 {'Inwave_model'},{'Tp'});
@@ -433,8 +440,9 @@ classdef CT_WaveModels < muiDataSet
                 % d50 - sediment grain size(m)
                 
             %class instance for inshore wave data
-            promptxt = 'Select nearshore wave data set:'; 
+            promptxt = 'Select nearshore wave data set:';             
             inwave = selectCaseObj(mobj.Cases,[],{'ctWaveModel','WRM_WaveModel'},promptxt);
+            if isempty(inwave), output = [];  return; end
             %retrieve an inshore wave data set
             [wv,output.wvrec] = getWaveModelDataset(inwave,mobj,...
                                                 {'Inwave_model'},{'Tp'});
