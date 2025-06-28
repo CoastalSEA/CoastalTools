@@ -630,7 +630,7 @@ function edit_delete_profile(muicat)
             end
             plot(hax,y,z,'Tag','EditLine');
             legend(sprintf('Profile: %s, Date: %s',dst.Description,...
-                                        string(ptime(idx),'dd-mmm-yyyy')));
+                                        string(ptime(idx),'dd-MMM-yyyy')));
 
             action = questdlg('Edit or Delete this profile?',dst.Description,...
                                     'Edit/Delete','Next','Cancel','Next');

@@ -776,7 +776,7 @@ classdef CT_BeachAnalysis < muiDataSet
             promptxt = 'Select beach profile';
             [caserec,ok] = selectRecord(muicat,'PromptText',promptxt,...
                                 'CaseClass',{'ctBeachProfileData'},...
-                                'SelectionMode','single','ListSize',[250,200]);
+                                'SelectionMode','single','ListSize',[200,350]);
             if ok<1
                 warndlg('No selection made');
                 dst_time = []; x = []; z = []; pid = [];
