@@ -90,7 +90,11 @@ classdef CoastalTools < muiModelUI
             
             % submenu for 'Clear all'
             menu.Tools(2).List = {'Project','Figures','Data','Models'};
-            menu.Tools(2).Callback = repmat({@obj.toolsMenuOptions},[1,4]);
+            menu.Tools(2).Callback = [{@obj.toolsMenuOptions},{'gcbo;'},...
+                                     repmat({@obj.toolsMenuOptions},[1,2])];
+
+            menu.Tools(3).List = {'UI figures','Tag figures'};
+            menu.Tools(3).Callback = repmat({@obj.toolsMenuOptions},[1,2]);            
 
             %% Project menu -----------------------------------------------
             menu.Project(1).List = {'Project Info','Cases','Export/Import'};
@@ -284,8 +288,8 @@ classdef CoastalTools < muiModelUI
             switch src.Text
                 case 'Project'
                     obj.clearModel;
-                case 'Figures'
-                    obj.clearFigures;
+                case  {'Figures','UI figures','Tag figures'}
+                    clearFigures(obj,src);
                 case 'Data'
                     clearCases(obj,'Data');
                 case 'Models'
