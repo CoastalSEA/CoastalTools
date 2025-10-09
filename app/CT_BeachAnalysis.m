@@ -1433,7 +1433,14 @@ classdef CT_BeachAnalysis < muiDataSet
                 muiPlots.xySurface(yt,xt,zt',yint,xint,ytext,xtext,...
                     legtxt,titletxt,ptype);
                 figax = hfig.CurrentAxes; 
-                hold(figax,'on')   
+                hold(figax,'on')  
+                if length(yt)>20
+                    inp = inputdlg({'Interval to use (integer)'},'SpaceTime',1,{'5'});
+                    if isempty(inp), inp = {'5'}; end
+                    n = str2double(inp{1});
+                    yt = yt(1:n:end);
+                    pnames = pnames(1:n:end);
+                end
                 figax.XTick = yt;
                 figax.XTickLabel = pnames;           
                 figax.XTickLabelRotation = 45;
