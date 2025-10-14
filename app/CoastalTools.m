@@ -180,9 +180,9 @@ classdef CoastalTools < muiModelUI
             menu.Run(4).Callback = repmat({@obj.runBeachAnalysis},[1,5]);
             menu.Run(4).Separator = {'off','off','on','off','off'};
             
-            menu.Run(5).List = {'Shoreline','Change plot','Rates plot'};
-            menu.Run(5).Callback = repmat({@obj.runBeachAnalysis},[1,3]);
-            menu.Run(5).Separator = {'off','on','off'};
+            menu.Run(5).List = {'Shore lines','Shore volumes','Change plot','Rates plot'};
+            menu.Run(5).Callback = repmat({@obj.runBeachAnalysis},[1,4]);
+            menu.Run(5).Separator = {'off','off','on','off'};
             
             % submenu for Tidal analysis
             menu.Run(6).List = {'Analysis','Reconstruction'}; 
@@ -223,7 +223,7 @@ classdef CoastalTools < muiModelUI
             tabs.Plot = {'  Q-Plot  ',@obj.getTabData};
             tabs.Calcs = {'  Calcs  ',''};
             subtabs.Calcs(1,:) = {' Volumes ',@obj.setTabAction};
-            subtabs.Calcs(2,:) = {' Shoreline ',@obj.setTabAction};
+            subtabs.Calcs(2,:) = {' Shorelines ',@obj.setTabAction};
             subtabs.Calcs(3,:) = {'  BVI  ',@obj.setTabAction};
             subtabs.Calcs(4,:) = {' Profile ',@obj.setTabAction};
             tabs.Stats = {'   Stats   ',''};
@@ -266,7 +266,7 @@ classdef CoastalTools < muiModelUI
                         delete(src.Children);   return; 
                     end
                     tabStats(cobj,src);    
-                case {'Volumes','Shoreline','BVI'}
+                case {'Volumes','Shorelines','BVI'}
                     cobj = getClassObj(obj,'Cases','CT_BeachAnalysis',msg);
                     if isempty(cobj), return; end
                     tabCalcs(cobj,src);
@@ -459,8 +459,8 @@ classdef CoastalTools < muiModelUI
         function runBeachAnalysis(obj,src,~)
             %callback to run beach analysis functions
             %indices refer to model type in CT_BeachAnalysis
-            %'Beach type','Volumes','Shoreline position','Shoreline',
-            %'BVI profile set','Shore profile','Dean profile'
+            %'Beach type','Volumes','Shore volumes','Shoreline position',
+            %'Shore lines','BVI profile set','Shore profile','Dean profile'
             msgtxt = 'No data available to plot';
             switch src.Text
                 case 'Location plot'

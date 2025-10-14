@@ -30,9 +30,10 @@ classdef CT_BeachAnalysis < muiDataSet
     end
     
     properties (Transient)
-        MenuList = {'Volumes','Shore position','Shoreline','BVI profile set',...
-                    'Crenulate Bay','Shore profile','Dean profile'}                     
-        ModelName = {'Volumes','ShorePosition','ShoreLine','BVI'}
+        MenuList = {'Volumes','Shore volumes','Shore position','Shore lines',...
+                    'BVI profile set','Crenulate Bay',...
+                    'Shore profile','Dean profile'}                     
+        ModelName = {'Volumes','ShoreVolumes','ShorePosition','ShoreLines','BVI'}
     end
     
     methods
@@ -79,17 +80,27 @@ classdef CT_BeachAnalysis < muiDataSet
                         obj.TabOutput.headtxt = headtxt;
                         tablefigure(src,headtxt,output.table);
                     end
-                case 2  %Shoreline position for individual profile
+                case 2  %Volumes for a set of profiles
+                    output = volumes2matrix(obj,mobj);
+                    % if ~isempty(output)
+                    %     src = findobj(mobj.mUI.Tabs.Children,'Tag','Shorelines'); 
+                    %     headtxt = sprintf('Profile: %s\nFor: %s',...
+                    %                   output.source,output.metatxt);
+                    %     obj.TabOutput.table = output.table;
+                    %     obj.TabOutput.headtxt = headtxt;          
+                    %     tablefigure(src,headtxt,output.table);
+                    % end
+                case 3  %Shoreline position for individual profile
                     output = shorelinePositionModel(obj,mobj);
                     if ~isempty(output)
-                        src = findobj(mobj.mUI.Tabs.Children,'Tag','Shoreline'); 
+                        src = findobj(mobj.mUI.Tabs.Children,'Tag','Shorelines'); 
                         headtxt = sprintf('Profile: %s\nFor: %s',...
                                       output.source,output.metatxt);
                         obj.TabOutput.table = output.table;
                         obj.TabOutput.headtxt = headtxt;          
                         tablefigure(src,headtxt,output.table);
                     end
-                case 3  %Shoreline (position extracted from set of profiles)
+                case 4  %Shoreline (position extracted from set of profiles)
                     output = profiles2shoreline(obj,mobj);
                     if ~isempty(output)                
                         src = findobj(mobj.mUI.Tabs.Children,'Tag','BVI');
@@ -99,7 +110,7 @@ classdef CT_BeachAnalysis < muiDataSet
                         obj.TabOutput.headtxt = headtxt;
                         tablefigure(src,headtxt,output.table);
                     end
-                case 4 %beach vulnerability index
+                case 5 %beach vulnerability index
                     output = getBVindex(obj,mobj);
                     if ~isempty(output)
                         src = findobj(mobj.mUI.Tabs.Children,'Tag','BVI'); 
@@ -110,14 +121,14 @@ classdef CT_BeachAnalysis < muiDataSet
                         obj.TabOutput.headtxt = headtxt;
                         tablefigure(src,headtxt,output.bvitable);
                     end
-                case 5 %crenulate bay plots
+                case 6 %crenulate bay plots
                     crenulateBay(obj,mobj);
                     output = [];
-                case 6  %plot an idealised profile and closure depths
+                case 7  %plot an idealised profile and closure depths
                     src = findobj(mobj.mUI.Tabs.Children,'Tag','Profile');                    
                     bmvProfile(obj,mobj,src);
                     output = [];
-                case 7  %plot the Dean profile
+                case 8  %plot the Dean profile
                     src = findobj(mobj.mUI.Tabs.Children,'Tag','Profile'); 
                     getDeanProfile(obj,mobj,src);
                     output = [];
@@ -133,7 +144,7 @@ classdef CT_BeachAnalysis < muiDataSet
             %if model returns single variable as array of doubles, use {results}
             dst = dstable(output.results{:},'RowNames',output.modeltime,...
                                                     'DSproperties',dsp);
-            if any(id_model==[3,4])
+            if any(id_model==[2,4,5])
                 plist = output.proflist; %ordered list along coast, so retain order
                 dst.Dimensions.PID = categorical(plist,plist,'Ordinal',true);
             end
@@ -158,13 +169,16 @@ classdef CT_BeachAnalysis < muiDataSet
     methods       
         function tabPlot(obj,src,mobj)    %method for muiDataSet abstract class
             %generate plot for display on Q-Plot tab 
-            ht = findobj(src,'Type','axes');
-            delete(ht);
-            ax = axes('Parent',src,'Tag','TS_Plot');            
+            tabcb  = @(src,evdat)tabPlot(obj,src,mobj);
+            ax = tabfigureplot(obj,src,tabcb,false);
+            
+            % ht = findobj(src,'Type','axes');
+            % delete(ht);
+            % ax = axes('Parent',src,'Tag','TS_Plot');            
 
             dst = obj.Data.Dataset;
             if isa(obj,'CT_BeachAnalysis') &&...
-                      (strcmp(obj.ModelType,'ShoreLine') ||...
+                      (strcmp(obj.ModelType,'ShoreLines') ||...
                                    strcmp(obj.ModelType,'BVI'))
                  if strcmp(obj.ModelType,'BVI')  
                      answer = questdlg('Shore or BVI?','tabPlot','Shore','BVI','BVI');
@@ -195,7 +209,7 @@ classdef CT_BeachAnalysis < muiDataSet
             ht = src.Children;   %clear any existing tab content
             delete(ht);
             %prompt selection of compatible dataset for chosen tab
-            if strcmp(src.Tag,'Shoreline')
+            if strcmp(src.Tag,'Shorelines')
                 idx = find(contains({obj(:).ModelType},'Shore')); 
             else
                 idx = find(strcmp({obj(:).ModelType},src.Tag));
@@ -257,7 +271,7 @@ classdef CT_BeachAnalysis < muiDataSet
             %plot the indices for a BVI set analysis            
             switch src
                 case 'Rates plot'
-                    type = {'ShoreLine','BVI'};
+                    type = {'ShoreLines','BVI'};
                 case 'BVI set plot'
                     type = {'BVI'};
             end
@@ -309,6 +323,13 @@ classdef CT_BeachAnalysis < muiDataSet
 %%
         function getProfileSpaceTimePlot(obj,mobj)
             %setup selection of profiles for plotting as a space-time plot
+            [time,profnames,datavar,vardesc] = getMultiVolumeData(obj,mobj);
+            plotSpaceTime(obj,time,profnames,datavar,vardesc)
+        end
+%%
+        function [time,profnames,datavar,vardesc] = getMultiVolumeData(obj,mobj)
+            %setup selection of profiles to create shore volumes dataset
+            time = []; profnames = []; datavar =[]; vardesc = [];
             muicat = mobj.Cases;
             [obj,ok] = getVolumePostionSet(obj);
             if ok<1, return; end
@@ -349,8 +370,6 @@ classdef CT_BeachAnalysis < muiDataSet
                 idp = ismember(time,ptime);          %ids of ptime in time    
                 datavar(idp,i) = dsts(i).(varnames{idvar});
             end
-            
-            plotSpaceTime(obj,time,profnames,datavar,vardesc)
         end   
 
 %% ------------------------------------------------------------------------
@@ -450,7 +469,7 @@ classdef CT_BeachAnalysis < muiDataSet
             [X,Z,xrange,zrange] = getSampledDataPoints(obj,x,z,mxmn);
             %get the dimensional volumes and centroids (isND=false)
             [V,X1,Z1] = getVolumeCentroids(obj,X,Z,xrange,zrange,false);
-            %get the non-dimensional volumen and centroids (isND=true)
+            %get the non-dimensional volume and centroids (isND=true)
             [m0,x1,z1] = getVolumeCentroids(obj,X,Z,xrange,zrange,true);            
             
             %assign ouput
@@ -551,6 +570,33 @@ classdef CT_BeachAnalysis < muiDataSet
                                                 'deg','deg/yr','-','deg'};
         end
 %%
+        function output = volumes2matrix(obj,mobj)
+            %sample the available profiles and extract the shoreline at some
+            %elevation, return vectors of position and rates of change
+            output = [];
+            msgtxt = 'No data available to plot';
+            lobj = getClassObj(mobj,'Cases','CT_BeachAnalysis',msgtxt);
+            if isempty(lobj),  return; end
+            %prompt user to select profiles to be used (multiple profiles)
+
+            [time,profnames,datavar,vardesc] = getMultiVolumeData(lobj,mobj);
+            if isempty(time), return; end
+
+            dV = diff(datavar,1,1);       %volume change
+            dt = years(diff(time));       %time interval
+            datavar = dV./dt;             %rate of change of variable
+            %exclude extreme values from the output (+/- 2 st.dev.)
+            stdev = std(datavar,0,'all','omitnan');
+            datavar(datavar>2*stdev) = NaN;
+            datavar(datavar<-2*stdev) = NaN;
+
+            vardesc = sprintf('Gradient of %s',vardesc);
+
+            %this option currently duplicates the space-time profile plot
+            %using the rate of change of the selected variable
+            plotSpaceTime(obj,time(2:end),profnames,datavar,vardesc);
+        end
+%%
         function output = getBVindex(obj,mobj)
             %set up call to beachvulnerability and handle output
             %setup output for writing to stored dataset
@@ -595,7 +641,7 @@ classdef CT_BeachAnalysis < muiDataSet
                           'Resize','on','HandleVisibility','on','Tag','BayPlotFig');
                 ax = axes(hfig);
                 %select and generate background image
-                ans2 = questdlg('Use image or shoreline','Bay','Image','Shoreline','Shoreline');
+                ans2 = questdlg('Use image or shoreline','Bay','Image','Shorelines','Shorelines');
 
                 if strcmp(ans2,'Image')
                     [filename,path,~] = getfiles('MultiSelect','off','PromptText','Select file:');
@@ -810,13 +856,13 @@ classdef CT_BeachAnalysis < muiDataSet
             %Select to use Volumes or Shore position data and return
             %instances of selected option
             ok = 1;
-            msgtxt = 'A minimum of 3 datasets are needed for a space-time plot';
+            msgtxt = 'A minimum of 3 datasets are needed for space-time use';
             if length(obj)>2
                 type = {obj(:).ModelType}; 
                 utype = {'Volumes','ShorePosition'};
                 idv = strcmp(type,'Volumes');
                 ids = strcmp(type,'ShorePosition');
-                
+
                 if sum(idv)>2 && sum(ids)>2   %volumes and shore position
                     answer = questdlg('Which model','Space-time plot',utype{:},utype{1});
                     idobj = strcmp(type,answer);
@@ -839,7 +885,7 @@ classdef CT_BeachAnalysis < muiDataSet
             %user selects a shoreline position data set - returns Eastings and
             %Northings time series
             vname = [];
-            [cobj,dst,ok] = selectClassInstance(obj,'ModelType','ShoreLine');
+            [cobj,dst,ok] = selectClassInstance(obj,'ModelType','ShoreLines');
             if ok<1
                 warndlg('No selection made');
                 dst_time = []; E = []; N = []; Loc = []; pid = [];
@@ -855,7 +901,7 @@ classdef CT_BeachAnalysis < muiDataSet
             dst_time = dst.RowNames;
             pid = dst.Description;
             Loc = dst.UserData;  %list of profile ids;
-            type = questdlg('Plot as E&N or Profile location?','Shoreline',...
+            type = questdlg('Plot as E&N or Profile location?','Shorelines',...
                                                         options{:},'E&N');
             if strcmp(type,'E&N')            
                 E = dst.Eastings;
@@ -864,7 +910,7 @@ classdef CT_BeachAnalysis < muiDataSet
                 
             else
                 E = [];
-                vname = questdlg('Select variable to plot?','Shoreline',...
+                vname = questdlg('Select variable to plot?','Shorelines',...
                                'Chainage','Slope','Orientation','Chainage');
                 switch vname
                     case 'Chainage'
@@ -890,7 +936,7 @@ classdef CT_BeachAnalysis < muiDataSet
             end
 
             %check that profiles are in order along coast
-            [~,~,idd] = shore_profile_order(mobj,caserec);
+            [~,~,idd] = shore_profile_order(mobj,caserec); %NB this only finds profiles with E,N
             caserec = caserec(idd);
             caselist = caselist(idd);
             [idp,ok] = listdlg('Name','Shoreline extraction', ...
@@ -1252,7 +1298,7 @@ classdef CT_BeachAnalysis < muiDataSet
                 [sortedE,sortedN] = sortENdata2line(Ei,Ni);
                 %now update plot with a new line
                 plot(h_ax,sortedE,sortedN,'DisplayName',time{i},...
-                                       'ButtonDownFcn',@nameDisplay);                
+                                       'ButtonDownFcn',@godisplay);                
             end
             if nline<obj.leglimit
                 legend;
@@ -1281,7 +1327,7 @@ classdef CT_BeachAnalysis < muiDataSet
                 Yi = y(xints);
                 %now update plot with a new line
                 plot(h_ax,Xi,Yi,'.-','DisplayName',time{i},...
-                                       'ButtonDownFcn',@nameDisplay);                
+                                       'ButtonDownFcn',@godisplay);                
             end
             if nline<obj.leglimit
                 legend;
@@ -1388,9 +1434,14 @@ classdef CT_BeachAnalysis < muiDataSet
             legtxt = varname;
             titletxt = sprintf('Surface plot of %s',varname);
             ptype = 'contourf'; 
-            %apply function from Forum to replace NaNs with interpolated values
-            method = 3;  %results can be sensitive to fitting method used
-            zt = inpaint_nans(data,method)'; 
+            infill = questdlg('Infill NaNs?','Space-time plot','Yes','No','Yes');
+            if strcmp(infill,'Yes')
+                %apply function from Forum to replace NaNs with interpolated values
+                method = 3;  %results can be sensitive to fitting method used
+                zt = inpaint_nans(data,method)'; 
+            else
+                zt = data';
+            end
             yt = 1:yint;
             
             %to normalise data use
@@ -1425,7 +1476,8 @@ classdef CT_BeachAnalysis < muiDataSet
                 muiPlots.xySurface(xt,yt,zt,xint,yint,xtext,ytext,...
                     legtxt,titletxt,ptype);
                 figax = hfig.CurrentAxes; 
-                hold(figax,'on')   
+                hold(figax,'on') 
+                [yt,pnames] = subLabels(yt,pnames);
                 figax.YTick = yt;
                 figax.YTickLabel = pnames;
             else
@@ -1434,13 +1486,7 @@ classdef CT_BeachAnalysis < muiDataSet
                     legtxt,titletxt,ptype);
                 figax = hfig.CurrentAxes; 
                 hold(figax,'on')  
-                if length(yt)>20
-                    inp = inputdlg({'Interval to use (integer)'},'SpaceTime',1,{'5'});
-                    if isempty(inp), inp = {'5'}; end
-                    n = str2double(inp{1});
-                    yt = yt(1:n:end);
-                    pnames = pnames(1:n:end);
-                end
+                [yt,pnames] = subLabels(yt,pnames);
                 figax.XTick = yt;
                 figax.XTickLabel = pnames;           
                 figax.XTickLabelRotation = 45;
@@ -1448,8 +1494,9 @@ classdef CT_BeachAnalysis < muiDataSet
             hold(figax,'off')
             %to fix the range of colorbar use
 %             caxis([200,500]);  
-            
+            %--------------------------------------------------------------
             function var = ScaleVariable(inputvar,dim)
+                %normalise the variable based on users selected dimension
                 vardims = fliplr(size(inputvar));
                 %invert matrix if dim=2 to obtain values for each row 
                 if dim==2
@@ -1466,6 +1513,17 @@ classdef CT_BeachAnalysis < muiDataSet
                 if dim==2
                     var = var';
                 end
+            end
+            %--------------------------------------------------------------
+            function [yt,pnames] = subLabels(yt,pnames)
+                %subselect the number of profile labels to be displayed
+                if length(yt)>20
+                    inp = inputdlg({'Interval profile labels (integer)'},'SpaceTime',1,{'5'});
+                    if isempty(inp), inp = {'5'}; end
+                    n = str2double(inp{1});
+                    yt = yt(1:n:end);
+                    pnames = pnames(1:n:end);
+                end                
             end
         end    
    

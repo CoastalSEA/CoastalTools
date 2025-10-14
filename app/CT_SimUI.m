@@ -155,9 +155,11 @@ classdef CT_SimUI < muiDataUI
             lobj = getClassObj(mobj,'Cases','CT_BeachAnalysis');
             if strcmp(src.Tag,'YGOR model')                
                 idum = find(strcmp(muicat.Catalogue.CaseClass,'muiUserModel'));                
-                caseidx = getClassInstances(lobj,'ModelType','ShorePosition');
-                idps = caseRec(muicat,caseidx);
-                idx = sort([idwv;idum;idps']);
+                posidx = getClassInstances(lobj,'ModelType','ShorePosition');
+                idp = caseRec(muicat,posidx);
+                volidx = getClassInstances(lobj,'ModelType','Volumes');
+                idv = caseRec(muicat,volidx);
+                idx = sort([idwv;idum;idp';idv']);
             else
                 caseidx = getClassInstances(lobj,'ModelType','Volumes');
                 idps = caseRec(muicat,caseidx);
