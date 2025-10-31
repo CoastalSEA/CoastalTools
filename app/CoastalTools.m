@@ -193,9 +193,9 @@ classdef CoastalTools < muiModelUI
             menu.Run(7).Callback = repmat({@obj.runModel},[1,3]);            
             
             %% Plot menu --------------------------------------------------  
-            menu.Analysis(1).List = {'Plots','Statistics','Coastal Plots'};
-            menu.Analysis(1).Callback = repmat({@obj.analysisMenuOptions},[1,3]);
-            menu.Analysis(1).Separator = {'off','off','on'};
+            menu.Analysis(1).List = {'Plots','Statistics','Coastal Plots','Spectrum Plots'};
+            menu.Analysis(1).Callback = repmat({@obj.analysisMenuOptions},[1,4]);
+            menu.Analysis(1).Separator = {'off','off','on','off'};
             
             %% Help menu --------------------------------------------------
             menu.Help.List = {'Documentation','Manual'};
@@ -499,6 +499,8 @@ classdef CoastalTools < muiModelUI
                     obj.mUI.StatsUI = muiStatsUI.getStatsUI(obj);
                 case 'Coastal Plots'
                     ct_coastal_plots(obj);
+                case 'Spectrum Plots'
+                    ctWaveSpectra.getPlotOption(obj);
             end            
         end
 
