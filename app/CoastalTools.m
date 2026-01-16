@@ -15,8 +15,8 @@ classdef CoastalTools < muiModelUI
 % 
     properties  (Access = protected)
         %implement properties defined as Abstract in muiModelUI
-        vNumber = '3.41'
-        vDate   = 'June 2024'
+        vNumber = '3.44'
+        vDate   = 'January 2026'
         modelName = 'CoastalTools'                        
         %Properties defined in muiModelUI that need to be assigned in setGui
         % ModelInputs  %classes required by model: used in isValidModel check 
@@ -73,7 +73,7 @@ classdef CoastalTools < muiModelUI
             %menu. Main menu labels are defined in sequential order and 
             %submenus in order following each brach to the lowest level 
             %before defining the next branch.         
-                                                              % << Edit menu to suit model 
+                                                            
             MenuLabels = {'File','Tools','Project','Setup','Run',...
                                                         'Analysis','Help'};
             menu = menuStruct(obj,MenuLabels);  %create empty menu struct
@@ -111,10 +111,10 @@ classdef CoastalTools < muiModelUI
             menu.Project(3).Callback = repmat({@obj.projectMenuOptions},[1,2]);
             
             %% Setup menu -------------------------------------------------
-            menu.Setup(1).List = {'Import data','Site parameters',...
+            menu.Setup(1).List = {'Import data','Import table','Site parameters',...
                                       'Model parameters','Data clean-up'};                                    
-            menu.Setup(1).Callback = repmat({'gcbo;'},[1,4]);
-            menu.Setup(1).Separator = {'off','off','off','on'}; %separator preceeds item
+            menu.Setup(1).Callback = repmat({'gcbo;'},[1,5]);
+            menu.Setup(1).Separator = {'off','off','on','off','on'}; %separator preceeds item
             
             % submenu for Import Data
             menu.Setup(2).List = {'Waves','Water levels','Winds',...
@@ -128,8 +128,20 @@ classdef CoastalTools < muiModelUI
                 menu.Setup(j+2).List = {'Load','Add','Delete','Quality Control'};
                 menu.Setup(j+2).Callback = repmat({@obj.loadMenuOptions},[1,4]);
             end
-            % submenu for Site parameters
+
+            % submenu for Import Table (if these are changed need to edit
+            % loadTVoptions to be match)
             offset = nitems+3;
+            menu.Setup(offset).List = {'Load Table','Add to Table','Delete Table'};
+            menu.Setup(offset).Callback = {@obj.loadTVoptions,'gcbo;','gcbo;'};
+
+            for k=1:2
+                menu.Setup(offset+k).List = {'Rows','Variables','Dataset'};
+                menu.Setup(offset+k).Callback = repmat({@obj.loadTVoptions},[1,3]);
+            end
+
+            % submenu for Site parameters
+            offset = offset+3;
             menu.Setup(offset).List = {'Wave propagation',...
                             'Wind-wave hindcast','Structure parameters'};
             menu.Setup(offset).Callback = repmat({@obj.runProps},[1,3]);
@@ -248,6 +260,7 @@ classdef CoastalTools < muiModelUI
                 'Sim_YGORinput','Simulation',[0.95,0.48],{180,60},'YGOR Forecast parameters:';...
                 'Sim_BMVinput','Simulation',[0.95,0.98],{180,60},'BMV Model parameters:'};
         end    
+
  %%
         function setTabAction(obj,src,cobj)
             %function required by muiModelUI and sets action for selected
@@ -255,7 +268,8 @@ classdef CoastalTools < muiModelUI
             msg = 'No results to display';
             switch src.Tag                             
                 case 'Plot' 
-                    if isa(cobj,'CT_BeachAnalysis') || isa(cobj,'SpectralTransfer')  
+                    if isa(cobj,'CT_BeachAnalysis') || ...
+                            isa(cobj,'SpectralTransfer') || isa(cobj,'muiTableImport')
                         tabPlot(cobj,src,obj);
                     else
                         tabPlot(cobj,src);
@@ -304,12 +318,12 @@ classdef CoastalTools < muiModelUI
         function setupMenuOptions(obj,src,~)
             %callback functions for data input
             switch src.Text
-                case 'Input parameters'                       % << Edit to call Parameter Input class
+                case 'Input parameters'                       
                     ParamInput_template.setParamInput(obj);  
                     %update tab display with input data
                     tabsrc = findobj(obj.mUI.Tabs,'Tag','Inputs');
                     InputTabSummary(obj,tabsrc);
-                case 'Run parameters'                         % << Edit to call Data Import class
+                case 'Run parameters'                        
                     ParamInput_template.setParamInput(obj);  
                     %update tab display with input data
                     tabsrc = findobj(obj.mUI.Tabs,'Tag','Inputs');
@@ -317,7 +331,8 @@ classdef CoastalTools < muiModelUI
                 case 'Model Constants'
                     obj.Constants = editProperties(obj.Constants);
             end
-        end  
+        end
+
 %%
         function loadMenuOptions(obj,src,~)
             %callback functions to import data   
@@ -355,7 +370,29 @@ classdef CoastalTools < muiModelUI
             end
             ht = findobj(obj.mUI.Tabs.Children,'Tag','Data');
             DrawMap(obj,ht);
-        end        
+        end  
+
+%%
+        function loadTVoptions(obj,src,~)
+            %callback functions to import table data using muiTableImport
+            classname = 'muiTableImport';
+            switch src.Text
+                case 'Load Table'
+                    muiTableImport.loadData(obj.Cases);
+                otherwise
+                    switch src.Parent.Text
+                        case 'Add to Table'
+                            functxt = ['add',src.Text];
+                        case 'Delete Table'
+                            functxt = ['del',src.Text];
+                        otherwise
+                            functxt = [];
+                    end
+                    useCase(obj.Cases,'single',{classname},functxt);
+            end
+            DrawMap(obj);
+        end 
+
 %%
         function runProps(obj,src,~)
             %callback functions for run and settings parameter input
@@ -419,6 +456,7 @@ classdef CoastalTools < muiModelUI
                     user_model(obj)
             end
         end
+
 %%
         function runWaveModel(obj,src,~)
             %callback functions to run wave models
@@ -443,6 +481,7 @@ classdef CoastalTools < muiModelUI
             ht = findobj(obj.mUI.Tabs.Children,'Tag','Models');
             DrawMap(obj,ht);
         end
+
 %%
         function runTides(obj,src,~)
             %callback functions to run tidal analysis and reconstruction
@@ -455,6 +494,7 @@ classdef CoastalTools < muiModelUI
                     ctTidalAnalysis.getTidalData(obj);
             end
         end
+
 %%
         function runBeachAnalysis(obj,src,~)
             %callback to run beach analysis functions
@@ -536,7 +576,8 @@ classdef CoastalTools < muiModelUI
             else
                 isok = true;
             end
-        end        
+        end   
+
 %% ------------------------------------------------------------------------
 % Overload muiModelUI.MapTable to customise Data and Model Tabs
 %--------------------------------------------------------------------------  
