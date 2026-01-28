@@ -321,20 +321,22 @@ classdef CT_PlotsUI < muiDataUI
             S.XYZlabels = {'Var','X'};               %default button labels
             
             %Action button specifications
-            S.ActButNames = {'Refresh','Swap','Polar'}; %names assigned selection struct
-            S.ActButText = {char(174),'XY','+'};     %labels for additional action buttons
+            S.ActButNames = {'Refresh','RightYaxis','Swap','Polar'}; %names assigned selection struct
+            S.ActButText = {char(174),'yL','XY','+'};     %labels for additional action buttons
             % Negative values in ActButPos indicate that a
             % button is alligned with a selection option numbered in the 
             % order given by S.Titles
-            S.ActButPos = [0.86,-1;0.895,0.37;0.895,0.28];%positions for action buttons   
+            S.ActButPos = [0.86,-1;0.895,0.38;0.895,0.32;0.895,0.26];%positions for action buttons   
             % action button callback function names
             S.ActButCall = {'@(src,evt)updateCaseList(obj,src,evt,mobj)',...
+                            '@(src,evt)setRightYaxis(src,evt)',...
                             '@(src,evt)setXYorder(src,evt)',...
                             '@(src,evt)setPolar(src,evt)'};
             % tool tips for buttons             
             S.ActButTip = {'Refresh data list',...
+                           'Swap from left to right axis',...
                            'Swap from X-Y to Y-X axes',...
-                           'XY to Polar; X data in degrees or radians'};         
+                           'XY to Polar; X data in degrees or radians'};           
             obj.TabContent(itab) = S;                %update object
         end
 %%
