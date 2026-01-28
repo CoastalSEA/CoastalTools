@@ -158,7 +158,8 @@ classdef CT_PlotsUI < muiDataUI
                     idx = ismember(classes,'ctBeachProfileData');
                 case 'Rose'
                     roseclasses = {'ctWaveData','ctWindData','ctWaveModel',...
-                                   'ctWindWaveModel','WRM_WaveModel'};
+                                   'ctWindWaveModel','WRM_WaveModel'...
+                                   'muiTableImport','muiUserData','muiUserModel'};
                     idx = ismember(classes,roseclasses);
                 otherwise
                     idx = true(length(classes),1);
@@ -228,8 +229,20 @@ classdef CT_PlotsUI < muiDataUI
             S.XYZlabels = {'TSvar'};                 %default button labels
             
             %Action button specifications - use default
-       
-            obj.TabContent(itab) = S;                %update object
+            %Action button specifications
+            S.ActButNames = {'Refresh','RightYaxis'}; %names assigned selection struct
+            S.ActButText = {char(174),'yL'};     %labels for additional action buttons
+            % Negative values in ActButPos indicate that a
+            % button is alligned with a selection option numbered in the 
+            % order given by S.Titles
+            S.ActButPos = [0.86,-1;0.895,0.30];  %positions for action buttons   
+            % action button callback function names
+            S.ActButCall = {'@(src,evt)updateCaseList(obj,src,evt,mobj)',...
+                            '@(src,evt)setRightYaxis(src,evt)'};
+            % tool tips for buttons             
+            S.ActButTip = {'Refresh data list',...
+                           'Swap from left to right axis'};         
+            obj.TabContent(itab) = S;            %update object
         end
 %%
         function setProf_tab(obj,src)

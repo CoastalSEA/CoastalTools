@@ -9,7 +9,7 @@ To make changes, update the MATLAB code and republish this document.
 <title>CoastalTools classes and functions</title>
 <meta name="generator" content="MATLAB 24.2">
 <link rel="schema.DC" href="http://purl.org/dc/elements/1.1/">
-<meta name="DC.date" content="2025-04-24">
+<meta name="DC.date" content="2026-01-28">
 <meta name="DC.source" content="coastaltools_classes.m">
 <style type="text/css">
 html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
@@ -173,6 +173,10 @@ table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px soli
 <b>ctWindData</b> &ndash; import wind data</li>
 <li>
 <b>ctWindWaveModel</b> &ndash; model wind-wave generation over varying fetch lengths</li>
+<li>
+<b>waveModels</b> - Abstract class wave models to define data access methods. Used by <b>ctWaveModel</b> and <b>WRM_WaveModel</b> classes</li>
+<li>
+<b>addwaterlevels2waves</b> - class function to add water levels to a selected wave dataset. Used by <b>waveModels</b> and <b>ctWaveData</b> when being used for derivative models such as runup in <b>CT_WaveModels</b>.</li>
 </ul>
 </div>
 <h2 id="5">Import format functions</h2>
@@ -331,6 +335,11 @@ table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px soli
 % * *ctWaveParameters* – input parameters for the wave models
 % * *ctWindData* – import wind data
 % * *ctWindWaveModel* – model wind-wave generation over varying fetch lengths
+% * *waveModels* - Abstract class wave models to define data access methods.
+% Used by *ctWaveModel* and *WRM_WaveModel* classes
+% * *addwaterlevels2waves* - class function to add water levels to a 
+% selected wave dataset. Used by *waveModels* and *ctWaveData* when being 
+% used for derivative models such as runup in *CT_WaveModels*.
 
 %% Import format functions
 % The folder ../muiAppCoastalClasses/FormatFiles contains a range of 

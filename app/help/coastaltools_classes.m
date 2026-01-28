@@ -39,6 +39,11 @@
 % * *ctWaveParameters* – input parameters for the wave models
 % * *ctWindData* – import wind data
 % * *ctWindWaveModel* – model wind-wave generation over varying fetch lengths
+% * *waveModels* - Abstract class wave models to define data access methods.
+% Used by *ctWaveModel* and *WRM_WaveModel* classes
+% * *addwaterlevels2waves* - class function to add water levels to a 
+% selected wave dataset. Used by *waveModels* and *ctWaveData* when being 
+% used for derivative models such as runup in *CT_WaveModels*.
 
 %% Import format functions
 % The folder ../muiAppCoastalClasses/FormatFiles contains a range of 

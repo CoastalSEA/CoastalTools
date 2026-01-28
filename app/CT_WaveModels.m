@@ -26,9 +26,10 @@ classdef CT_WaveModels < muiDataSet
     
     properties (Transient)
         MenuList = {'Littoral Drift','X-shore Transport','Wave Power',...
-                     'Runup','Overtopping','Iribarren Number','Beach type'}
-        ModelName = {'Drift','Xshore','WavePower','Runup','Overtopping',...
-                                                'Iribarren','BeachType'};
+                     'Runup','Structure Overtopping','Beach Overtopping',...
+                     'Iribarren Number','Beach type'}
+        ModelName = {'Drift','Xshore','WavePower','Runup','StructureOtop',...
+                                      'BeachOtop','Iribarren','BeachType'};
     end
     
     methods
@@ -49,12 +50,17 @@ classdef CT_WaveModels < muiDataSet
             
             %now check that the input data has been entered
             %isValidModel checks the InputHandles defined in ModelUI
-            if ~isValidModel(mobj, metaclass(obj).Name)  
-                txt1 = 'Use Setup to define model input parameters';
-                txt2 = 'Run Nearshore wave model to define input waves';
-                warndlg(sprintf('%s\n%s',txt1,txt2));
-                return;
+            %sturct input allows class to be used as well as ctWaveModel
+            txt1 = 'Use Setup to define model input parameters';
+            txt2 = 'Run Nearshore wave model to define input waves';
+            if id_model==4
+                altclass = struct('idv',{2},'class',{'ctWaveData'});
+                isvalid = isValidModel(mobj, metaclass(obj).Name,altclass);
+            else
+                isvalid = isValidModel(mobj, metaclass(obj).Name);
             end
+            if ~isvalid, warndlg(sprintf('%s\n%s',txt1,txt2)); return; end              
+
             muicat = mobj.Cases;
             %assign the run parameters to the model instance
             %may need to be after input data selection to capture caserecs
@@ -72,11 +78,13 @@ classdef CT_WaveModels < muiDataSet
                     output = energyModel(obj,mobj,site);
                 case 4              %Runup                    
                     output = runupModel(obj,mobj,site);
-                case 5              %Overtopping
-                    output = overtopModel(obj,mobj,site);
-                case 6              %Iribarren Number
+                case 5              %Strucure Overtopping
+                    output = sOtopModel(obj,mobj,site);
+                case 6              %Strucure Overtopping
+                    output = bOtopModel(obj,mobj,site);
+                case 7              %Iribarren Number
                     output = iribarrenModel(obj,mobj,site); 
-                case 7              %Beach type based on fall velocity
+                case 8              %Beach type based on fall velocity
                     output = beachTypeModel(obj,mobj,site);
             end
             if isempty(output) || ~isfield(output,'results') || isempty(output.results{1})
@@ -167,6 +175,7 @@ classdef CT_WaveModels < muiDataSet
             mtxt2 = sprintf('Using %s case for wave input',wv.Description);
             output.metatxt = sprintf('%s\n%s',mtxt1,mtxt2);    
         end
+
 %%
         function output = xshoreModel(~,mobj,site)
             % compute the xross-shore transport based in the surf zone
@@ -217,6 +226,7 @@ classdef CT_WaveModels < muiDataSet
             mtxt2 = sprintf('Using %s case for wave input',wv.Description);
             output.metatxt = sprintf('%s\n%s',mtxt1,mtxt2);  
         end
+
 %%
         function output = energyModel(~,mobj,site)
             %calculate the inshore wave power (wave energy flux) using 
@@ -264,6 +274,7 @@ classdef CT_WaveModels < muiDataSet
             mtxt2 = sprintf('Using %s case for wave input',wv.Description);
             output.metatxt = sprintf('%s\n%s',mtxt1,mtxt2);  
         end
+
 %%
         function output = runupModel(obj,mobj,site)
              %calculate the 2% runup magnitude and elevation (R2+WL) using
@@ -288,15 +299,35 @@ classdef CT_WaveModels < muiDataSet
             
             %class instance for inshore wave data
             promptxt = 'Select nearshore wave data set:'; 
-            inwave = selectCaseObj(mobj.Cases,[],{'ctWaveModel','WRM_WaveModel'},promptxt);
+            [inwave,~,~] = selectCaseObj(mobj.Cases,[],...
+                    {'ctWaveModel','WRM_WaveModel','ctWaveData'},promptxt);
             if isempty(inwave), output = [];   return; end            
             %retrieve an inshore wave data set
-            [wv,output.wvrec] = getWaveModelDataset(inwave,mobj,...
+            if isa(inwave,'ctWaveData')
+                %retrieve an offshore (e.g. buoy) wave data set
+                % %not implemented
+                % wv = [];
+                % msgbox('Select nearshore (model) wave data')
+                output.wvrec = caseRec(mobj.Cases,inwave.CaseIndex);
+                [wv,meta] = addWaveWLdataset(inwave,mobj,output.wvrec);
+                mtxt2 = meta.inptxt;
+                idv = strcmp(wv.VariableNames,'Hs');
+                wv.VariableNames{idv} = 'Hsi';%match variable names to wave model
+            else
+                %retrieve an inshore wave data set
+                [wv,output.wvrec] = getWaveModelDataset(inwave,mobj,...
                                                 {'Inwave_model'},{'Tp'});
-            if isempty(wv), return; end %user cancelled or no data
+                mtxt2 = sprintf('Using %s case for wave input',wv.Description);
+            end
+            if isempty(wv), output = []; return; end %user cancelled or no data
             
-            %get "effective" deepwater offshore wave conditions             
-            dep0 = wv.depi;        %depth at inshore pint used by wave model
+            %get "effective" deepwater offshore wave heights   
+            if any(strcmp(wv.VariableNames,'depi'))
+                dep0 = wv.depi;        %depth at inshore point used by wave model
+            else
+                dep0 = wv.swl-site.OffshoreBedLevel;
+                wv = addvars(wv,dep0,'NewVariableNames','depi');
+            end
             dep1  = 100;           %offshore deep water depth           
             Hs0 = shoaling(wv.Hsi,wv.Tp,dep0,dep1);
             
@@ -308,8 +339,9 @@ classdef CT_WaveModels < muiDataSet
             bs = profileslope(0,swl_0,z1km,ubs); %first argument is depth
             
             %get runup and elevation of runup             
-            R2 = runup(bs,Hs0,wv.Tp);            
-            zR = R2+wv.swl;
+            [R2,~,~,gR2] = runup(bs,Hs0,wv.Tp);            
+            zR2 = R2+wv.swl;
+            zgR2 = gR2+wv.swl;
             
             %get runup slope using method of Reis and Gama, 2010
             Rslope = getRunupSlope(obj,mobj,Hs0,wv.Tp,site);
@@ -317,14 +349,15 @@ classdef CT_WaveModels < muiDataSet
             bs = mean(bs,'omitnan'); %use average slope in metadata
             zi = mean((wv.swl-wv.depi),'omitnan');
             
-            output.results = {R2,zR,Rslope};
+            output.results = {R2,zR2,gR2,zgR2,Rslope};
             output.modeltime = wv.RowNames;
             mtxt1 = sprintf('Beach slope=1:%0.1f; mean zi=%g',bs,zi); 
-            mtxt2 = sprintf('Using %s case for wave input',wv.Description);
+            
             output.metatxt = sprintf('%s\n%s',mtxt1,mtxt2);  
         end
+
 %%
-        function output = overtopModel(~,mobj,site)
+        function output = sOtopModel(~,mobj,site)
             %calculate the wave overtopping for the defined structure
             %properties using the HRW Owen model.
             % INPUTS
@@ -362,7 +395,7 @@ classdef CT_WaveModels < muiDataSet
             varnames = wv.VariableNames;
             if ~any(strcmp(varnames,'Tz'))
                 Tz = wv.Tp*0.7775;  %assumes JONSWAP with gamma=3.3
-                wv = addvars(wvdst,Tz,'NewVariableNames','Tz'); 
+                wv = addvars(wv,Tz,'NewVariableNames','Tz'); 
                 getdialog('Tz estimated using Tp')
             end
             
@@ -384,6 +417,55 @@ classdef CT_WaveModels < muiDataSet
             mtxt2 = sprintf('Using %s case for wave input',wv.Description);
             output.metatxt = sprintf('%s\n%s',mtxt1,mtxt2);  
         end
+
+%%
+        function output = bOtopModel(~,mobj,site)
+            %calculate the wave overtopping for a gravel beach
+            %properties required by the model of Stoke's et al, 2021
+            % INPUTS
+            % mobj - handle to CoastlTools class objects
+            % site - uses ctWaveParameters properties
+            %        BeachCrestLevel  - crest elevation (mOD)
+            %        UpperBeachSlope - upper beach slope (1:ubs)
+            % Variables used by overtopping model:
+                % Hsi  - inshore significant wave height (m)
+                % Tp   - peak wave period (s)
+                % swl  - still water level (m above datum)
+            % FUNCTION CALLS (external)
+            % otopBeach (uses hb_break, profileslope)
+            
+            %class instance for inshore wave data
+            promptxt = 'Select nearshore wave data set:'; 
+            inwave = selectCaseObj(mobj.Cases,[],{'ctWaveModel','WRM_WaveModel'},promptxt);
+            if isempty(inwave), output = [];  return; end 
+            %retrieve an inshore wave data set
+            [wv,output.wvrec] = getWaveModelDataset(inwave,mobj,...
+                                                {'Inwave_model'},{'Tp'});
+            if isempty(wv), return; end %user cancelled or no data
+
+            %get "effective" deepwater offshore wave heights  
+            if any(strcmp(wv.VariableNames,'depi'))
+                dep0 = wv.depi;        %depth at inshore point used by wave model
+            else
+                dep0 = wv.swl-site.OffshoreBedLevel;
+            end
+            dep1  = 100;           %offshore deep water depth           
+            H0 = shoaling(wv.Hsi,wv.Tp,dep0,dep1);
+
+            inp = inputdlg('Beach toe level (mOD):','Beach toe',1,{'0'});
+            if isempty(inp), output = []; return; end    
+            beach = getPropertiesStruct(site);
+            beach.BeachToeLevel = str2double(inp{1});
+
+            [Q,gR2,zgR2] = otopBeach(wv.swl,wv.Hsi,wv.Tp,H0,beach);
+
+            output.results = {Q,gR2,zgR2};
+            output.modeltime = wv.RowNames;
+            mtxt1 = sprintf('Beach toe level %g',beach.BeachToeLevel); 
+            mtxt2 = sprintf('Using %s case for wave input',wv.Description);
+            output.metatxt = sprintf('%s\n%s',mtxt1,mtxt2);  
+        end
+
 %%
         function output = iribarrenModel(~,mobj,site)
             %calculate the Iribarren number and breaker type at the 
@@ -426,6 +508,7 @@ classdef CT_WaveModels < muiDataSet
             mtxt2 = sprintf('Using %s case for wave input',wv.Description);
             output.metatxt = sprintf('%s\n%s',mtxt1,mtxt2);  
         end
+
 %%
        function output = beachTypeModel(~,mobj,site)
             % compute the beach type based on dimensionless fall velocity
@@ -464,7 +547,8 @@ classdef CT_WaveModels < muiDataSet
             mtxt1 = sprintf('d50=%g',d50); 
             mtxt2 = sprintf('Using %s case for wave input',wv.Description);
             output.metatxt = sprintf('%s\n%s',mtxt1,mtxt2);  
-        end
+       end
+
 %%
         function Rslope = getRunupSlope(~,mobj,Hs0,Tp,site)
             %setup input and call runup_slope
@@ -484,7 +568,8 @@ classdef CT_WaveModels < muiDataSet
                 P = str2double(answer{3});
             end
             Rslope = runup_slope(Hs0,Tp,ubs,C,d50,S,P,g,visc);                        
-        end        
+        end 
+
 %%
         function tabPlot(obj,src) %abstract class for muiDataSet
             %generate plot for display on Q-Plot tab
@@ -514,6 +599,7 @@ classdef CT_WaveModels < muiDataSet
             obj.RunParam.ctWaveParameters.GrainSize = d50;
             obj.RunParam.ctWaveParameters.DriftCoefficient = Kc;
         end
+
 %%
         function dsp = modelDSproperties(~,id_model) 
             %define a dsproperties struct and add the model metadata
@@ -547,28 +633,40 @@ classdef CT_WaveModels < muiDataSet
                         'QCflag',{'model'});
                 case 4              %Runup
                     dsp.Variables = struct(...                       
-                        'Name',{'R2','zRU','Rslope'},...
-                        'Description',{'Runup (2%)','Runup elevation (R2%+swl)',...
-                                                    'Runup slope (1:rs)'},...
-                        'Unit',{'m','mOD','-'},...
+                        'Name',{'R2','zR2','gR2','zgR2','Rslope'},...
+                        'Description',{'Runup (R2%)','Runup elevation (R2%+swl)',...
+                                       'Runup gravel (gR2%)','Runup gravel elevation (gR2%+swl)',...
+                                       'Runup slope (1:rs)'},...
+                        'Unit',{'m','mOD','m','mOD','-'},...
                         'Label',{'Runup distance (m)','Runup elevation (mOD)',...
-                                                    'Runup slope (1:rs)'},...
-                        'QCflag',repmat({'model'},1,3));
-                case 5              %Overtopping
+                                 'Runup distance (m)','Runup elevation (mOD)',...
+                                 'Runup slope (1:rs)'},...
+                        'QCflag',repmat({'model'},1,5));
+                case 5              %Structure Overtopping
                     dsp.Variables = struct(...                       
                         'Name',{'Qotop'},...
                         'Description',{'Overtopping discharge'},...
                         'Unit',{'m^3/s'},...
                         'Label',{'Overtopping discharge (m^3/s)'},...
                         'QCflag',{'model'});
-                case 6              %Iribarren
+                case 6
+                    dsp.Variables = struct(...                       
+                        'Name',{'Qotop','gR2','zgR2'},...
+                        'Description',{'Overtopping discharge',...
+                                       'Runup gravel (gR2%)',...
+                                       'Runup gravel elevation (gR2%+swl)'},...
+                        'Unit',{'m^3/s','m','mOD'},...
+                        'Label',{'Overtopping discharge (m^3/s)',...
+                                 'Runup distance (m)','Runup elevation (mOD)'},...
+                        'QCflag',repmat({'model'},1,3));
+                case 7              %Iribarren
                     dsp.Variables = struct(...                       
                         'Name',{'Iri','BreakerType'},...
                         'Description',{'Iribarren wave number','Breaker type'},...
                         'Unit',{'-','-'},...
                         'Label',{'Iribarren wave number','Breaker Type (1-Spill; 2-Plunge; 3-Surge)'},...
                         'QCflag',{'model','model'});
-                case 7              %Beach tupe 
+                case 8              %Beach tupe 
                     dsp.Variables = struct(...                       
                         'Name',{'dfv'},...
                         'Description',{'Dimensionless fall velocity'},...

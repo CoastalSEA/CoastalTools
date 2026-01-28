@@ -175,34 +175,38 @@ classdef CoastalTools < muiModelUI
                                 'Littoral Drift','X-shore Transport',...
                                 'Overtopping','Iribarren Number'}; 
             nitems = length(menu.Run(2).List);
-            menu.Run(2).Callback = repmat({@obj.runWaveModel},[1,nitems]);
+            menu.Run(2).Callback = [repmat({@obj.runWaveModel},[1,nitems-2]),...
+                                           {'gcbo;'},{@obj.runWaveModel},];
             sep = repmat({'off'},[1,10]);   sep{5} = 'on';
             menu.Run(2).Separator = sep;
-            
+
+            menu.Run(3).List = {'Structure Overtopping','Beach Overtopping'};
+            menu.Run(3).Callback = repmat({@obj.runWaveModel},1,2);
+
             % submenu for Beach properties
-            menu.Run(3).List = {'Profiles','Shore change','Beach type',...
+            menu.Run(4).List = {'Profiles','Shore change','Beach type',...
                                 'Crenulate Bay','Shore profile','Dean profile'}; 
             runbeach = repmat({@obj.runBeachAnalysis},[1,3]);               
-            menu.Run(3).Callback = [{'gcbo;'},{'gcbo;'},{@obj.runWaveModel},...
+            menu.Run(4).Callback = [{'gcbo;'},{'gcbo;'},{@obj.runWaveModel},...
                                                             runbeach(:)'];
-            menu.Run(3).Separator = {'off','off','off','off','on','off'};
+            menu.Run(4).Separator = {'off','off','off','off','on','off'};
             
-            menu.Run(4).List = {'Volumes','Shore position',...
+            menu.Run(5).List = {'Volumes','Shore position',...
                         'Location plot','Centroid plot','Space-time plot'}; 
-            menu.Run(4).Callback = repmat({@obj.runBeachAnalysis},[1,5]);
-            menu.Run(4).Separator = {'off','off','on','off','off'};
+            menu.Run(5).Callback = repmat({@obj.runBeachAnalysis},[1,5]);
+            menu.Run(5).Separator = {'off','off','on','off','off'};
             
-            menu.Run(5).List = {'Shore lines','Shore volumes','Change plot','Rates plot'};
-            menu.Run(5).Callback = repmat({@obj.runBeachAnalysis},[1,4]);
-            menu.Run(5).Separator = {'off','off','on','off'};
+            menu.Run(6).List = {'Shore lines','Shore volumes','Change plot','Rates plot'};
+            menu.Run(6).Callback = repmat({@obj.runBeachAnalysis},[1,4]);
+            menu.Run(6).Separator = {'off','off','on','off'};
             
             % submenu for Tidal analysis
-            menu.Run(6).List = {'Analysis','Reconstruction'}; 
-            menu.Run(6).Callback = repmat({@obj.runTides},[1,2]);
+            menu.Run(7).List = {'Analysis','Reconstruction'}; 
+            menu.Run(7).Callback = repmat({@obj.runTides},[1,2]);
             
             % submenu for Beach vulnerability
-            menu.Run(7).List = {'BVI site','BVI profile set','BVI set plot'};
-            menu.Run(7).Callback = repmat({@obj.runModel},[1,3]);            
+            menu.Run(8).List = {'BVI site','BVI profile set','BVI set plot'};
+            menu.Run(8).Callback = repmat({@obj.runModel},[1,3]);            
             
             %% Plot menu --------------------------------------------------  
             menu.Analysis(1).List = {'Plots','Statistics','Coastal Plots','Spectrum Plots'};
