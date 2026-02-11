@@ -26,7 +26,7 @@ classdef CT_PlotsUI < muiDataUI
     methods (Access=protected)
         function obj = CT_PlotsUI(mobj)
             %initialise standard figure and menus
-            guititle = 'Select Data for Plotting';
+            guititle = 'Plotting';
             setDataUIfigure(obj,mobj,guititle);    %initialise figure     
         end
     end

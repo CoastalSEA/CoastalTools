@@ -16,7 +16,7 @@ classdef CoastalTools < muiModelUI
     properties  (Access = protected)
         %implement properties defined as Abstract in muiModelUI
         vNumber = '3.44'
-        vDate   = 'January 2026'
+        vDate   = 'February 2026'
         modelName = 'CoastalTools'                        
         %Properties defined in muiModelUI that need to be assigned in setGui
         % ModelInputs  %classes required by model: used in isValidModel check 
@@ -152,13 +152,12 @@ classdef CoastalTools < muiModelUI
             % submenu for Data clean-up
             menu.Setup(offset+2).List = {'Concatenate two timeseries',...
                             'Resample timeseries','Patch timeseries',...                
-                            'Trim timeseries','Delete interval',...
+                            'Trim timeseries','Match timeseries','Delete interval',...
                             'Merge cases','Subsample case','Scale variables',...
                             'Scale range','Delete multiple profiles',...                
                             'Edit or Delete profile in timeseries'};
-            menu.Setup(offset+2).Callback = repmat({@obj.datacleanup},[1,11]);
-            menu.Setup(offset+2).Separator = {'off','off','off','off','off',...
-                                              'off','off','on','off','on','off'};
+            menu.Setup(offset+2).Callback = repmat({@obj.datacleanup},[1,12]);
+            menu.Setup(offset+2).Separator = [repmat({'off'},[1,10]),{'on','off'}];         
             
             %% Run menu ---------------------------------------------------
             menu.Run(1).List = {'Wave properties','Beach properties',...
@@ -196,9 +195,10 @@ classdef CoastalTools < muiModelUI
             menu.Run(5).Callback = repmat({@obj.runBeachAnalysis},[1,5]);
             menu.Run(5).Separator = {'off','off','on','off','off'};
             
-            menu.Run(6).List = {'Shore lines','Shore volumes','Change plot','Rates plot'};
-            menu.Run(6).Callback = repmat({@obj.runBeachAnalysis},[1,4]);
-            menu.Run(6).Separator = {'off','off','on','off'};
+            menu.Run(6).List = {'Shore lines','Shore volumes','Profile variance',...
+                                              'Change plot','Rates plot'};
+            menu.Run(6).Callback = repmat({@obj.runBeachAnalysis},[1,5]);
+            menu.Run(6).Separator = {'off','off','off','on','off'};
             
             % submenu for Tidal analysis
             menu.Run(7).List = {'Analysis','Reconstruction'}; 

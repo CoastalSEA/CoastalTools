@@ -34,6 +34,8 @@ function ct_data_cleanup(muicat,src)
             patch_ts(muicat);
         case 'Trim timeseries'
             trim_ts(muicat);
+        case 'Match timeseries'
+            match_ts(muicat);
         case 'Delete interval'
             del_interval(muicat);
         case 'Merge cases'
@@ -223,6 +225,7 @@ function patch_ts(muicat)
     [caserec1,isok] = selectRecord(muicat,'PromptText',promptxt1,...
                                                         'ListSize',[150,250]);
     if isok<1, return; end %user cancelled  
+    
     dst1 = getDataset(muicat,caserec1,1);
     [tint,dst1] = get_timeinterval(dst1,1);  %if resampled then dst1 is a new dstable
     if isempty(tint), return; end
