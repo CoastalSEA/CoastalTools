@@ -146,6 +146,7 @@ classdef CT_BeachAnalysis < muiDataSet
                     src = findobj(mobj.mUI.Tabs.Children,'Tag','Profile'); 
                     getDeanProfile(obj,mobj,src);
                     output = [];
+                    getdialog('Results are on Calcs>Profile tab');
             end
             if isempty(output) || isempty(output.results{1})
                 return; %user cancelled or no results returned
@@ -773,8 +774,8 @@ classdef CT_BeachAnalysis < muiDataSet
         function bmvProfile(~,mobj,src)
             %plot the BMV profile with surf and shoal depths 
             msgtxt = 'BMV input parameters have not been defined';
-            inp = getClassObj(mobj,'Inputs','Sim_BMVinput',msgtxt);
-            if isempty(inp), return; end        
+            bmvinp = getClassObj(mobj,'Inputs','Sim_BMVinput',msgtxt);
+            if isempty(bmvinp), return; end        
 
             %class instance for inshore wave data
             msgtxt = 'Nearshore wave data not defined';
@@ -805,8 +806,8 @@ classdef CT_BeachAnalysis < muiDataSet
                     %use user defined Hs and Tp
                     Hs = inputval(1); Tp = inputval(2);
                 else
-                    %use percentile wave ehight and indicative  wave period
-                    Hs = prctile(hsts.Data,inputval);
+                    %use percentile wave height and indicative wave period
+                    Hs = prctile(wvdst.Hsi,inputval);
                     %limiting steepness based of 1/18 gives coeff=3.4
                     %for spanish coast BMV, 2003, suggest coeff~=6
                     Tp = 6*sqrt(Hs);
