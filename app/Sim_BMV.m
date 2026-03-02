@@ -222,8 +222,8 @@ classdef Sim_BMV < muiDataSet
 
             %mean(Hs),std(Hs),mean(Tp)used in option 3 of ClosureOption
             %for Hallermeier zones
-            bmv.meanWaves.mH = mean(wvdst.Hsi);  
-            bmv.meanWaves.sH = std(wvdst.Hsi);  
+            bmv.meanWaves.mH = mean(wvdst.Hs);  
+            bmv.meanWaves.sH = std(wvdst.Hs);  
             bmv.meanWaves.mT = mean(wvdst.Tp);
             close(hw);
         end  

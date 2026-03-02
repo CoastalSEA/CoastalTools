@@ -120,9 +120,9 @@ classdef CT_WaveModels < muiDataSet
             % INPUTS
             % mobj - handle to CoastlTools class objects
             % Variables used by model:
-                % Hsi  - inshore significant wave height (m)
+                % Hs  - inshore significant wave height (m)
                 % Tp   - peak wave period (s)
-                % Diri - wave direction (degrees TN)
+                % Dir - wave direction (degrees TN)
                 % depi  - water depth at wave point (m)
                 % theta- angle of shoreline from north (degrees TN)                
                 % d50  - grain size d50 (m)
@@ -150,7 +150,7 @@ classdef CT_WaveModels < muiDataSet
             vsc = mobj.Constants.KinematicViscosity;
             [theta,d50,Kc] = getDriftSettings(obj,site);
 
-            Qall = littoraldrift(wv.Hsi,wv.Tp,wv.Diri,wv.depi,...
+            Qall = littoraldrift(wv.Hs,wv.Tp,wv.Dir,wv.depi,...
                                         theta,bs,d50,Kc,g,rhs,rhw,vsc);            
             %user selects which model to use
             tlist = {'CERC formula (SPM, 1994)',...
@@ -182,9 +182,9 @@ classdef CT_WaveModels < muiDataSet
             % INPUTS
             % mobj - handle to CoastlTools class objects
             % Variables used by model:
-                % Hsi  - inshore significant wave height (m)
+                % Hs  - inshore significant wave height (m)
                 % Tp   - peak wave period (s)
-                % Diri - wave direction (degrees TN)
+                % Dir - wave direction (degrees TN)
                 % depi  - water depth at wave point (m)
                 % theta- angle of shoreline fron north (degrees TN)                
                 % d50  - grain size d50 (m)
@@ -213,7 +213,7 @@ classdef CT_WaveModels < muiDataSet
             vsc = mobj.Constants.KinematicViscosity;
             theta = site.ShorelineAngle;
             d50 = site.GrainSize;
-            Qx = xshore_bailard(wv.Hsi,wv.Tp,wv.Diri,wv.depi,...
+            Qx = xshore_bailard(wv.Hs,wv.Tp,wv.Dir,wv.depi,...
                                             theta,bs,d50,g,rhw,rhs,vsc);
             
             bs = mean(bs,'omitnan');
@@ -265,7 +265,7 @@ classdef CT_WaveModels < muiDataSet
             %calculate energy flux and add results to wave timeseries
             rhow = mobj.Constants.WaterDensity;
             g = mobj.Constants.Gravity;
-            Hrms = wv.Hsi/sqrt(2);            %rms wave height
+            Hrms = wv.Hs/sqrt(2);            %rms wave height
             Ef = wave_energyflux(Hrms,wv.Tp,wv.depi,rhow,g);
  
             output.results = {Ef};
@@ -312,7 +312,7 @@ classdef CT_WaveModels < muiDataSet
                 [wv,meta] = addWaveWLdataset(inwave,mobj,output.wvrec);
                 mtxt2 = meta.inptxt;
                 idv = strcmp(wv.VariableNames,'Hs');
-                wv.VariableNames{idv} = 'Hsi';%match variable names to wave model
+                wv.VariableNames{idv} = 'Hs';%match variable names to wave model
             else
                 %retrieve an inshore wave data set
                 [wv,output.wvrec] = getWaveModelDataset(inwave,mobj,...
@@ -329,11 +329,11 @@ classdef CT_WaveModels < muiDataSet
                 wv = addvars(wv,dep0,'NewVariableNames','depi');
             end
             dep1  = 100;           %offshore deep water depth           
-            Hs0 = shoaling(wv.Hsi,wv.Tp,dep0,dep1);
+            Hs0 = shoaling(wv.Hs,wv.Tp,dep0,dep1);
             
             %find slope at swl on beach  
             swl_0  = wv.swl; 
-            swl_0(isnan(swl_0)) = 0; %replace nans with zero
+            swl_0(isnan(swl_0)) = 0; %replace nans with zerHsio
             ubs = site.UpperBeachSlope;
             z1km = site.BedLevelat1km;            
             bs = profileslope(0,swl_0,z1km,ubs); %first argument is depth
@@ -363,9 +363,9 @@ classdef CT_WaveModels < muiDataSet
             % INPUTS
             % mobj - handle to CoastlTools class objects
             % Variables used by overtopping model:
-                % Hsi  - inshore significant wave height (m)
+                % Hs  - inshore significant wave height (m)
                 % Tp   - peak wave period (s)
-                % Diri - wave direction (degrees TN)
+                % Dir - wave direction (degrees TN)
                 % swl  - still water level (m above datum)
                 % alp  - wave angle in degrees from normal to the wall
                 %      - taken to be the same as the shoreline angle
@@ -406,9 +406,9 @@ classdef CT_WaveModels < muiDataSet
 
             g = mobj.Constants.Gravity;
             theta = site.ShorelineAngle;
-            alp = wv.Diri-(theta+90);            
+            alp = wv.Dir-(theta+90);            
             structure = getStructure(structprops);
-            Q = otop_Q(wv.swl,wv.Hsi,wv.Tz,alp,bs,g,structure);            
+            Q = otop_Q(wv.swl,wv.Hs,wv.Tz,alp,bs,g,structure);            
             bs = mean(bs,'omitnan'); %use average slope in metadata
 
             output.results = {Q};
@@ -428,7 +428,7 @@ classdef CT_WaveModels < muiDataSet
             %        BeachCrestLevel  - crest elevation (mOD)
             %        UpperBeachSlope - upper beach slope (1:ubs)
             % Variables used by overtopping model:
-                % Hsi  - inshore significant wave height (m)
+                % Hs  - inshore significant wave height (m)
                 % Tp   - peak wave period (s)
                 % swl  - still water level (m above datum)
             % FUNCTION CALLS (external)
@@ -450,14 +450,14 @@ classdef CT_WaveModels < muiDataSet
                 dep0 = wv.swl-site.OffshoreBedLevel;
             end
             dep1  = 100;           %offshore deep water depth           
-            H0 = shoaling(wv.Hsi,wv.Tp,dep0,dep1);
+            H0 = shoaling(wv.Hs,wv.Tp,dep0,dep1);
 
             inp = inputdlg('Beach toe level (mOD):','Beach toe',1,{'0'});
             if isempty(inp), output = []; return; end    
             beach = getPropertiesStruct(site);
             beach.BeachToeLevel = str2double(inp{1});
 
-            [Q,gR2,zgR2] = otopBeach(wv.swl,wv.Hsi,wv.Tp,H0,beach);
+            [Q,gR2,zgR2] = otopBeach(wv.swl,wv.Hs,wv.Tp,H0,beach);
 
             output.results = {Q,gR2,zgR2};
             output.modeltime = wv.RowNames;
@@ -498,7 +498,7 @@ classdef CT_WaveModels < muiDataSet
             
             %call Iribarren function and add results to wave timeseries
             g = mobj.Constants.Gravity;
-            [Iri,Ityp] = iribarren(wv.Hsi,wv.Tp,bs,g);   
+            [Iri,Ityp] = iribarren(wv.Hs,wv.Tp,bs,g);   
             bs = mean(bs,'omitnan');
             zi = mean((wv.swl-wv.depi),'omitnan');
             
@@ -515,7 +515,7 @@ classdef CT_WaveModels < muiDataSet
             % INPUTS
             % mobj - handle to CoastlTools class objects
             % Variables used by model:
-                % Hsi - incident significant wave height (m)
+                % Hs - incident significant wave height (m)
                 % Tp  - peak wave period (s)
                 % rhow- water density(kg/m3)
                 % rhos- sediment density(kg/m3)   
@@ -538,7 +538,7 @@ classdef CT_WaveModels < muiDataSet
             rhos = mobj.Constants.SedimentDensity;
             visc = mobj.Constants.KinematicViscosity;
             ws = settling_velocity(d50,g,rhow,rhos,visc);  %sediment fall velocity
-            dfv = wv.Hsi./ws./wv.Tp;  %dimensionless fall velocity
+            dfv = wv.Hs./ws./wv.Tp;  %dimensionless fall velocity
             %if dfv(i)>=6  'dissipative';
             %elseif dfv(i)<6 && dfv(ij)>1  'intermediate';
             %else  'reflective';

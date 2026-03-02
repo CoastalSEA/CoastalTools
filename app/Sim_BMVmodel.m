@@ -194,15 +194,15 @@ classdef Sim_BMVmodel < muiPropertyUI
 function output =runBMVsimulation(obj,mnvals,mxmn,pvobj)
     %input wave conditions
     varnames = fieldnames(mnvals);
-    Hsi = mnvals.(varnames{1}); %mean wave height over averaging interval 
+    Hs = mnvals.(varnames{1}); %mean wave height over averaging interval 
     Tp = mnvals.(varnames{2});  %mean wave period over averaging interval  
 
    %get "reference" profile for conditions that give lowest closure depth
     if obj.ClosureOption==1
         [maxTp,imx] = max(Tp);
-        maxHs = Hsi(imx);
+        maxHs = Hs(imx);
     else
-        [maxHs,imx] = max(Hsi);      %maximum wave condition in time series
+        [maxHs,imx] = max(Hs);      %maximum wave condition in time series
         maxTp = Tp(imx);
     end
 %     K0mx = bmvFittingCoeffs(obj,maxHs,maxTp);
@@ -215,9 +215,9 @@ function output =runBMVsimulation(obj,mnvals,mxmn,pvobj)
        return;
    end
     %
-    for i=1:length(Hsi)
-        if Hsi(i)>0        
-            [X(:,i),Z(:,i)] = sampleProfile(obj,Hsi(i),Tp(i),[]); 
+    for i=1:length(Hs)
+        if Hs(i)>0        
+            [X(:,i),Z(:,i)] = sampleProfile(obj,Hs(i),Tp(i),[]); 
             if mopt==1
                 obj.Xref = X(:,i);
                 obj.Zref = Z(:,i);

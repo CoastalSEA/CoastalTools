@@ -782,15 +782,15 @@ classdef CT_BeachAnalysis < muiDataSet
             inwaveobj = getClassObj(mobj,'Cases','ctWaveModel',msgtxt);
             if isempty(inwaveobj), return; end
 
-            %retrieve Hsi from inshore wave data set
+            %retrieve Hs from inshore wave data set
             wvdst = getWaveModelDataset(inwaveobj,mobj,{'Inwave_model'},{'Tp'});
             
             idx = [15,16];     %subset of variables to be checked
             bmv = setBMVmodelParams(bmvinp,mobj,idx);
             %mean(Hs),std(Hs),mean(Tp)used in option 3 of ClosureOption
             %for Hallermeier zones
-            bmv.meanWaves.mH = mean(wvdst.Hsi,'omitnan');  
-            bmv.meanWaves.sH = std(wvdst.Hsi,'omitnan');  
+            bmv.meanWaves.mH = mean(wvdst.Hs,'omitnan');  
+            bmv.meanWaves.sH = std(wvdst.Hs,'omitnan');  
             bmv.meanWaves.mT = mean(wvdst.Tp,'omitnan');
             
             prompt = 'Specify Hs & Tp or a percentile (e.g. 95)';
@@ -807,7 +807,7 @@ classdef CT_BeachAnalysis < muiDataSet
                     Hs = inputval(1); Tp = inputval(2);
                 else
                     %use percentile wave height and indicative wave period
-                    Hs = prctile(wvdst.Hsi,inputval);
+                    Hs = prctile(wvdst.Hs,inputval);
                     %limiting steepness based of 1/18 gives coeff=3.4
                     %for spanish coast BMV, 2003, suggest coeff~=6
                     Tp = 6*sqrt(Hs);

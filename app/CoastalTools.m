@@ -544,7 +544,7 @@ classdef CoastalTools < muiModelUI
                 case 'Coastal Plots'
                     ct_coastal_plots(obj);
                 case 'Spectrum Plots'
-                    ctWaveSpectra.getPlotOption(obj);
+                    ctWaveSpectraPlots.getPlotOption(obj);
             end            
         end
 

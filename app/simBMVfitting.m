@@ -56,14 +56,14 @@ function [K,dfv,iprof,obj] = simBMVfitting(obj,mndst,prdst,mxmn)
 
     %input wave conditions
     % varnames = mndst.VariableNames;
-    Hsi = mndst.Hsi; %mean wave height over averaging interval 
+    Hs = mndst.Hs; %mean wave height over averaging interval 
     Tp = mndst.Tp;  %mean wave period over averaging interval  
 
     if obj.ClosureOption==1
         [maxTp,imx] = max(Tp);
-        maxHs = Hsi(imx);
+        maxHs = Hs(imx);
     else
-        [maxHs,imx] = max(Hsi);      %maximum wave condition in time series
+        [maxHs,imx] = max(Hs);      %maximum wave condition in time series
         maxTp = Tp(imx);
     end
 %     K0mx = bmvFittingCoeffs(obj,maxHs,maxTp);
@@ -95,7 +95,7 @@ function [K,dfv,iprof,obj] = simBMVfitting(obj,mndst,prdst,mxmn)
             'SelectionMode','multiple', ...
             'ListString',tlist);
         if ok==0, return; end  %user cancelled
-        nrec = length(h_dlg)-sum(isnan(Hsi(h_dlg)));
+        nrec = length(h_dlg)-sum(isnan(Hs(h_dlg)));
         if nrec>1
             %analyse profiles and return timeseries of K and dfv
             ok = 0;
@@ -106,9 +106,9 @@ function [K,dfv,iprof,obj] = simBMVfitting(obj,mndst,prdst,mxmn)
             hw = waitbar(0, 'Processing.');
             for ip=h_dlg
                 date = datestr(t{ip},'dd-mmm-yyyy');
-                if ~isnan(Hsi(ip))
+                if ~isnan(Hs(ip))
                     txt = sprintf('comparison for profile %s surveyed on %s',pid,date);
-                    [K(ic,:),dfv(ic,1)] = fitProfile(obj,Hsi(ip),Tp(ip),...
+                    [K(ic,:),dfv(ic,1)] = fitProfile(obj,Hs(ip),Tp(ip),...
                                 mxmn,x(ip,:)',z(ip,:)',txt,aflag);
                     iprof(ic,1) = ip;
                     ic = ic+1;
@@ -127,7 +127,7 @@ function [K,dfv,iprof,obj] = simBMVfitting(obj,mndst,prdst,mxmn)
                 xi = (x(h_dlg,:)');
                 zi = (z(h_dlg,:)');
                 txt = sprintf('Model comparison for profile %s surveyed on %s',pid,date);
-                [K,dfv] = fitProfile(obj,Hsi(h_dlg),Tp(h_dlg),mxmn,...
+                [K,dfv] = fitProfile(obj,Hs(h_dlg),Tp(h_dlg),mxmn,...
                                                 xi,zi,txt,aflag);
                 iprof = h_dlg;
                 if isempty(K) 
