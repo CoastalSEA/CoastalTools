@@ -9,7 +9,7 @@ To make changes, update the MATLAB code and republish this document.
 <title>CoastalTools classes and functions</title>
 <meta name="generator" content="MATLAB 24.2">
 <link rel="schema.DC" href="http://purl.org/dc/elements/1.1/">
-<meta name="DC.date" content="2026-01-28">
+<meta name="DC.date" content="2026-03-11">
 <meta name="DC.source" content="coastaltools_classes.m">
 <style type="text/css">
 html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
@@ -134,15 +134,15 @@ table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px soli
 <div>
 <ul>
 <li>
-<i>data_cleanup</i> &ndash; set of functions to help clean up timeseries and beach profile data</li>
+<i>ct_sitevulnerability</i> &ndash; compute Beach Vulnerability Index for a single site</li>
 <li>
-<i>ct_sitevulnerability</i> &ndash; function to compute Beach Vulnerability Index for a single site</li>
+<i>ct_beachvulnerability</i> &ndash; compute Beach Vulnerability Index for a set of beach profiles</li>
 <li>
-<i>ct_sitevulnerability</i> &ndash; function to compute Beach Vulnerability Index for a set of beach profiles</li>
+<i>ct_beachvariance</i> - compute the beach variability over a set of profiles</li>
 <li>
-<i>simBMVfitting</i> &ndash; functions to fit the BMV model to a profile data set</li>
+<i>simBMVfitting</i> &ndash; fit the BMV model to a profile data set</li>
 <li>
-<i>simYGORmodel</i> &ndash; functions to run the YGOR model</li>
+<i>simYGORmodel</i> &ndash; run the YGOR model</li>
 </ul>
 </div>
 <h2 id="3">Additional Coastal Classes</h2>
@@ -197,6 +197,8 @@ table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px soli
 <i>coeff_AB</i> - function called by overtopping functions otop_Q and otop_C.</li>
 <li>
 <i>crenulate_bay</i> - generate the shoreline for an equilibrium crenulate bay using the method of Hsu and Evans, 1989 (Hsu and Evans, 1989).</li>
+<li>
+<i>ct_data_cleanup</i> &ndash; set of functions to help clean up timeseries and beach profile data</li>
 <li>
 <i>deanbeachprofile</i> - find the bed slope across the surf zone. the profile is based on a user defined slope between Hw and SWL (0mOD) and a Dean profile below this level.</li>
 <li>
@@ -313,11 +315,11 @@ table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px soli
 % * *Sim_YGORinput* – data input for the YGOR model
 
 %% CoastalTools Functions
-% * _data_cleanup_ – set of functions to help clean up timeseries and beach profile data
-% * _ct_sitevulnerability_ – function to compute Beach Vulnerability Index for a single site 
-% * _ct_sitevulnerability_ – function to compute Beach Vulnerability Index for a set of beach profiles
-% * _simBMVfitting_ – functions to fit the BMV model to a profile data set
-% * _simYGORmodel_ – functions to run the YGOR model 
+% * _ct_sitevulnerability_ – compute Beach Vulnerability Index for a single site 
+% * _ct_beachvulnerability_ – compute Beach Vulnerability Index for a set of beach profiles
+% * _ct_beachvariance_ - compute the beach variability over a set of profiles
+% * _simBMVfitting_ – fit the BMV model to a profile data set
+% * _simYGORmodel_ – run the YGOR model 
 
 %% Additional Coastal Classes
 % In the folder ../muiAppCoastalClasses.
@@ -357,6 +359,7 @@ table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px soli
 % * _coeff_AB_ - function called by overtopping functions otop_Q and
 % otop_C.
 % * _crenulate_bay_ - generate the shoreline for an equilibrium crenulate bay using the method of Hsu and Evans, 1989 (Hsu and Evans, 1989).
+% * _ct_data_cleanup_ – set of functions to help clean up timeseries and beach profile data
 % * _deanbeachprofile_ - find the bed slope across the surf zone.
 %   the profile is based on a user defined slope between Hw and SWL (0mOD)
 %   and a Dean profile below this level. 

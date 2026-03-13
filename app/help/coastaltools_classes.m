@@ -17,11 +17,11 @@
 % * *Sim_YGORinput* – data input for the YGOR model
 
 %% CoastalTools Functions
-% * _data_cleanup_ – set of functions to help clean up timeseries and beach profile data
-% * _ct_sitevulnerability_ – function to compute Beach Vulnerability Index for a single site 
-% * _ct_sitevulnerability_ – function to compute Beach Vulnerability Index for a set of beach profiles
-% * _simBMVfitting_ – functions to fit the BMV model to a profile data set
-% * _simYGORmodel_ – functions to run the YGOR model 
+% * _ct_sitevulnerability_ – compute Beach Vulnerability Index for a single site 
+% * _ct_beachvulnerability_ – compute Beach Vulnerability Index for a set of beach profiles
+% * _ct_beachvariance_ - compute the beach variability over a set of profiles
+% * _simBMVfitting_ – fit the BMV model to a profile data set
+% * _simYGORmodel_ – run the YGOR model 
 
 %% Additional Coastal Classes
 % In the folder ../muiAppCoastalClasses.
@@ -61,6 +61,7 @@
 % * _coeff_AB_ - function called by overtopping functions otop_Q and
 % otop_C.
 % * _crenulate_bay_ - generate the shoreline for an equilibrium crenulate bay using the method of Hsu and Evans, 1989 (Hsu and Evans, 1989).
+% * _ct_data_cleanup_ – set of functions to help clean up timeseries and beach profile data
 % * _deanbeachprofile_ - find the bed slope across the surf zone.
 %   the profile is based on a user defined slope between Hw and SWL (0mOD)
 %   and a Dean profile below this level. 
