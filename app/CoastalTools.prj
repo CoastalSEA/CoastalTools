@@ -1,5 +1,5 @@
 <deployment-project plugin="plugin.apptool" plugin-version="1.0">
-  <configuration build-checksum="3156356375" file="D:\Matlab Code\muiModels\CoastalTools\app\CoastalTools.prj" location="D:\Matlab Code\muiModels\CoastalTools\app" name="CoastalTools" target="target.mlapps" target-name="Package App">
+  <configuration build-checksum="1597795916" file="D:\Matlab Code\muiModels\CoastalTools\app\CoastalTools.prj" location="D:\Matlab Code\muiModels\CoastalTools\app" name="CoastalTools" target="target.mlapps" target-name="Package App">
     <param.appname>CoastalTools</param.appname>
     <param.authnamewatermark>Ian Townend</param.authnamewatermark>
     <param.email>i.townend@soton.ac.uk</param.email>
@@ -35,8 +35,8 @@
     </fileset.main>
     <fileset.depfun>
       <file>${PROJECT_ROOT}\CT_BeachAnalysis.m</file>
+      <file>${PROJECT_ROOT}\ct_beachvariance.m</file>
       <file>${PROJECT_ROOT}\ct_beachvulnerability.m</file>
-      <file>${PROJECT_ROOT}\ct_data_cleanup.m</file>
       <file>${PROJECT_ROOT}\CT_Plots.m</file>
       <file>${PROJECT_ROOT}\CT_PlotsUI.m</file>
       <file>${PROJECT_ROOT}\CT_SimUI.m</file>
@@ -57,6 +57,7 @@
       <file>${PROJECT_ROOT}\info.xml</file>
       <file>D:\Matlab Code\muiModels\muiAppLib\muiAppCoastalClasses</file>
       <file>D:\Matlab Code\muiModels\muiAppLib\muiAppCoastalFcns</file>
+      <file>D:\Matlab Code\muiModels\muiAppLib\muiAppCoastalWaves</file>
     </fileset.resources>
     <fileset.package />
     <build-deliverables>
