@@ -65,6 +65,8 @@
 % used for derivative models such as runup in *CT_WaveModels*.
 % * _datawell_directional_spectra_ - estimates the directional distribution of a wave spectrum for directions, dirs, given the mean, spread, skewness and kurtosis parameters as output by datawell buoys SPT file format.
 % * _directional_spreading_ – sample a directional spreading function at selected direction intervals.
+% * _estimate_jonswap_gamma_ - estimate the value of the JONSWAP peakiness parameter from the wave parameters
+%   provided by model hindcasts such as the Copernicus reanalysis.
 % * _extract_wave_data_ - extract Hs, Tp and Dir from a dataset that does not use default naming
 %   convention (e.g. Copernicus re-analysis data).
 % * _extract_wind_data_ - extract AvSpeed,MaxSpeed,Dir from a dataset that does not use default naming

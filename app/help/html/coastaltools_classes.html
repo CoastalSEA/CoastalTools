@@ -9,7 +9,7 @@ To make changes, update the MATLAB code and republish this document.
 <title>CoastalTools classes and functions</title>
 <meta name="generator" content="MATLAB 24.2">
 <link rel="schema.DC" href="http://purl.org/dc/elements/1.1/">
-<meta name="DC.date" content="2026-03-18">
+<meta name="DC.date" content="2026-03-24">
 <meta name="DC.source" content="coastaltools_classes.m">
 <style type="text/css">
 html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
@@ -206,6 +206,8 @@ table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px soli
 <i>datawell_directional_spectra</i> - estimates the directional distribution of a wave spectrum for directions, dirs, given the mean, spread, skewness and kurtosis parameters as output by datawell buoys SPT file format.</li>
 <li>
 <i>directional_spreading</i> &ndash; sample a directional spreading function at selected direction intervals.</li>
+<li>
+<i>estimate_jonswap_gamma</i> - estimate the value of the JONSWAP peakiness parameter from the wave parameters provided by model hindcasts such as the Copernicus reanalysis.</li>
 <li>
 <i>extract_wave_data</i> - extract Hs, Tp and Dir from a dataset that does not use default naming convention (e.g. Copernicus re-analysis data).</li>
 <li>
@@ -430,6 +432,8 @@ table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px soli
 % used for derivative models such as runup in *CT_WaveModels*.
 % * _datawell_directional_spectra_ - estimates the directional distribution of a wave spectrum for directions, dirs, given the mean, spread, skewness and kurtosis parameters as output by datawell buoys SPT file format.
 % * _directional_spreading_ – sample a directional spreading function at selected direction intervals.
+% * _estimate_jonswap_gamma_ - estimate the value of the JONSWAP peakiness parameter from the wave parameters
+%   provided by model hindcasts such as the Copernicus reanalysis.
 % * _extract_wave_data_ - extract Hs, Tp and Dir from a dataset that does not use default naming
 %   convention (e.g. Copernicus re-analysis data).
 % * _extract_wind_data_ - extract AvSpeed,MaxSpeed,Dir from a dataset that does not use default naming

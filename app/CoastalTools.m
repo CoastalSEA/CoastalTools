@@ -153,11 +153,13 @@ classdef CoastalTools < muiModelUI
             menu.Setup(offset+2).List = {'Concatenate two timeseries',...
                             'Resample timeseries','Patch timeseries',...                
                             'Trim timeseries','Match timeseries','Delete interval',...
-                            'Merge cases','Subsample case','Scale variables',...
+                            'Merge cases','Subsample case timeseries',...
+                            'Subsample case variables','Scale variables',...
                             'Scale range','Delete multiple profiles',...                
                             'Edit or Delete profile in timeseries'};
-            menu.Setup(offset+2).Callback = repmat({@obj.datacleanup},[1,12]);
-            menu.Setup(offset+2).Separator = [repmat({'off'},[1,10]),{'on','off'}];         
+            menu.Setup(offset+2).Callback = repmat({@obj.datacleanup},[1,13]);
+            menu.Setup(offset+2).Separator = [repmat({'off'},[1,7]),...
+                                       {'on','off','on','off','on','off'}];         
             
             %% Run menu ---------------------------------------------------
             menu.Run(1).List = {'Wave properties','Beach properties',...
@@ -305,13 +307,16 @@ classdef CoastalTools < muiModelUI
             %callback function for Tools menu options
             switch src.Text
                 case 'Project'
+                    answer = questdlg('Delete current project?','Clear','Delete','Quit','Quit');  
+                    if strcmp(answer,'Quit'), return; end
                     obj.clearModel;
                 case  {'Figures','UI figures','Tag figures'}
                     clearFigures(obj,src);
-                case 'Data'
-                    clearCases(obj,'Data');
-                case 'Models'
-                    clearCases(obj,'Models');
+                case {'Data','Models'}
+                    quest = sprintf('Confirm deletion of ALL %s Cases?',src.Text);
+                    answer = questdlg(quest,'Clear','Delete','Quit','Quit');  
+                    if strcmp(answer,'Quit'), return; end
+                    clearCases(obj,src.Text);
             end
         end         
         

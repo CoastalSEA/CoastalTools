@@ -162,10 +162,19 @@ classdef CT_Plots < muiPlots
                 crec = obj.UIsel(1).caserec;
                 dset = obj.UIsel(1).dataset;
                 dst = getDataset(mobj.Cases,crec,dset);
-                idvar = find(contains(dst.VariableNames,'Dir'));
-                obj.UIsel(2).variable = idvar;
-                %varange = dst.VariableRange.(dst.VariableNames{idvar});
-				varange = dst.VariableRange.(dst.VariableNames{idvar(1)}); %temp fix to handle multiple direction variables
+
+                %assign direction variable to use
+                idvar = find(contains(dst.VariableDescriptions,'direction'));
+                sel = 1;
+                if numel(idvar)>1  %user needs to select direction
+                    sel = listdlg('Name','Directions', ...
+                    'PromptString','Select direction to use','ListSize',[300,150],... ...
+                    'SelectionMode','single','ListString',dst.VariableDescriptions(idvar));
+                end
+                if isempty(sel), sel = 1; end
+
+                obj.UIsel(2).variable = idvar(sel);
+				varange = dst.VariableRange.(dst.VariableNames{idvar(sel)});
                 obj.UIsel(2).range = var2range(varange);                
                 obj.UIsel(2).desc = 'Direction';
                 obj.UIset.Polar = true;
