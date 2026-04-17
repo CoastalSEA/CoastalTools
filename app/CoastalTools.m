@@ -93,7 +93,7 @@ classdef CoastalTools < muiModelUI
             menu.Tools(2).Callback = [{@obj.toolsMenuOptions},{'gcbo;'},...
                                      repmat({@obj.toolsMenuOptions},[1,2])];
 
-            menu.Tools(3).List = {'UI figures','Tag figures'};
+            menu.Tools(3).List = {'UI Figures','Tag Figures'};
             menu.Tools(3).Callback = repmat({@obj.toolsMenuOptions},[1,2]);            
 
             %% Project menu -----------------------------------------------
@@ -303,24 +303,9 @@ classdef CoastalTools < muiModelUI
 %-------------------------------------------------------------------------- 
         %% File menu ------------------------------------------------------
         %use default menu functions defined in muiModelUI
-            
-        %% Tools menu ----------------------------------------------------- 
-        function toolsMenuOptions(obj,src,~)
-            %callback function for Tools menu options
-            switch src.Text
-                case 'Project'
-                    answer = questdlg('Delete current project?','Clear','Delete','Quit','Quit');  
-                    if strcmp(answer,'Quit'), return; end
-                    obj.clearModel;
-                case  {'Figures','UI figures','Tag figures'}
-                    clearFigures(obj,src);
-                case {'Data','Models'}
-                    quest = sprintf('Confirm deletion of ALL %s Cases?',src.Text);
-                    answer = questdlg(quest,'Clear','Delete','Quit','Quit');  
-                    if strcmp(answer,'Quit'), return; end
-                    clearCases(obj,src.Text);
-            end
-        end         
+
+        %% Tools menu -----------------------------------------------------
+        %use default menu functions defined in muiModelU   
         
         %% Project menu ---------------------------------------------------
         %use default menu functions defined in muiModelUI           
