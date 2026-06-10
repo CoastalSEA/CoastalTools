@@ -1481,10 +1481,15 @@ classdef CT_BeachAnalysis < muiDataSet
             %plot average(st.dev.anomaly) for all profiles as function of elevation
             h2d = figure('Name','Profile Variance','Tag','PlotFig');
             ax = axes(h2d);
-            plot(ax,mean(newres{2},1,'omitnan'),z)
-            xlabel('St.Dev of anomaly (m)')
+            s1 = subplot(1,2,1,ax);
+            plot(s1,mean(newres{2},1,'omitnan'),z)
+            xlabel('Frontage mean of anomaly St.Dev (m)')
             ylabel('Elevation (mOD)')
-            title('Variation of shoreline position anomaly with elevation')
+            s2 = subplot(1,2,2);
+            plot(s2,mean(newres{1},1,'omitnan'),z)
+            xlabel('Frontage mean of anomaly maximum (m)')
+            ylabel('Elevation (mOD)')
+            sgtitle('Variation of shoreline position anomaly with elevation')
             
             %plot contours of maximum anomaly and st.dev.
             hf = figure('Name','Profile Variance','Tag','PlotFig');
